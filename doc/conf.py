@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'km3io'
-copyright = '2019, Zineb Aly, Tamas Gal, Johannes Schumann'
-author = 'Zineb Aly, Tamas Gal, Johannes Schumann'
+copyright = '2019, Zineb Aly and Tamas Gal'
+author = 'Zineb Aly, Tamas Gal'
 
 
 # -- General configuration ---------------------------------------------------
@@ -42,6 +42,10 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+
+# AutoAPI
+autoapi_type = 'python'
+autoapi_dirs = ['../km3io']
 
 
 # -- Options for HTML output -------------------------------------------------

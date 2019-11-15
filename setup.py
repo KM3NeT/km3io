@@ -21,8 +21,8 @@ setup(
     url='http://git.km3net.de/km3py/km3io',
     description='KM3NeT I/O without ROOT',
     long_description=long_description,
-    author='Zineb Aly, Tamas Gal, Johannes Schumann',
-    author_email='zaly@km3net.de, jschumann@km3net.de, tgal@km3net.de',
+    author='Zineb Aly, Tamas Gal',
+    author_email='zaly@km3net.de, tgal@km3net.de',
     packages=['km3io'],
     include_package_data=True,
     platforms='any',
@@ -40,4 +40,4 @@ setup(
     ],
 )
 
-__author__ = 'Zineb Aly, Tamas Gal and Johannes Schumann'
+__author__ = 'Zineb Aly and Tamas Gal'

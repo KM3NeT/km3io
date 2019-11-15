@@ -10,6 +10,10 @@
    :maxdepth: 2
    :caption: Contents:
 
+   autoapi/index
+   autoapi/km3io/aanet/index
+   autoapi/km3io/jpp/index
+
 
 
 Indices and tables

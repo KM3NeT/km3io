@@ -5,7 +5,6 @@ The km3io setup script.
 
 """
 from setuptools import setup
-import sys
 
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]

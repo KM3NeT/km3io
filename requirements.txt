@@ -1,1 +1,1 @@
-uproot
+uproot>=3.10.12

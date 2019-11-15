@@ -1,13 +1,16 @@
 import uproot
 
-class DataReader:
+class AanetReader:
 
-    def __init__(self, file_path):
+    def __init__(self, file_path: str):
         self.file_path = file_path
         self.data = uproot.open(self.file_path)['E']
         self.lazy_data = self.data.lazyarrays()
+        self._valid_keys = None
+        self._hits_keys = None
+        self._tracks_keys = None
 
-    def event_reader(self, key):
+    def read_event(self, key: str):
         """event_reader function reads data stored in a branch of interest in an event tree.
         
         Parameters
@@ -35,29 +38,9 @@ class DataReader:
             evt_key_lazy = self.lazy_data[key]
             return evt_key_lazy
         else:
-            raise NameError("The event key must be one of the following: 'id', 'det_id', 'mc_id', 'run_id', 'mc_run_id', 'frame_index', 'trigger_mask', 'trigger_counter', 'overlays', 'hits', 'trks', 'w', 'w2list', 'w3list', 'mc_t', 'mc_hits', 'mc_trks', 'comment', 'index', 'flags', 't.fSec', 't.fNanoSec' ")
+            raise KeyError(f"{key} could not be found or is a fake branch")
 
-    def _event_keys(self, evt_tree):
-        """_event_keys function returns a list of all the keys of interest
-            for data analysis, and removes the keys of empty "fake branches" 
-            found in Aanet event files. 
-        
-        Parameters
-        ----------
-        evt_tree : aanet event (Evt) tree.
-        
-        Returns
-        -------
-        list of str
-            list of all the event keys.
-        """
-        fake_branches = ['Evt', 'AAObject', 'TObject','t']
-        t_baskets = ['t.fSec', 't.fNanoSec']
-        # 
-        all_keys_evt = [key.decode('utf-8') for key in evt_tree.keys() if key.decode('utf-8') not in fake_branches] + t_baskets
-        return all_keys_evt
-
-    def hits_reader(self, hits_key):
+    def read_hits(self, key: str):
         """hits_reader function reads data stored in a branch of interest in hits tree from an Aanet
         event file.
         
@@ -81,14 +64,14 @@ class DataReader:
             from hits tree data.
         """
         hits_tree = self.data['Evt']['hits']
-        hits_keys = [key.decode('utf8') for key in hits_tree.keys()]
-        if hits_key in hits_keys:
-            hits_key_lazy = self.lazy_data[hits_key]
+        keys = [key.decode('utf8') for key in hits_tree.keys()]
+        if key in keys:
+            hits_key_lazy = self.lazy_data[key]
             return hits_key_lazy
         else:
-            raise NameError("The hits key must be one of the following: 'hits.fUniqueID', 'hits.fBits', 'hits.usr', 'hits.usr_names', 'hits.id', 'hits.dom_id', 'hits.channel_id', 'hits.tdc', 'hits.tot', 'hits.trig', 'hits.pmt_id', 'hits.t', 'hits.a', 'hits.pos.x', 'hits.pos.y', 'hits.pos.z', 'hits.dir.x', 'hits.dir.y', 'hits.dir.z', 'hits.pure_t', 'hits.pure_a', 'hits.type', 'hits.origin', 'hits.pattern_flags'")
+            raise KeyError(f"{key} is not a valid hits key")
 
-    def tracks_reader(self, tracks_key ):
+    def read_tracks(self, key: str):
         """tracks_reader function reads data stored in a branch of interest in tracks tree
         from an Aanet event file.
         
@@ -112,12 +95,47 @@ class DataReader:
             from tracks tree data.
         """
         tracks_tree = self.data['Evt']['trks']
-        tracks_keys = [key.decode('utf8') for key in tracks_tree.keys()]
-        if tracks_key in tracks_keys:
-            tracks_key_lazy = self.lazy_data[tracks_key]
+        keys = [key.decode('utf8') for key in tracks_tree.keys()]
+        if key in keys:
+            tracks_key_lazy = self.lazy_data[key]
             return tracks_key_lazy
         else:
-            raise NameError("The tracks key must be one the following: 'trks.fUniqueID', 'trks.fBits', 'trks.usr', 'trks.usr_names', 'trks.id', 'trks.pos.x', 'trks.pos.y', 'trks.pos.z', 'trks.dir.x', 'trks.dir.y', 'trks.dir.z', 'trks.t', 'trks.E', 'trks.len', 'trks.lik', 'trks.type', 'trks.rec_type', 'trks.rec_stages', 'trks.fitinf', 'trks.hit_ids', 'trks.error_matrix', 'trks.comment'")
+            raise KeyError(f"{key} is not a valid tracks key")
 
-  
+    @property
+    def valid_keys(self, evt_tree):
+        """_event_keys function returns a list of all the keys of interest
+            for data analysis, and removes the keys of empty "fake branches" 
+            found in Aanet event files. 
+        
+        Parameters
+        ----------
+        evt_tree : aanet event (Evt) tree.
+        
+        Returns
+        -------
+        list of str
+            list of all the event keys.
+        """
+        if self._valid_keys is None:
+            fake_branches = ['Evt', 'AAObject', 'TObject','t']
+            t_baskets = ['t.fSec', 't.fNanoSec']
+            self._valid_keys = [key.decode('utf-8') for key in evt_tree.keys() if key.decode('utf-8') not in fake_branches] + t_baskets
+        return self._valid_keys
+
+    @property
+    def get_hits_keys(self):
+        if self._hits_keys = None:
+            hits_tree = self.data['Evt']['hits']
+            self._hits_keys = [key.decode('utf8') for key in hits_tree.keys()]
+        return self._hits_keys
+
+    @property
+    def get_tracks_keys(self):
+        if self._tracks_keys = None:
+            tracks_tree = self.data['Evt']['trks']
+            self._tracks_keys = [key.decode('utf8') for key in tracks_tree.keys()]
+        return self._tracks_keys
+
+
 

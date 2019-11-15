@@ -1,7 +1,7 @@
 import uproot
 
-class AanetReader:
 
+class AanetReader:
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.data = uproot.open(self.file_path)['E']
@@ -38,7 +38,8 @@ class AanetReader:
             evt_key_lazy = self.lazy_data[key]
             return evt_key_lazy
         else:
-            raise KeyError(f"{key} could not be found or is a fake branch")
+            raise KeyError(
+                "{} could not be found or is a fake branch".format(key))
 
     def read_hits(self, key: str):
         """hits_reader function reads data stored in a branch of interest in hits tree from an Aanet
@@ -118,9 +119,12 @@ class AanetReader:
             list of all the event keys.
         """
         if self._valid_keys is None:
-            fake_branches = ['Evt', 'AAObject', 'TObject','t']
+            fake_branches = ['Evt', 'AAObject', 'TObject', 't']
             t_baskets = ['t.fSec', 't.fNanoSec']
-            self._valid_keys = [key.decode('utf-8') for key in evt_tree.keys() if key.decode('utf-8') not in fake_branches] + t_baskets
+            self._valid_keys = [
+                key.decode('utf-8') for key in evt_tree.keys()
+                if key.decode('utf-8') not in fake_branches
+            ] + t_baskets
         return self._valid_keys
 
     @property
@@ -134,8 +138,7 @@ class AanetReader:
     def get_tracks_keys(self):
         if self._tracks_keys is None:
             tracks_tree = self.data['Evt']['trks']
-            self._tracks_keys = [key.decode('utf8') for key in tracks_tree.keys()]
+            self._tracks_keys = [
+                key.decode('utf8') for key in tracks_tree.keys()
+            ]
         return self._tracks_keys
-
-
-

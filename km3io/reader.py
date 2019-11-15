@@ -125,14 +125,14 @@ class AanetReader:
 
     @property
     def get_hits_keys(self):
-        if self._hits_keys = None:
+        if self._hits_keys is None:
             hits_tree = self.data['Evt']['hits']
             self._hits_keys = [key.decode('utf8') for key in hits_tree.keys()]
         return self._hits_keys
 
     @property
     def get_tracks_keys(self):
-        if self._tracks_keys = None:
+        if self._tracks_keys is None:
             tracks_tree = self.data['Evt']['trks']
             self._tracks_keys = [key.decode('utf8') for key in tracks_tree.keys()]
         return self._tracks_keys

@@ -70,7 +70,7 @@ class AanetReader:
             hits_key_lazy = self.lazy_data[key]
             return hits_key_lazy
         else:
-            raise KeyError(f"{key} is not a valid hits key")
+            raise KeyError("{} is not a valid hits key".format(key))
 
     def read_tracks(self, key: str):
         """tracks_reader function reads data stored in a branch of interest in tracks tree
@@ -101,7 +101,7 @@ class AanetReader:
             tracks_key_lazy = self.lazy_data[key]
             return tracks_key_lazy
         else:
-            raise KeyError(f"{key} is not a valid tracks key")
+            raise KeyError("{} is not a valid tracks key".format(key))
 
     @property
     def valid_keys(self, evt_tree):

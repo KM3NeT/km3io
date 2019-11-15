@@ -6,6 +6,18 @@ from km3io import JppReader
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 
 
+class TestJppEvents(unittest.TestCase):
+    def setUp(self):
+        self.events = JppReader(os.path.join(SAMPLES_DIR,
+                                             "jpp_v12.0.0.root")).events
+
+    def test_index_lookup(self):
+        event = self.events[1]
+        assert 124 == len(event.snapshot_hits)
+        event = self.events[-1]
+        assert 78 == len(event.snapshot_hits)
+
+
 class TestJppEventsSnapshotHits(unittest.TestCase):
     def setUp(self):
         self.events = JppReader(os.path.join(SAMPLES_DIR,

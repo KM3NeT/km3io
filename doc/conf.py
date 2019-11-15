@@ -13,14 +13,20 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-
+import sys
+import os
+from datetime import date
+import sphinx_rtd_theme
+from pkg_resources import get_distribution
+import km3io
 
 # -- Project information -----------------------------------------------------
 
-project = 'km3io'
-copyright = '2019, Zineb Aly and Tamas Gal'
+release = get_distribution('km3io').version
+version = '.'.join(release.split('.')[:2])
+project = 'km3io {}'.format(km3io.__version__)
+copyright = '{0}, Zineb Aly and Tamas Gal'.format(date.today().year)
 author = 'Zineb Aly, Tamas Gal'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -28,12 +34,10 @@ author = 'Zineb Aly, Tamas Gal'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-        'sphinx.ext.autodoc',
-        'sphinx.ext.autosummary',
-        'sphinx.ext.viewcode',
-        'autoapi.extension',
-        'numpydoc'
+    'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.viewcode',
+    'autoapi.extension', 'numpydoc'
 ]
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -46,16 +50,19 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # AutoAPI
 autoapi_type = 'python'
 autoapi_dirs = ['../km3io']
-
+autoapi_options = ['members', 'undoc-members']
+autoapi_include_summaries = True
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_title = "km3io {}".format(km3io.__version__)

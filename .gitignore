@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 # Version info for PyPI
-km3noroot/version.txt
+km3io/version.txt
 
 # Distribution / packaging
 .Python

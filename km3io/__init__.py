@@ -1,1 +1,2 @@
-from .reader import AanetReader, JppReader
+from .aanet import AanetReader
+from .jpp import JppReader

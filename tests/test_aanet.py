@@ -1,14 +1,14 @@
 import os
 import unittest
 
-from km3io import reader
+from km3io import AanetReader
 
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 
 
 class TestAanetReaderHits(unittest.TestCase):
     def setUp(self):
-        self.r = reader.AanetReader(
+        self.r = AanetReader(
             os.path.join(SAMPLES_DIR, "aanet_v2.0.0.root"))
         self.lengths = {0: 176, 1: 125, -1: 105}
         self.total_item_count = 1434

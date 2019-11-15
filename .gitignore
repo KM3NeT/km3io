@@ -1,0 +1,84 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyxbldc
+
+# C extensions
+*.so
+
+# Version info for PyPI
+km3noroot/version.txt
+
+# Distribution / packaging
+.Python
+env/
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.eggs
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+.coverage.*
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Rope
+.ropeproject
+
+# Sphinx documentation
+doc/_build/
+doc/auto_examples/
+doc/modules/
+doc/api
+
+# VI swap files
+*.swp
+*.swo
+
+# PyCharm files
+.idea
+
+# jupyter files
+.ipynb_checkpoints/
+
+# 
+junit*.xml
+reports
+
+# misc
+*~
+*.dqd
+*.dat
+
+.pytest_cache/
+.DS_Store
+
+# venv, pyenv tmp
+.python-version
+venv

@@ -12,20 +12,20 @@ class AanetReader:
 
     def read_event(self, key: str):
         """event_reader function reads data stored in a branch of interest in an event tree.
-        
+
         Parameters
         ----------
         key : str
             name of the branch of interest in event data.
-        
+
         Returns
         -------
         lazyarray
             Lazyarray of all data stored in a branch of interest (in an event tree). A lazyarray is an array-like
-            object that reads data on demand. Here, only the first and last chunks of data are 
+            object that reads data on demand. Here, only the first and last chunks of data are
             read in memory, and not all data in the array. The output of event_reader can be used
             with all `Numpy's universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`.
-        
+
         Raises
         ------
         NameError
@@ -44,20 +44,20 @@ class AanetReader:
     def read_hits(self, key: str):
         """hits_reader function reads data stored in a branch of interest in hits tree from an Aanet
         event file.
-        
+
         Parameters
         ----------
         hits_key : str
             name of the branch of interest in hits tree.
-        
+
         Returns
         -------
         lazyarray
             Lazyarray of all data stored in a branch of interest (in hits tree). A lazyarray is an array-like
-            object that reads data on demand. Here, only the first and last chunks of data are 
+            object that reads data on demand. Here, only the first and last chunks of data are
             read in memory, and not all data in the array. The output of event_reader can be used
             with all `Numpy's universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`.
-        
+
         Raises
         ------
         NameError
@@ -75,20 +75,20 @@ class AanetReader:
     def read_tracks(self, key: str):
         """tracks_reader function reads data stored in a branch of interest in tracks tree
         from an Aanet event file.
-        
+
         Parameters
         ----------
         tracks_key : str
             name of the branch of interest in tracks tree.
-        
+
         Returns
         -------
         lazyarray
             Lazyarray of all data stored in a branch of interest (in tracks tree). A lazyarray is an array-like
-            object that reads data on demand. Here, only the first and last chunks of data are 
+            object that reads data on demand. Here, only the first and last chunks of data are
             read in memory, and not all data in the array. The output of event_reader can be used
             with all `Numpy's universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`.
-        
+
         Raises
         ------
         NameError
@@ -106,13 +106,13 @@ class AanetReader:
     @property
     def valid_keys(self, evt_tree):
         """_event_keys function returns a list of all the keys of interest
-            for data analysis, and removes the keys of empty "fake branches" 
-            found in Aanet event files. 
-        
+            for data analysis, and removes the keys of empty "fake branches"
+            found in Aanet event files.
+
         Parameters
         ----------
         evt_tree : aanet event (Evt) tree.
-        
+
         Returns
         -------
         list of str

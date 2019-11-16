@@ -67,6 +67,7 @@ coverage:
     stage: coverage
     script:
         - *virtualenv_definition
+        - make install-dev
         - "make test-cov|grep TOTAL| awk '{printf \"COVERAGE: %.2f%%\", (1-$3/$2)*100 }'"
     coverage: '/COVERAGE:\s*([0-9]*\.[0-9]*%)/'
     #     - make test-cov

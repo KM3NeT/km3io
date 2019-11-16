@@ -2,7 +2,7 @@ import uproot
 
 
 class AanetReader:
-    def __init__(self, file_path: str):
+    def __init__(self, file_path):
         self.file_path = file_path
         self.data = uproot.open(self.file_path)['E']
         self.lazy_data = self.data.lazyarrays()
@@ -12,20 +12,20 @@ class AanetReader:
 
     def read_event(self, key: str):
         """event_reader function reads data stored in a branch of interest in an event tree.
-        
+
         Parameters
         ----------
         key : str
             name of the branch of interest in event data.
-        
+
         Returns
         -------
         lazyarray
             Lazyarray of all data stored in a branch of interest (in an event tree). A lazyarray is an array-like
-            object that reads data on demand. Here, only the first and last chunks of data are 
+            object that reads data on demand. Here, only the first and last chunks of data are
             read in memory, and not all data in the array. The output of event_reader can be used
             with all `Numpy's universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`.
-        
+
         Raises
         ------
         NameError
@@ -44,20 +44,20 @@ class AanetReader:
     def read_hits(self, key: str):
         """hits_reader function reads data stored in a branch of interest in hits tree from an Aanet
         event file.
-        
+
         Parameters
         ----------
         hits_key : str
             name of the branch of interest in hits tree.
-        
+
         Returns
         -------
         lazyarray
             Lazyarray of all data stored in a branch of interest (in hits tree). A lazyarray is an array-like
-            object that reads data on demand. Here, only the first and last chunks of data are 
+            object that reads data on demand. Here, only the first and last chunks of data are
             read in memory, and not all data in the array. The output of event_reader can be used
             with all `Numpy's universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`.
-        
+
         Raises
         ------
         NameError
@@ -75,20 +75,20 @@ class AanetReader:
     def read_tracks(self, key: str):
         """tracks_reader function reads data stored in a branch of interest in tracks tree
         from an Aanet event file.
-        
+
         Parameters
         ----------
         tracks_key : str
             name of the branch of interest in tracks tree.
-        
+
         Returns
         -------
         lazyarray
             Lazyarray of all data stored in a branch of interest (in tracks tree). A lazyarray is an array-like
-            object that reads data on demand. Here, only the first and last chunks of data are 
+            object that reads data on demand. Here, only the first and last chunks of data are
             read in memory, and not all data in the array. The output of event_reader can be used
             with all `Numpy's universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`.
-        
+
         Raises
         ------
         NameError
@@ -106,13 +106,13 @@ class AanetReader:
     @property
     def valid_keys(self, evt_tree):
         """_event_keys function returns a list of all the keys of interest
-            for data analysis, and removes the keys of empty "fake branches" 
-            found in Aanet event files. 
-        
+            for data analysis, and removes the keys of empty "fake branches"
+            found in Aanet event files.
+
         Parameters
         ----------
         evt_tree : aanet event (Evt) tree.
-        
+
         Returns
         -------
         list of str
@@ -142,69 +142,3 @@ class AanetReader:
                 key.decode('utf8') for key in tracks_tree.keys()
             ]
         return self._tracks_keys
-
-
-class JppReader:
-    """Reader for Jpp ROOT files"""
-    def __init__(self, filename):
-        self.fobj = uproot.open(filename)
-        self._events = None
-
-    @property
-    def events(self):
-        if self._events is None:
-            tree = self.fobj["KM3NET_EVENT"]
-
-            headers = tree["KM3NETDAQ::JDAQEventHeader"].array(
-                uproot.interpret(tree["KM3NETDAQ::JDAQEventHeader"],
-                                 cntvers=True))
-            snapshot_hits = tree["snapshotHits"].array(
-                uproot.asjagged(uproot.astable(
-                    uproot.asdtype([("dom_id", "i4"), ("channel_id", "u1"),
-                                    ("time", "u4"), ("tot", "u1")])),
-                                skipbytes=10))
-            triggered_hits = tree["triggeredHits"].array(
-                uproot.asjagged(uproot.astable(
-                    uproot.asdtype([("dom_id", "i4"), ("channel_id", "u1"),
-                                    ("time", "u4"), ("tot", "u1"),
-                                    (" cnt", "u4"), (" vers", "u2"),
-                                    ("trigger_mask", "u8")])),
-                                skipbytes=10))
-            self._events = JppEvents(headers, snapshot_hits, triggered_hits)
-        return self._events
-
-
-class JppEvents:
-    """A simple wrapper for Jpp events"""
-    def __init__(self, headers, snapshot_hits, triggered_hits):
-        self.headers = headers
-        self.snapshot_hits = snapshot_hits
-        self.triggered_hits = triggered_hits
-
-    def __getitem__(self, item):
-        return JppEvent(self.headers[item], self.snapshot_hits[item],
-                        self.triggered_hits[item])
-
-    def __len__(self):
-        return len(self.headers)
-
-    def __str__(self):
-        return "Number of events: {}".format(len(self.headers))
-
-    def __repr__(self):
-        return str(self)
-
-
-class JppEvent:
-    """A wrapper for a Jpp event"""
-    def __init__(self, header, snapshot_hits, triggered_hits):
-        self.header = header
-        self.snapshot_hits = snapshot_hits
-        self.triggered_hits = triggered_hits
-
-    def __str__(self):
-        return "Jpp event with {} snapshot hits and {} triggered hits".format(
-            len(self.snapshot_hits), len(self.triggered_hits))
-
-    def __repr__(self):
-        return str(self)

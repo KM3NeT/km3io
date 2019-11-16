@@ -6,6 +6,7 @@ include =
     km3io/*
 omit =
     tests/*
+    km3io/__version__.py
 exclude_lines =
     pragma: no cover
     raise AssertionError

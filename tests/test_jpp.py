@@ -1,4 +1,5 @@
 import os
+import re
 import unittest
 
 from km3io import JppReader
@@ -12,10 +13,27 @@ class TestJppEvents(unittest.TestCase):
                                              "jpp_v12.0.0.root")).events
 
     def test_index_lookup(self):
-        event = self.events[1]
-        assert 124 == len(event.snapshot_hits)
-        event = self.events[-1]
-        assert 78 == len(event.snapshot_hits)
+        assert 3 == len(self.events)
+
+    def test_str(self):
+        assert re.match(".*events.*3", str(self.events))
+
+    def test_repr(self):
+        assert re.match(".*events.*3", self.events.__repr__())
+
+
+class TestJppEvent(unittest.TestCase):
+    def setUp(self):
+        self.event = JppReader(os.path.join(SAMPLES_DIR,
+                                            "jpp_v12.0.0.root")).events[0]
+
+    def test_str(self):
+        assert re.match(".*event.*96.*snapshot.*18.*triggered",
+                        str(self.event))
+
+    def test_repr(self):
+        assert re.match(".*event.*96.*snapshot.*18.*triggered",
+                        self.event.__repr__())
 
 
 class TestJppEventsSnapshotHits(unittest.TestCase):

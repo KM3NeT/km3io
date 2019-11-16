@@ -10,9 +10,14 @@
    :maxdepth: 2
    :caption: Contents:
 
+   changelog
+
    autoapi/index
    autoapi/km3io/aanet/index
    autoapi/km3io/jpp/index
+
+   Code Coverage <http://km3py.pages.km3net.de/km3io/coverage>
+   Source (Git) <https://git.km3net.de/km3py/km3io.git>
 
 
 

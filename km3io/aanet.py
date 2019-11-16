@@ -2,7 +2,7 @@ import uproot
 
 
 class AanetReader:
-    def __init__(self, file_path: str):
+    def __init__(self, file_path):
         self.file_path = file_path
         self.data = uproot.open(self.file_path)['E']
         self.lazy_data = self.data.lazyarrays()

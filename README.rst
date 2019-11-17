@@ -46,3 +46,88 @@ That's it! Now let's have a look at the hits data::
            22, 22, 29, 24, 29, 24, 24, 25, 25, 21, 31, 26, 28, 30, 42, 28],
           dtype=uint8)
 
+Quick intro to read Aanet files
+-------------------------------
+
+Currently, only one Aanet event file can be read. The next version of km3io will be able to read multiple Aanet files (from the same simulation!). 
+
+Let's have a look at some events data from ORCA 4 lines simulations - run id 5971 (``datav6.0test.jchain.aanet.00005971.root``)
+
+To get a lazy ragged array of all data::
+
+    >>> import km3io as ki
+    >>> reader = ki.AanetReader('datav6.0test.jchain.aanet.00005971.root')
+
+That's it! Now let's take a look at all the available branches in our file::
+
+    >>> reader
+    Number of events: 10
+    Events keys are:
+      id
+      det_id
+      mc_id
+      run_id
+      mc_run_id
+      frame_index
+      trigger_mask
+      trigger_counter
+      overlays
+      hits
+      trks
+      w
+      w2list
+      w3list
+      mc_t
+      mc_hits
+      mc_trks
+      comment
+      index
+      flags
+      t.fSec
+      t.fNanoSec
+    Hits keys are:
+      hits.id
+      hits.dom_id
+      hits.channel_id
+      hits.tdc
+      hits.tot
+      hits.trig
+      hits.pmt_id
+      hits.t
+      hits.a
+      hits.pos.x
+      hits.pos.y
+      hits.pos.z
+      hits.dir.x
+      hits.dir.y
+      hits.dir.z
+      hits.pure_t
+      hits.pure_a
+      hits.type
+      hits.origin
+      hits.pattern_flags
+    Tracks keys are:
+      trks.fUniqueID
+      trks.fBits
+      trks.usr_data
+      trks.usr_names
+      trks.id
+      trks.pos.x
+      trks.pos.y
+      trks.pos.z
+      trks.dir.x
+      trks.dir.y
+      trks.dir.z
+      trks.t
+      trks.E
+      trks.len
+      trks.lik
+      trks.type
+      trks.rec_type
+      trks.rec_stages
+      trks.status
+      trks.mother_id
+      trks.fitinf
+      trks.hit_ids
+      trks.error_matrix
+      trks.comment

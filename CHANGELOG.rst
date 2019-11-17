@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 * Preliminary Jpp timeslice reader prototype
+* Updated ``AaetReader``
+* Updated docs
 
 Version 0
 ---------

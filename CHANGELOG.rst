@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Preliminary Jpp timeslice reader prototype
 
 Version 0
 ---------

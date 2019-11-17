@@ -21,8 +21,8 @@ test-cov:
 	py.test --cov ./km3io --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage tests
 
 test-loop: 
-	py.test $(PKGNAME)
-	ptw --ext=.py,.pyx --ignore=doc $(PKGNAME)
+	py.test tests
+	ptw --ext=.py,.pyx --ignore=doc tests
 
 flake8: 
 	py.test --flake8

@@ -6,6 +6,7 @@ class JppReader:
     def __init__(self, filename):
         self.fobj = uproot.open(filename)
         self._events = None
+        self._timeslices = None
 
     @property
     def events(self):
@@ -29,6 +30,48 @@ class JppReader:
                                 skipbytes=10))
             self._events = JppEvents(headers, snapshot_hits, triggered_hits)
         return self._events
+
+    @property
+    def timeslices(self):
+        if self._timeslices is None:
+            self._timeslices = JppTimeslices(self.fobj)
+        return self._timeslices
+
+
+class JppTimeslices:
+    """A simple wrapper for Jpp timeslices"""
+    def __init__(self, fobj):
+        self._timeslices = {}
+        streams = [
+            s.split(b"KM3NET_TIMESLICE_")[1].split(b';')[0]
+            for s in fobj.keys() if b"KM3NET_TIMESLICE_" in s
+        ]
+        for stream in streams:
+            tree = fobj[b'KM3NET_TIMESLICE_' + stream]
+            self._timeslices[stream] = JppTimeslice(tree[b'km3net_timeslice_' +
+                                                         stream])
+
+    def __str__(self):
+        return "Available timeslice streams: {}".format(','.join(
+            s.decode("ascii") for s in self._timeslices.keys()))
+
+    def __repr__(self):
+        return str(self)
+
+
+class JppTimeslice:
+    """A wrapper for a Jpp timeslice"""
+    def __init__(self, tree):
+        self.header = tree[b'KM3NETDAQ::JDAQTimeslice'][
+            b'KM3NETDAQ::JDAQTimesliceHeader'][b'KM3NETDAQ::JDAQHeader'][
+                b'KM3NETDAQ::JDAQChronometer']
+        # [b'KM3NETDAQ::JDAQTimeslice'][b'vector<KM3NETDAQ::JDAQSuperFrame>']
+
+    def __str__(self):
+        return "Jpp timeslice"
+
+    def __repr__(self):
+        return str(self)
 
 
 class JppEvents:

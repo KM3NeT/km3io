@@ -45,7 +45,7 @@ class AanetReader:
             branches are not read.
         """
         if key not in self.keys() and not isinstance(key, int):
-            raise KeyError(f"'{key}' is not a valid key or is a fake branch.")
+            raise KeyError("'{}' is not a valid key or is a fake branch.".format(key))
         return self.lazy_data[key]
 
     def __len__(self):

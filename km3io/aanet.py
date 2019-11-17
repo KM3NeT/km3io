@@ -1,14 +1,15 @@
 import uproot
 
 class AanetReader:
-
+    """Reader for one Aanet ROOT file"""
     def __init__(self, file_path):
-        """Summary
+        """ AanetReader class is a Aanet ROOT file wrapper
         
         Parameters
         ----------
         file_path : path-like object
-            Description
+            Path to the file of interest. It can be a str or any python path-like object that points 
+            to the file of ineterst.
         """
         self.file_path = file_path
         self.data = uproot.open(self.file_path)['E']
@@ -17,8 +18,9 @@ class AanetReader:
         self._hits_keys = None
         self._tracks_keys = None
 
-    def read_event(self, key):
-        """event_reader function reads data stored in a branch of interest in an event tree.
+
+    def __getitem__(self, key):
+        """reads data stored in the branch of interest in an event tree. 
         
         Parameters
         ----------
@@ -28,95 +30,35 @@ class AanetReader:
         Returns
         -------
         lazyarray
-            Lazyarray of all data stored in a branch of interest (in an event tree). A lazyarray is an array-like
+            Lazyarray of all data stored in the branch of interest. A lazyarray is an array-like
             object that reads data on demand. Here, only the first and last chunks of data are 
-            read in memory, and not all data in the array. The output of event_reader can be used
+            read in memory, and not all data in the array. The output can be used
             with all `Numpy's universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`.
         
         Raises
         ------
-        NameError
+        KeyEroor
             Some branches in an Aanet file structure are "fake branches" and do not contain data. Therefore,
-            the keys corresponding to these fake branches are not read.
+            the keys corresponding to these fake branches are not read. 
         """
-        if key not in self.events_keys:
-            raise KeyError(f"'{key}' is not a valid events key or is a fake branch.")
-        evt_key_lazy = self.lazy_data[key]
-        return evt_key_lazy
-            
-            
-    def read_hits(self, key):
-        """hits_reader function reads data stored in a branch of interest in hits tree from an Aanet
-        event file.
-        
-        Parameters
-        ----------
-        hits_key : str
-            name of the branch of interest in hits tree.
-        
-        Returns
-        -------
-        lazyarray
-            Lazyarray of all data stored in a branch of interest (in hits tree). A lazyarray is an array-like
-            object that reads data on demand. Here, only the first and last chunks of data are 
-            read in memory, and not all data in the array. The output of event_reader can be used
-            with all `Numpy's universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`.
-        
-        Raises
-        ------
-        NameError
-            the hits.key stored in an Aanet file must be used to access the branch of interest
-            from hits tree data.
-        """
-        if key not in self.hits_keys:
-            raise KeyError(f"'{key}' is not a valid hits key.")
-        hits_key_lazy = self.lazy_data[key]
-        return hits_key_lazy
-            
+        if key not in self.keys():
+            raise KeyEroor(f"'{key}' is not a valid key or is a fake branch.")
+        return self.lazy_data[key]
 
-    def read_tracks(self, key):
-        """tracks_reader function reads data stored in a branch of interest in tracks tree
-        from an Aanet event file.
-        
-        Parameters
-        ----------
-        tracks_key : str
-            name of the branch of interest in tracks tree.
-        
-        Returns
-        -------
-        lazyarray
-            Lazyarray of all data stored in a branch of interest (in tracks tree). A lazyarray is an array-like
-            object that reads data on demand. Here, only the first and last chunks of data are 
-            read in memory, and not all data in the array. The output of event_reader can be used
-            with all `Numpy's universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`.
-        
-        Raises
-        ------
-        NameError
-            the trks.key stored in an Aanet file must be used to access the branch of interest
-            from tracks tree data.
-        """
-        if key not in self.tracks_keys:
-            raise KeyError(f"'{key}' is not a valid tracks key.")
-        tracks_key_lazy = self.lazy_data[key]
-        return tracks_key_lazy
+    def __len__(self):
+        return len(self.lazy_data)
+
+    def __repr__(self):
+        return '\n'.join([f"Number of events: {self.__len__()}",
+                          "Events keys are:\n\t" + '\n\t'.join(self.events_keys),
+                          "Hits keys are:\n\t" + '\n\t'.join(self.hits_keys),
+                          "Tracks keys are:\n\t" + '\n\t'.join(self.tracks_keys)])
+
+    def keys(self):
+        return self.events_keys + self.hits_keys + self.tracks_keys 
 
     @property
     def events_keys(self):
-        """_event_keys function returns a list of all the keys of interest
-            for data analysis, and removes the keys of empty "fake branches" 
-            found in Aanet event files. 
-        
-        Parameters
-        ----------
-        evt_tree : aanet event (Evt) tree.
-        
-        Returns
-        -------
-        list of str
-            list of all the event keys.
-        """
         if self._events_keys is None:
             fake_branches = ['Evt', 'AAObject', 'TObject','t']
             t_baskets = ['t.fSec', 't.fNanoSec']

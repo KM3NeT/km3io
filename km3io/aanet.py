@@ -41,11 +41,12 @@ class AanetReader:
             Some branches in an Aanet file structure are "fake branches" and do not contain data. Therefore,
             the keys corresponding to these fake branches are not read. 
         """
-        if key not in self.keys():
-            raise KeyEroor(f"'{key}' is not a valid key or is a fake branch.")
+        if key not in self.keys() and not isinstance(key, int):
+            raise KeyError(f"'{key}' is not a valid key or is a fake branch.")
         return self.lazy_data[key]
 
     def __len__(self):
+
         return len(self.lazy_data)
 
     def __repr__(self):

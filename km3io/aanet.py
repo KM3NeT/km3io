@@ -53,7 +53,7 @@ class AanetReader:
 
     def __repr__(self):
         return '\n'.join([
-            f"Number of events: {self.__len__()}",
+            "Number of events: {}".format(self.__len__()),
             "Events keys are:\n\t" + '\n\t'.join(self.events_keys),
             "Hits keys are:\n\t" + '\n\t'.join(self.hits_keys),
             "Tracks keys are:\n\t" + '\n\t'.join(self.tracks_keys)

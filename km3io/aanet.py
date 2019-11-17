@@ -2,15 +2,22 @@ import uproot
 
 class AanetReader:
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path):
+        """Summary
+        
+        Parameters
+        ----------
+        file_path : path-like object
+            Description
+        """
         self.file_path = file_path
         self.data = uproot.open(self.file_path)['E']
         self.lazy_data = self.data.lazyarrays()
-        self._valid_keys = None
+        self._events_keys = None
         self._hits_keys = None
         self._tracks_keys = None
 
-    def read_event(self, key: str):
+    def read_event(self, key):
         """event_reader function reads data stored in a branch of interest in an event tree.
         
         Parameters
@@ -32,13 +39,13 @@ class AanetReader:
             Some branches in an Aanet file structure are "fake branches" and do not contain data. Therefore,
             the keys corresponding to these fake branches are not read.
         """
-        if key not in self.valid_keys:
-            raise KeyError(f"'{key}' could not be found or is a fake branch.")
+        if key not in self.events_keys:
+            raise KeyError(f"'{key}' is not a valid events key or is a fake branch.")
         evt_key_lazy = self.lazy_data[key]
         return evt_key_lazy
             
             
-    def read_hits(self, key: str):
+    def read_hits(self, key):
         """hits_reader function reads data stored in a branch of interest in hits tree from an Aanet
         event file.
         
@@ -61,13 +68,13 @@ class AanetReader:
             the hits.key stored in an Aanet file must be used to access the branch of interest
             from hits tree data.
         """
-        if key not in self.get_hits_keys:
+        if key not in self.hits_keys:
             raise KeyError(f"'{key}' is not a valid hits key.")
         hits_key_lazy = self.lazy_data[key]
         return hits_key_lazy
             
 
-    def read_tracks(self, key: str):
+    def read_tracks(self, key):
         """tracks_reader function reads data stored in a branch of interest in tracks tree
         from an Aanet event file.
         
@@ -90,13 +97,13 @@ class AanetReader:
             the trks.key stored in an Aanet file must be used to access the branch of interest
             from tracks tree data.
         """
-        if key not in self.get_tracks_keys:
+        if key not in self.tracks_keys:
             raise KeyError(f"'{key}' is not a valid tracks key.")
         tracks_key_lazy = self.lazy_data[key]
         return tracks_key_lazy
 
     @property
-    def valid_keys(self):
+    def events_keys(self):
         """_event_keys function returns a list of all the keys of interest
             for data analysis, and removes the keys of empty "fake branches" 
             found in Aanet event files. 
@@ -110,21 +117,21 @@ class AanetReader:
         list of str
             list of all the event keys.
         """
-        if self._valid_keys is None:
+        if self._events_keys is None:
             fake_branches = ['Evt', 'AAObject', 'TObject','t']
             t_baskets = ['t.fSec', 't.fNanoSec']
-            self._valid_keys = [key.decode('utf-8') for key in self.data['Evt'].keys() if key.decode('utf-8') not in fake_branches] + t_baskets
-        return self._valid_keys
+            self._events_keys = [key.decode('utf-8') for key in self.data['Evt'].keys() if key.decode('utf-8') not in fake_branches] + t_baskets
+        return self._events_keys
 
     @property
-    def get_hits_keys(self):
+    def hits_keys(self):
         if self._hits_keys is None:
             hits_tree = self.data['Evt']['hits']
             self._hits_keys = [key.decode('utf8') for key in hits_tree.keys()]
         return self._hits_keys
 
     @property
-    def get_tracks_keys(self):
+    def tracks_keys(self):
         if self._tracks_keys is None:
             tracks_tree = self.data['Evt']['trks']
             self._tracks_keys = [key.decode('utf8') for key in tracks_tree.keys()]

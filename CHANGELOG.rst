@@ -1,11 +1,15 @@
 Unreleased changes
 ------------------
-* Preliminary Jpp timeslice reader prototype
-* Updated ``AaetReader``
-* Updated docs
+
 
 Version 0
 ---------
+
+0.3.0 / 2019-11-19
+~~~~~~~~~~~~~~~~~~~
+* Preliminary Jpp timeslice reader prototype
+* Updated ``AaetReader``
+* Updated docs
 
 0.2.1 / 2019-11-15
 ~~~~~~~~~~~~~~~~~~~

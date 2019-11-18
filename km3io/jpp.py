@@ -41,18 +41,29 @@ class JppReader:
 class JppTimeslices:
     """A simple wrapper for Jpp timeslices"""
     def __init__(self, fobj):
+        self.fobj = fobj
         self._timeslices = {}
+        self._read_default_stream()
+        self._read_streams()
+
+    def _read_default_stream(self):
+        """Read the default KM3NET_TIMESLICE stream"""
+        tree = self.fobj[b'KM3NET_TIMESLICE'][b'KM3NET_TIMESLICE']
+        header = tree[b'KM3NETDAQ::JDAQTimesliceHeader']
+        self._timeslices['default'] = JppTimeslice(header)
+
+    def _read_streams(self):
+        """Read the L0, L1, L2 and SN streams if available"""
         streams = [
             s.split(b"KM3NET_TIMESLICE_")[1].split(b';')[0]
-            for s in fobj.keys() if b"KM3NET_TIMESLICE_" in s
+            for s in self.fobj.keys() if b"KM3NET_TIMESLICE_" in s
         ]
         for stream in streams:
-            tree = fobj[b'KM3NET_TIMESLICE_' + stream]
-            self._timeslices[stream] = JppTimeslice(tree[b'km3net_timeslice_' +
-                                                         stream])
-        tree = fobj[b'KM3NET_TIMESLICE']
-        self._timeslices['default'] = JppTimeslice(tree[b'km3net_timeslice' +
-                                                     stream])
+            tree = self.fobj[b'KM3NET_TIMESLICE_' +
+                             stream][b'KM3NETDAQ::JDAQTimeslice']
+            header = tree[b'KM3NETDAQ::JDAQTimesliceHeader'][
+                b'KM3NETDAQ::JDAQHeader'][b'KM3NETDAQ::JDAQChronometer']
+            self._timeslices[stream.decode("ascii")] = JppTimeslice(header)
 
     def __str__(self):
         return "Available timeslice streams: {}".format(','.join(
@@ -64,17 +75,15 @@ class JppTimeslices:
 
 class JppTimeslice:
     """A wrapper for a Jpp timeslice"""
-    def __init__(self, tree):
-        self.header = tree[b'KM3NETDAQ::JDAQTimeslice'][
-            b'KM3NETDAQ::JDAQTimesliceHeader'][b'KM3NETDAQ::JDAQHeader'][
-                b'KM3NETDAQ::JDAQChronometer']
-        # [b'KM3NETDAQ::JDAQTimeslice'][b'vector<KM3NETDAQ::JDAQSuperFrame>']
+    def __init__(self, header):
+        self.header = header
 
     def __str__(self):
         return "Jpp timeslice"
 
     def __repr__(self):
-        return str(self)
+        return "<{}: {} entries>".format(self.__class__.__name__,
+                                         len(self.header))
 
 
 class JppEvents:

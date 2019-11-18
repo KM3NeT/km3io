@@ -114,3 +114,15 @@ class TestJppEventsTriggeredHits(unittest.TestCase):
         # channel IDs are always between [0, 30]
         assert all(c >= 0 for c in hits.channel_id.min())
         assert all(c < 31 for c in hits.channel_id.max())
+
+
+class TestTimeslices(unittest.TestCase):
+    def setUp(self):
+        self.ts = JppReader(os.path.join(SAMPLES_DIR,
+                                         "jpp_v12.0.0.root")).timeslices
+    def test_data_lengths(self):
+        assert 3 == len(self.ts._timeslices["default"].header)
+        assert 0 == len(self.ts._timeslices["L0"].header)
+        assert 3 == len(self.ts._timeslices["L1"].header)
+        assert 0 == len(self.ts._timeslices["L2"].header)
+        assert 3 == len(self.ts._timeslices["SN"].header)

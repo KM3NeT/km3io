@@ -50,6 +50,9 @@ class JppTimeslices:
             tree = fobj[b'KM3NET_TIMESLICE_' + stream]
             self._timeslices[stream] = JppTimeslice(tree[b'km3net_timeslice_' +
                                                          stream])
+        tree = fobj[b'KM3NET_TIMESLICE']
+        self._timeslices['default'] = JppTimeslice(tree[b'km3net_timeslice' +
+                                                     stream])
 
     def __str__(self):
         return "Available timeslice streams: {}".format(','.join(

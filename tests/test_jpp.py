@@ -123,10 +123,12 @@ class TestTimeslices(unittest.TestCase):
 
     def test_data_lengths(self):
         assert 3 == len(self.ts._timeslices["default"][0])
-        assert 0 == len(self.ts._timeslices["L0"][0])
         assert 3 == len(self.ts._timeslices["L1"][0])
-        assert 0 == len(self.ts._timeslices["L2"][0])
         assert 3 == len(self.ts._timeslices["SN"][0])
+        with self.assertRaises(KeyError):
+            assert 0 == len(self.ts._timeslices["L2"][0])
+        with self.assertRaises(KeyError):
+            assert 0 == len(self.ts._timeslices["L0"][0])
 
     def test_reading_frames(self):
         assert 8 == len(self.ts.stream("SN", 1).frames[808447186])

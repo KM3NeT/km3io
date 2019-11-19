@@ -66,12 +66,23 @@ class JppTimeslices:
                              stream][b'KM3NETDAQ::JDAQTimeslice']
             headers = tree[b'KM3NETDAQ::JDAQTimesliceHeader'][
                 b'KM3NETDAQ::JDAQHeader'][b'KM3NETDAQ::JDAQChronometer']
+            if len(headers) == 0:
+                continue
             superframes = tree[b'vector<KM3NETDAQ::JDAQSuperFrame>']
-            self._timeslices[stream.decode("ascii")] = (headers, superframes)
+            hits_buffer = superframes[
+                b'vector<KM3NETDAQ::JDAQSuperFrame>.buffer'].lazyarray(
+                    uproot.asjagged(uproot.astable(
+                        uproot.asdtype([("pmt", "u1"), ("tdc", "u4"),
+                                        ("tot", "u1")])),
+                                    skipbytes=6),
+                    basketcache=uproot.cache.ThreadSafeArrayCache(
+                        TIMESLICE_FRAME_BASKET_CACHE_SIZE))
+            self._timeslices[stream.decode("ascii")] = (headers, superframes,
+                                                        hits_buffer)
 
     def stream(self, stream, idx):
         ts = self._timeslices[stream]
-        return JppTimeslice(ts[0], ts[1], idx)
+        return JppTimeslice(*ts, idx)
 
     def __str__(self):
         return "Available timeslice streams: {}".format(', '.join(
@@ -83,10 +94,11 @@ class JppTimeslices:
 
 class JppTimeslice:
     """A wrapper for a Jpp timeslice"""
-    def __init__(self, header, superframe, idx):
+    def __init__(self, header, superframe, hits_buffer, idx):
         self.header = header
         self._frames = {}
         self._superframe = superframe
+        self._hits_buffer = hits_buffer
         self._idx = idx
 
     @property
@@ -97,14 +109,7 @@ class JppTimeslice:
 
     def _read_frames(self):
         """Populate a dictionary of frames with the module ID as key"""
-        hits_buffer = self._superframe[
-            b'vector<KM3NETDAQ::JDAQSuperFrame>.buffer'].lazyarray(
-                uproot.asjagged(uproot.astable(
-                    uproot.asdtype([("pmt", "u1"), ("tdc", "u4"),
-                                    ("tot", "u1")])),
-                                skipbytes=6),
-                basketcache=uproot.cache.ThreadSafeArrayCache(
-                    TIMESLICE_FRAME_BASKET_CACHE_SIZE))[self._idx]
+        hits_buffer = self._hits_buffer[self._idx]
         n_hits = self._superframe[
             b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].lazyarray()[
                 self._idx]

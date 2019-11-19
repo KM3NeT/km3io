@@ -49,9 +49,15 @@ That's it! Now let's have a look at the hits data::
 Quick intro to read Aanet files
 -------------------------------
 
-Currently, only one Aanet event file can be read. The next version of km3io will be able to read multiple Aanet files (from the same simulation!). Data is always returned as a "lazyarray". A lazyarray is an array-like object that reads data on demand. Here, only the first and last chunks of data are read in memory, and not all data in the array. The output can be used with all `Numpy's universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>.
+Currently, only one Aanet event file can be read. The next version of km3io
+will be able to read multiple Aanet files (from the same simulation!). Data
+is always returned as a "lazyarray". A lazyarray is an array-like object that
+reads data on demand. Here, only the first and last chunks of data are read in
+memory, and not all data in the array. The output can be used with all Numpy's
+universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>.
 
-Let's have a look at some events data from ORCA 4 lines simulations - run id 5971 (``datav6.0test.jchain.aanet.00005971.root``)
+Let's have a look at some events data from ORCA 4 lines simulations - run id
+5971 (``datav6.0test.jchain.aanet.00005971.root``)
 
 To get a lazy ragged array of all data::
 
@@ -132,7 +138,9 @@ That's it! Now let's take a look at all the available branches in our file::
       trks.error_matrix
       trks.comment
 
-Now that you have seen all the available branches, you can choose any key from the above (key refers to a branch name) and display the corresponding data. For example, we will check that we are indeed reading data from the run 5971::
+Now that you have seen all the available branches, you can choose any key from
+the above (key refers to a branch name) and display the corresponding data. For
+example, we will check that we are indeed reading data from the run 5971::
 
     >>> reader['run_id']
     <ChunkedArray [5971 5971 5971 ... 5971 5971 5971] at 0x7fb2341ad810>
@@ -144,7 +152,8 @@ Let's look at the number of hits and tracks in the event number 5::
     >>> reader[5]['trks']
     56
 
-So event 5 has exactly 60 hits and 56 tracks. Let's explore in more details hits and tracks data in event 5::
+So event 5 has exactly 60 hits and 56 tracks. Let's explore in more details
+hits and tracks data in event 5::
 
     >>> reader['hits.dom_id'][5]
     array([806455814, 806487219, 806487219, 806487219, 806487226, 808432835,
@@ -184,7 +193,3 @@ One can access the 'trks.dir.z' for the first track in event 5 as follows::
 
     >>> reader['trks.dir.z'][5][0]
     -0.60246049
-
-
-
-

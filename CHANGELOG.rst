@@ -1,6 +1,6 @@
 Unreleased changes
 ------------------
-
+* First timeslice frame readout prototype
 
 Version 0
 ---------

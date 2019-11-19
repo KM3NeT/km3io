@@ -49,8 +49,9 @@ class JppTimeslices:
     def _read_default_stream(self):
         """Read the default KM3NET_TIMESLICE stream"""
         tree = self.fobj[b'KM3NET_TIMESLICE'][b'KM3NET_TIMESLICE']
-        header = tree[b'KM3NETDAQ::JDAQTimesliceHeader']
-        self._timeslices['default'] = JppTimeslice(header)
+        headers = tree[b'KM3NETDAQ::JDAQTimesliceHeader']
+        superframes = tree[b'vector<KM3NETDAQ::JDAQSuperFrame>']
+        self._timeslices['default'] = (headers, superframes)
 
     def _read_streams(self):
         """Read the L0, L1, L2 and SN streams if available"""
@@ -61,13 +62,18 @@ class JppTimeslices:
         for stream in streams:
             tree = self.fobj[b'KM3NET_TIMESLICE_' +
                              stream][b'KM3NETDAQ::JDAQTimeslice']
-            header = tree[b'KM3NETDAQ::JDAQTimesliceHeader'][
+            headers = tree[b'KM3NETDAQ::JDAQTimesliceHeader'][
                 b'KM3NETDAQ::JDAQHeader'][b'KM3NETDAQ::JDAQChronometer']
-            self._timeslices[stream.decode("ascii")] = JppTimeslice(header)
+            superframes = tree[b'vector<KM3NETDAQ::JDAQSuperFrame>']
+            self._timeslices[stream.decode("ascii")] = (headers, superframes)
+
+    def stream(self, stream, idx):
+        ts = self._timeslices[stream]
+        return JppTimeslice(ts[0], ts[1], idx)
 
     def __str__(self):
-        return "Available timeslice streams: {}".format(','.join(
-            s.decode("ascii") for s in self._timeslices.keys()))
+        return "Available timeslice streams: {}".format(', '.join(
+            s for s in self._timeslices.keys()))
 
     def __repr__(self):
         return str(self)
@@ -75,8 +81,35 @@ class JppTimeslices:
 
 class JppTimeslice:
     """A wrapper for a Jpp timeslice"""
-    def __init__(self, header):
+    def __init__(self, header, superframe, idx):
         self.header = header
+        self._frames = {}
+        self._superframe = superframe
+        self._idx = idx
+
+    @property
+    def frames(self):
+        if not self._frames:
+            self._read_frames()
+        return self._frames
+
+    def _read_frames(self):
+        """Populate a dictionary of frames with the module ID as key"""
+        hits_buffer = self._superframe[
+            b'vector<KM3NETDAQ::JDAQSuperFrame>.buffer'].array(
+                uproot.asjagged(uproot.astable(
+                    uproot.asdtype([("pmt", "u1"), ("tdc", "u4"),
+                                    ("tot", "u1")])),
+                                skipbytes=6))[self._idx]
+        n_hits = self._superframe[
+            b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].array()[
+                self._idx]
+        module_ids = self._superframe[
+            b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].array()[self._idx]
+        idx = 0
+        for module_id, n_hits in zip(module_ids, n_hits):
+            self._frames[module_id] = hits_buffer[idx:idx + n_hits]
+            idx += n_hits
 
     def __str__(self):
         return "Jpp timeslice"

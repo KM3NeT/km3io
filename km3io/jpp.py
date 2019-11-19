@@ -1,5 +1,7 @@
 import uproot
 
+TIMESLICE_FRAME_BASKET_CACHE_SIZE = 23 * 1024**2  # [byte]
+
 
 class JppReader:
     """Reader for Jpp ROOT files"""
@@ -96,16 +98,18 @@ class JppTimeslice:
     def _read_frames(self):
         """Populate a dictionary of frames with the module ID as key"""
         hits_buffer = self._superframe[
-            b'vector<KM3NETDAQ::JDAQSuperFrame>.buffer'].array(
+            b'vector<KM3NETDAQ::JDAQSuperFrame>.buffer'].lazyarray(
                 uproot.asjagged(uproot.astable(
                     uproot.asdtype([("pmt", "u1"), ("tdc", "u4"),
                                     ("tot", "u1")])),
-                                skipbytes=6))[self._idx]
+                                skipbytes=6),
+                basketcache=uproot.cache.ThreadSafeArrayCache(
+                    TIMESLICE_FRAME_BASKET_CACHE_SIZE))[self._idx]
         n_hits = self._superframe[
-            b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].array()[
+            b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].lazyarray()[
                 self._idx]
         module_ids = self._superframe[
-            b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].array()[self._idx]
+            b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].lazyarray()[self._idx]
         idx = 0
         for module_id, n_hits in zip(module_ids, n_hits):
             self._frames[module_id] = hits_buffer[idx:idx + n_hits]

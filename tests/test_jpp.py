@@ -116,7 +116,7 @@ class TestJppEventsTriggeredHits(unittest.TestCase):
         assert all(c < 31 for c in hits.channel_id.max())
 
 
-class TestTimeslices(unittest.TestCase):
+class TestJppTimeslices(unittest.TestCase):
     def setUp(self):
         self.ts = JppReader(os.path.join(SAMPLES_DIR,
                                          "jpp_v12.0.0.root")).timeslices
@@ -132,3 +132,23 @@ class TestTimeslices(unittest.TestCase):
 
     def test_reading_frames(self):
         assert 8 == len(self.ts.stream("SN", 1).frames[808447186])
+
+    def test_str(self):
+        s = str(self.ts)
+        assert "default" in s
+        assert "L1" in s
+        assert "SN" in s
+
+
+class TestJppTimeslice(unittest.TestCase):
+    def setUp(self):
+        self.ts = JppReader(os.path.join(SAMPLES_DIR,
+                                         "jpp_v12.0.0.root")).timeslices
+        self.n_frames = {"L1": [69, 69, 69], "SN": [64, 66, 68]}
+
+    def test_str(self):
+        for stream, n_frames in self.n_frames.items():
+            print(stream, n_frames)
+            for i in range(len(n_frames)):
+                s = str(self.ts.stream(stream, i))
+                assert re.match("{}.*{}".format(stream, n_frames[i]), s)

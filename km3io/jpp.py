@@ -82,7 +82,7 @@ class JppTimeslices:
 
     def stream(self, stream, idx):
         ts = self._timeslices[stream]
-        return JppTimeslice(*ts, idx)
+        return JppTimeslice(*ts, idx, stream)
 
     def __str__(self):
         return "Available timeslice streams: {}".format(', '.join(
@@ -94,12 +94,14 @@ class JppTimeslices:
 
 class JppTimeslice:
     """A wrapper for a Jpp timeslice"""
-    def __init__(self, header, superframe, hits_buffer, idx):
+    def __init__(self, header, superframe, hits_buffer, idx, stream):
         self.header = header
         self._frames = {}
         self._superframe = superframe
         self._hits_buffer = hits_buffer
         self._idx = idx
+        self._stream = stream
+        self._n_frames = None
 
     @property
     def frames(self):
@@ -120,8 +122,15 @@ class JppTimeslice:
             self._frames[module_id] = hits_buffer[idx:idx + n_hits]
             idx += n_hits
 
+    def __len__(self):
+        if self._n_frames is None:
+            self._n_frames = len(
+                self._superframe[b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].
+                lazyarray()[self._idx])
+        return self._n_frames
+
     def __str__(self):
-        return "Jpp timeslice"
+        return "{} timeslice with {} frames.".format(self._stream, len(self))
 
     def __repr__(self):
         return "<{}: {} entries>".format(self.__class__.__name__,

@@ -72,8 +72,7 @@ class AanetReader:
         list
             list of all valid keys.
         """
-        return self.events_keys + self.hits_keys + self.tracks_keys + ...
-        +self.mc_tracks_keys + self.mc_hits_keys
+        return self.events_keys + self.hits_keys + self.tracks_keys + self.mc_tracks_keys + self.mc_hits_keys
 
     @property
     def events_keys(self):

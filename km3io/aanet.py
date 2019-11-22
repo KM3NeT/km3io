@@ -59,7 +59,9 @@ class AanetReader:
             "Number of events: {}".format(self.__len__()),
             "Events keys are:\n\t" + '\n\t'.join(self.events_keys),
             "Hits keys are:\n\t" + '\n\t'.join(self.hits_keys),
-            "Tracks keys are:\n\t" + '\n\t'.join(self.tracks_keys)
+            "Tracks keys are:\n\t" + '\n\t'.join(self.tracks_keys),
+            "Mc hits keys are:\n\t" + '\n\t'.join(self.mc_hits_keys),
+            "Mc tracks keys are:\n\t" + '\n\t'.join(self.mc_tracks_keys)
         ])
 
     def keys(self):

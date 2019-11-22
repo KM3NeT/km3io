@@ -105,15 +105,15 @@ class AanetReader:
     @property
     def mc_hits_keys(self):
         if self._mc_hits_keys is None:
-            hits_tree = self.data['Evt']['mc_hits']
-            self._hits_keys = [key.decode('utf8') for key in hits_tree.keys()]
+            mc_hits_tree = self.data['Evt']['mc_hits']
+            self._mc_hits_keys = [key.decode('utf8') for key in mc_hits_tree.keys()]
         return self._mc_hits_keys
 
     @property
     def mc_tracks_keys(self):
         if self._mc_tracks_keys is None:
-            tracks_tree = self.data['Evt']['mc_trks']
-            self._tracks_keys = [
-                key.decode('utf8') for key in tracks_tree.keys()
+            mc_tracks_tree = self.data['Evt']['mc_trks']
+            self._mc_tracks_keys = [
+                key.decode('utf8') for key in mc_tracks_tree.keys()
             ]
         return self._mc_tracks_keys

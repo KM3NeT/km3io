@@ -18,6 +18,8 @@ class AanetReader:
         self._events_keys = None
         self._hits_keys = None
         self._tracks_keys = None
+        self._mc_hits_keys = None
+        self._mc_tracks_keys = None
 
     def __getitem__(self, key):
         """reads data stored in the branch of interest in an event tree.
@@ -68,7 +70,8 @@ class AanetReader:
         list
             list of all valid keys.
         """
-        return self.events_keys + self.hits_keys + self.tracks_keys
+        return self.events_keys + self.hits_keys + self.tracks_keys + ...
+        +self.mc_tracks_keys + self.mc_hits_keys
 
     @property
     def events_keys(self):
@@ -96,3 +99,19 @@ class AanetReader:
                 key.decode('utf8') for key in tracks_tree.keys()
             ]
         return self._tracks_keys
+
+    @property
+    def mc_hits_keys(self):
+        if self._mc_hits_keys is None:
+            hits_tree = self.data['Evt']['mc_hits']
+            self._hits_keys = [key.decode('utf8') for key in hits_tree.keys()]
+        return self._mc_hits_keys
+
+    @property
+    def mc_tracks_keys(self):
+        if self._mc_tracks_keys is None:
+            tracks_tree = self.data['Evt']['mc_trks']
+            self._tracks_keys = [
+                key.decode('utf8') for key in tracks_tree.keys()
+            ]
+        return self._mc_tracks_keys

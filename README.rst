@@ -22,6 +22,10 @@ outperform the ROOT I/O performance. To install it::
 
     pip install km3io
 
+To get the latest (stable) development release::
+
+    pip install git+https://git.km3net.de/km3py/km3io
+
 Quick intro to read Jpp files
 -----------------------------
 

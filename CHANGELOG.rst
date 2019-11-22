@@ -1,9 +1,12 @@
 Unreleased changes
 ------------------
-* First timeslice frame readout prototype
 
 Version 0
 ---------
+
+0.4.0 / 2019-11-22
+~~~~~~~~~~~~~~~~~~~
+* First timeslice frame readout prototype
 
 0.3.0 / 2019-11-19
 ~~~~~~~~~~~~~~~~~~~

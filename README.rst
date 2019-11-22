@@ -17,6 +17,9 @@ This software provides a set of Python classes to read KM3NeT ROOT files
 without having ROOT, Jpp or aanet installed. It only depends on Python 3.5+ and
 the amazing uproot package and gives you access to the data via numpy arrays.
 
+Beware that this package is in the development phase, so the API will change
+until version ``1.0.0`` is released!
+
 It's very easy to use and according to the uproot benchmarks, it is able to
 outperform the ROOT I/O performance. To install it::
 

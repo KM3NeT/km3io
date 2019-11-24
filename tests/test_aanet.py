@@ -48,12 +48,27 @@ class TestAanetReader(unittest.TestCase):
 
         self.assertListEqual([70104010.0, 70104016.0, 70104192.0],
                              list(ts[0][:3]))
+    def test_reading_hits_keys(self):
+        keys = self.r.hits_keys
+        mc_keys = self.r.mc_hits_keys
+
+        # there are 20 hits keys
+        self.assertEqual(len(keys), 20)
+        self.assertEqual(len(mc_keys), 20)
+
+    def test_reading_tracks_keys(self):
+        keys = self.r.tracks_keys
+        mc_keys = self.r.mc_tracks_keys
+
+        # there are 24 tracks keys
+        self.assertEqual(len(keys), 24)
+        self.assertEqual(len(mc_keys), 24)
 
     def test_reading_keys(self):
         all_keys = self.r.keys()
 
-        # there are 66 valid keys in Aanet file
-        self.assertEqual(len(all_keys), 66)
+        # there are 110 valid keys in Aanet file
+        self.assertEqual(len(all_keys), 110)
 
     def test_raising_KeyError(self):
         # non valid keys must raise a KeyError
@@ -66,5 +81,5 @@ class TestAanetReader(unittest.TestCase):
 
         # check that there are 10 events
         self.assertEqual(Nevents, 10)
-        # check that there are 66 keys + 4 extra str
-        self.assertEqual(len(reader_repr.split('\n')), 70)
+        # check that there are 110 keys + 6 extra str
+        self.assertEqual(len(reader_repr.split('\n')), 116)

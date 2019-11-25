@@ -47,8 +47,13 @@ class AanetKeys:
     @property
     def tracks_keys(self):
         if self._tracks_keys is None:
+            fake_branches = ['trks.usr_data',
+                             'trks.usr_names']  # uproot can't read these
             tree = uproot.open(self._file_path)['E']['Evt']['trks']
-            self._tracks_keys = [key.decode('utf8') for key in tree.keys()]
+            self._tracks_keys = [
+                key.decode('utf8') for key in tree.keys()
+                if key.decode('utf8') not in fake_branches
+            ]
         return self._tracks_keys
 
     @property
@@ -61,8 +66,13 @@ class AanetKeys:
     @property
     def mc_tracks_keys(self):
         if self._mc_tracks_keys is None:
+            fake_branches = ['mc_trks.usr_data',
+                             'mc_trks.usr_names']  # uproot can't read these
             tree = uproot.open(self._file_path)['E']['Evt']['mc_trks']
-            self._mc_tracks_keys = [key.decode('utf8') for key in tree.keys()]
+            self._mc_tracks_keys = [
+                key.decode('utf8') for key in tree.keys()
+                if key.decode('utf8') not in fake_branches
+            ]
         return self._mc_tracks_keys
 
     @property
@@ -126,7 +136,6 @@ class Reader(AanetKeys):
 
 
 class AanetReader(AanetKeys):
-
     def __init__(self, file_path, data=None):
         """ AanetReader class is a Aanet ROOT file wrapper
 
@@ -143,12 +152,16 @@ class AanetReader(AanetKeys):
             self._lazy_data = uproot.open(self._file_path)['E'].lazyarrays()
         self._events = None
         self._hits = None
+        self._tracks = None
+        self._mc_hits = None
+        self._mc_tracks = None
 
     # def __getitem__(self, item):
     #     return AanetEvents(self._events_keys, [self._lazy_data[key] for key in self.events])
 
     def __getitem__(self, item):
-        return AanetReader(file_path=self._file_path, data=self._lazy_data[item])
+        return AanetReader(file_path=self._file_path,
+                           data=self._lazy_data[item])
 
     @property
     def events(self):
@@ -165,6 +178,30 @@ class AanetReader(AanetKeys):
                 self.hits_keys,
                 [self._lazy_data[key] for key in self.hits_keys])
         return self._hits
+
+    @property
+    def tracks(self):
+        if self._tracks is None:
+            self._tracks = AanetTracks(
+                self.tracks_keys,
+                [self._lazy_data[key] for key in self.tracks_keys])
+        return self._tracks
+
+    @property
+    def mc_hits(self):
+        if self._mc_hits is None:
+            self._mc_hits = AanetHits(
+                self.mc_hits_keys,
+                [self._lazy_data[key] for key in self.mc_hits_keys])
+        return self._mc_hits
+
+    @property
+    def mc_tracks(self):
+        if self._mc_tracks is None:
+            self._mc_tracks = AanetTracks(
+                self.mc_tracks_keys,
+                [self._lazy_data[key] for key in self.mc_tracks_keys])
+        return self._mc_tracks
 
 
 class AanetEvents:
@@ -217,7 +254,7 @@ class AanetHits:
         self._keys = keys  # list of keys
         self._values = values
         for k, v in zip(self._keys, self._values):
-            setattr(self, k.split('hits.')[1].replace('.','_'), v)
+            setattr(self, k.split('hits.')[1].replace('.', '_'), v)
 
     def __getitem__(self, item):
         # return self._values[item]
@@ -234,7 +271,8 @@ class AanetHits:
             return "Number of hits in the selected event: {}".format(len(self))
         # mc hits
         if all(key.startswith('mc_hits.') for key in self._keys):
-            return "Number of mc hits in the selected event: {}".format(len(self))
+            return "Number of mc hits in the selected event: {}".format(
+                len(self))
 
     def __repr__(self):
         return str(self)
@@ -247,20 +285,88 @@ class AanetHit:
         self._keys = keys  # list of keys
         self._values = values
         for k, v in zip(self._keys, self._values):
-            setattr(self, k.split('hits.')[1].replace('.','_'), v)
+            setattr(self, k.split('hits.')[1].replace('.', '_'), v)
 
     def __str__(self):
         # hits
         if all(key.startswith('hits.') for key in self._keys):
             return "Aanet hit:\n\t" + "\n\t".join([
-                "{:15} {:^10} {:>10}".format(k.split('hits.')[1].replace('.','_'), ':', str(v))
+                "{:15} {:^10} {:>10}".format(
+                    k.split('hits.')[1].replace('.', '_'), ':', str(v))
                 for k, v in zip(self._keys, self._values)
             ])
 
         # mc hits
         if all(key.startswith('mc_hits.') for key in self._keys):
             return "Aanet mc hit:\n\t" + "\n\t".join([
-                "{:15} {:^10} {:>10}".format(k.split('mc_hits.')[1].replace('.','_'), ':', str(v))
+                "{:15} {:^10} {:>10}".format(
+                    k.split('mc_hits.')[1].replace('.', '_'), ':', str(v))
+                for k, v in zip(self._keys, self._values)
+            ])
+
+    def __getitem__(self, item):
+        # return self._values[item]
+        return self._values[item]
+
+    def __repr__(self):
+        return str(self)
+
+
+class AanetTracks:
+    "wrapper for Aanet tracks, manages the display of all tracks in one event"
+
+    def __init__(self, keys, values):  # values is a list of lists
+        self._keys = keys  # list of keys
+        self._values = values
+        for k, v in zip(self._keys, self._values):
+            setattr(self, k.split('trks.')[1].replace('.', '_'), v)
+
+    def __getitem__(self, item):
+        # return self._values[item]
+        return AanetTrack(self._keys, [v[item] for v in self._values])
+
+    def __len__(self):
+        return len(
+            self._values[0]
+        )  # I don't like this being explicit, what if values is empty ...
+
+    def __str__(self):
+        # hits
+        if all(key.startswith('trks.') for key in self._keys):
+            return "Number of tracks in the selected event: {}".format(
+                len(self))
+        # mc hits
+        if all(key.startswith('mc_trks.') for key in self._keys):
+            return "Number of mc tracks in the selected event: {}".format(
+                len(self))
+
+    def __repr__(self):
+        return str(self)
+
+
+class AanetTrack:
+    "wrapper for an Aanet track"
+
+    def __init__(self, keys, values):  # both inputs are lists
+        self._keys = keys  # list of keys
+        self._values = values
+        for k, v in zip(self._keys, self._values):
+            setattr(self, k.split('trks.')[1].replace('.', '_'), v)
+
+    def __str__(self):
+        # hits
+        if all(key.startswith('trks.') for key in self._keys):
+            return "Aanet track:\n\t" + "\n\t".join([
+                "{:15} {:^10} {:>10}".format(
+                    k.split('trks.')[1].replace('.', '_'), ':', str(v))
+                for k, v in zip(self._keys, self._values)
+            ])
+
+        # mc hits
+        if all(key.startswith('mc_trks.') for key in self._keys):
+            return "Aanet mc track:\n\t" + "\n\t".join([
+                "{:15} {:^10} {:>10}".format(
+                    k.split('trks.')[1].replace('.', '_'), ':', str(v))
                 for k, v in zip(self._keys, self._values)
             ])
 

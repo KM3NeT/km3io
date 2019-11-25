@@ -3,6 +3,7 @@ import uproot
 
 class AanetKeys:
     "wrapper for aanet keys"
+
     def __init__(self, file_path):
         self._file_path = file_path
         self._events_keys = None
@@ -73,11 +74,13 @@ class AanetKeys:
             list of all valid keys.
     """
         if self._valid_keys is None:
-            self._valid_keys = self.events_keys + self.hits_keys + self.tracks_keys + self.mc_tracks_keys + self.mc_hits_keys
+            self._valid_keys = (self.events_keys + self.hits_keys +
+                                self.tracks_keys + self.mc_tracks_keys +
+                                self.mc_hits_keys)
         return self._valid_keys
 
 
-class AanetReader(AanetKeys):
+class Reader(AanetKeys):
     """Reader for one Aanet ROOT file"""
     def __init__(self, file_path):
         """ AanetReader class is a Aanet ROOT file wrapper
@@ -122,8 +125,9 @@ class AanetReader(AanetKeys):
         return self._lazy_data[key]
 
 
-class Reader(AanetKeys):
-    def __init__(self, file_path):
+class AanetReader(AanetKeys):
+
+    def __init__(self, file_path, data=None):
         """ AanetReader class is a Aanet ROOT file wrapper
 
         Parameters
@@ -133,20 +137,41 @@ class Reader(AanetKeys):
             path-like object that points to the file of ineterst.
         """
         super().__init__(file_path)
-        self._lazy_data = uproot.open(self._file_path)['E'].lazyarrays()
+        if data is not None:
+            self._lazy_data = data
+        else:
+            self._lazy_data = uproot.open(self._file_path)['E'].lazyarrays()
         self._events = None
+        self._hits = None
+
+    # def __getitem__(self, item):
+    #     return AanetEvents(self._events_keys, [self._lazy_data[key] for key in self.events])
+
+    def __getitem__(self, item):
+        return AanetReader(file_path=self._file_path, data=self._lazy_data[item])
 
     @property
     def events(self):
         if self._events is None:
-            self._events = AanetEvents(self._events_keys, [self._lazy_data[key] for key in self._events_keys])
+            self._events = AanetEvents(
+                self.events_keys,
+                [self._lazy_data[key] for key in self.events_keys])
         return self._events
+
+    @property
+    def hits(self):
+        if self._hits is None:
+            self._hits = AanetHits(
+                self.hits_keys,
+                [self._lazy_data[key] for key in self.hits_keys])
+        return self._hits
 
 
 class AanetEvents:
     "wrapper for Aanet events"
-    def __init__(self, keys, values): #values is a list of lists
-        self._keys = keys # list of keys
+
+    def __init__(self, keys, values):  # values is a list of lists
+        self._keys = keys  # list of keys
         self._values = values
         for k, v in zip(self._keys, self._values):
             setattr(self, k, v)
@@ -155,7 +180,9 @@ class AanetEvents:
         return AanetEvent(self._keys, [v[item] for v in self._values])
 
     def __len__(self):
-        return len(self._values[0]) # I don't like this being explicit, what if values is empty ...
+        return len(
+            self._values[0]
+        )  # I don't like this being explicit, what if values is empty ...
 
     def __str__(self):
         return "Number of events: {}".format(len(self))
@@ -166,14 +193,80 @@ class AanetEvents:
 
 class AanetEvent:
     "wrapper for an Aanet event"
-    def __init__(self, keys, values): # both inputs are lists
-        self._dict = dict(zip(keys, values))
-        for k, v in self._dict.items():
+
+    def __init__(self, keys, values):  # both inputs are lists
+        self._keys = keys  # list of keys
+        self._values = values
+        for k, v in zip(self._keys, self._values):
             setattr(self, k, v)
 
     def __str__(self):
-        return "Aanet event:\n\t" + "\n\t".join(["{:10} {:^10} {:>10}".format(k, ':',v) for k, v in self._dict.items()])
+        return "Aanet event:\n\t" + "\n\t".join([
+            "{:15} {:^10} {:>10}".format(k, ':', str(v))
+            for k, v in zip(self._keys, self._values)
+        ])
 
     def __repr__(self):
         return str(self)
 
+
+class AanetHits:
+    "wrapper for Aanet hits, manages the display of all hits in one event"
+
+    def __init__(self, keys, values):  # values is a list of lists
+        self._keys = keys  # list of keys
+        self._values = values
+        for k, v in zip(self._keys, self._values):
+            setattr(self, k.split('hits.')[1].replace('.','_'), v)
+
+    def __getitem__(self, item):
+        # return self._values[item]
+        return AanetHit(self._keys, [v[item] for v in self._values])
+
+    def __len__(self):
+        return len(
+            self._values[0]
+        )  # I don't like this being explicit, what if values is empty ...
+
+    def __str__(self):
+        # hits
+        if all(key.startswith('hits.') for key in self._keys):
+            return "Number of hits in the selected event: {}".format(len(self))
+        # mc hits
+        if all(key.startswith('mc_hits.') for key in self._keys):
+            return "Number of mc hits in the selected event: {}".format(len(self))
+
+    def __repr__(self):
+        return str(self)
+
+
+class AanetHit:
+    "wrapper for an Aanet hit"
+
+    def __init__(self, keys, values):  # both inputs are lists
+        self._keys = keys  # list of keys
+        self._values = values
+        for k, v in zip(self._keys, self._values):
+            setattr(self, k.split('hits.')[1].replace('.','_'), v)
+
+    def __str__(self):
+        # hits
+        if all(key.startswith('hits.') for key in self._keys):
+            return "Aanet hit:\n\t" + "\n\t".join([
+                "{:15} {:^10} {:>10}".format(k.split('hits.')[1].replace('.','_'), ':', str(v))
+                for k, v in zip(self._keys, self._values)
+            ])
+
+        # mc hits
+        if all(key.startswith('mc_hits.') for key in self._keys):
+            return "Aanet mc hit:\n\t" + "\n\t".join([
+                "{:15} {:^10} {:>10}".format(k.split('mc_hits.')[1].replace('.','_'), ':', str(v))
+                for k, v in zip(self._keys, self._values)
+            ])
+
+    def __getitem__(self, item):
+        # return self._values[item]
+        return self._values[item]
+
+    def __repr__(self):
+        return str(self)

@@ -261,10 +261,10 @@ class AanetHits:
         return AanetHit(self._keys, [v[item] for v in self._values])
 
     def __len__(self):
-        return len(
-            self._values[0]
-        )  # I don't like this being explicit, what if values is empty ...
-
+        try:
+            return len(self._values[0])
+        except IndexError:
+            return 0
     def __str__(self):
         # hits
         if all(key.startswith('hits.') for key in self._keys):

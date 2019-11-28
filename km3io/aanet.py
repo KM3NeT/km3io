@@ -149,7 +149,7 @@ class AanetReader(AanetKeys):
         if data is not None:
             self._data = data
         else:
-            self._lazy_data = uproot.open(self._file_path)['E'].lazyarrays()
+            self._data = uproot.open(self._file_path)['E'].lazyarrays()
         self._events = None
         self._hits = None
         self._tracks = None

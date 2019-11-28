@@ -176,7 +176,7 @@ class AanetReader(AanetKeys):
         if self._hits is None:
             self._hits = AanetHits(
                 self.hits_keys,
-                [self._lazy_data[key] for key in self.hits_keys])
+                [self._data[key] for key in self.hits_keys])
         return self._hits
 
     @property

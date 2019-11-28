@@ -184,7 +184,7 @@ class AanetReader(AanetKeys):
         if self._tracks is None:
             self._tracks = AanetTracks(
                 self.tracks_keys,
-                [self._lazy_data[key] for key in self.tracks_keys])
+                [self._data[key] for key in self.tracks_keys])
         return self._tracks
 
     @property

@@ -271,7 +271,7 @@ class AanetHits:
             return "Number of hits: {}".format(len(self))
         # mc hits
         if all(key.startswith('mc_hits.') for key in self._keys):
-            return "Number of mc hits in the selected event: {}".format(
+            return "Number of MC hits: {}".format(
                 len(self))
 
     def __repr__(self):

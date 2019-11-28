@@ -161,7 +161,7 @@ class AanetReader(AanetKeys):
 
     def __getitem__(self, item):
         return AanetReader(file_path=self._file_path,
-                           data=self._lazy_data[item])
+                           data=self._data[item])
 
     @property
     def events(self):

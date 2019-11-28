@@ -200,7 +200,7 @@ class AanetReader(AanetKeys):
         if self._mc_tracks is None:
             self._mc_tracks = AanetTracks(
                 self.mc_tracks_keys,
-                [self._lazy_data[key] for key in self.mc_tracks_keys])
+                [self._data[key] for key in self.mc_tracks_keys])
         return self._mc_tracks
 
 

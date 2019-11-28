@@ -132,7 +132,7 @@ class Reader(AanetKeys):
         if key not in self.valid_keys and not isinstance(key, int):
             raise KeyError(
                 "'{}' is not a valid key or is a fake branch.".format(key))
-        return self._lazy_data[key]
+        return self._data[key]
 
 
 class AanetReader(AanetKeys):

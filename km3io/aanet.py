@@ -102,7 +102,7 @@ class Reader(AanetKeys):
             path-like object that points to the file of ineterst.
         """
         super().__init__(file_path)
-        self._lazy_data = uproot.open(self._file_path)['E'].lazyarrays()
+        self._data = uproot.open(self._file_path)['E'].lazyarrays()
 
     def __getitem__(self, key):
         """reads data stored in the branch of interest in an event tree.

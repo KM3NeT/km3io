@@ -15,8 +15,9 @@ import km3io
 
 events = km3io.JppReader("samples/jpp_v12.0.0.root").events
 
+#####################################################
 # Note that only some meta information is read into memory.
-
+#
 # Printing it will simply tell you how many events it has found. Again, nothing
 # else is read yet:
 

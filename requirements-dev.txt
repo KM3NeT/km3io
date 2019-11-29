@@ -1,3 +1,4 @@
+memory_profiler
 numpydoc
 pytest
 pytest-cov

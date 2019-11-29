@@ -1,29 +1,23 @@
 """
-This is my example script
-=========================
+Reading DAQ Data (Jpp)
+======================
 
-This example doesn't do much, it just makes a simple output
+The following example shows how to access hits in a ROOT file which is coming
+from the detector and written by the `JDataWriter` application.
 """
+import km3io
 
-#%%
-# This is a section header
+#####################################################
+# Accessing the event tree
 # ------------------------
-# This is the first section!
-# The `#%%` signifies to Sphinx-Gallery that this text should be rendered as
-# rST and if using one of the above IDE/plugin's, also signifies the start of a
-# 'code block'.
+# Just pass a filename to the reader class and get access to the event tree
+# with:
 
-# This line won't be rendered as rST because there's a space after the last block.
-myvariable = 2
-print("my variable is {}".format(myvariable))
-# This is the end of the 'code block' (if using an above IDE). All code within
-# this block can be easily executed all at once.
+events = km3io.JppReader("samples/jpp_v12.0.0.root").events
 
-#%%
-# This is another section header
-# ------------------------------
-#
-# In the built documentation, it will be rendered as rST after the code above!
-# This is also another code block.
+# Note that only some meta information is read into memory.
 
-print('my variable plus 2 is {}'.format(myvariable + 2))
+# Printing it will simply tell you how many events it has found. Again, nothing
+# else is read yet:
+
+print(events)

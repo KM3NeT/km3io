@@ -1,2 +1,3 @@
+docopt
 uproot>=3.10.12
 setuptools_scm

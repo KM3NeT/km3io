@@ -32,6 +32,11 @@ setup(
     },
     install_requires=requirements,
     python_requires='>=3.5',
+    entry_points={
+        'console_scripts': [
+            'KPrintTree=km3io.utils.kprinttree:main'
+        ]
+    },
     classifiers=[
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',

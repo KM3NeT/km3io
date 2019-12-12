@@ -6,11 +6,12 @@
 Print the available ROOT trees.
 
 Usage:
-    kprinttree.py FILENAME
-    kprinttree.py (-h | --help)
+    KPrintTree -f FILENAME
+    KPrintTree (-h | --help)
 
 Options:
-    -h --help   Show this screen.
+    -f FILENAME  The file to print (;
+    -h --help    Show this screen.
 
 """
 import uproot
@@ -19,7 +20,7 @@ def print_tree(filename):
     f = uproot.open(filename)
     for key, ttree in f.items():
         try:
-            print("{} : {}".format(key.decode(), len(ttree)))
+            print("{:<30} : {:>9} items".format(key.decode(), len(ttree)))
         except TypeError:
             print("{}".format(key.decode()))
 
@@ -28,7 +29,7 @@ def main():
     from docopt import docopt
     args = docopt(__doc__)
 
-    print_tree(args['FILENAME'])
+    print_tree(args['-f'])
 
 
 if __name__ == '__main__':

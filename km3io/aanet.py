@@ -17,6 +17,7 @@ class AanetKeys:
         self._fit_keys = None
         self._cut_hits_keys = None
         self._cut_tracks_keys = None
+        self._cut_events_keys = None
 
     def __str__(self):
         return '\n'.join([
@@ -137,6 +138,14 @@ class AanetKeys:
             ]
         return self._cut_tracks_keys
 
+    @property
+    def cut_events_keys(self):
+        if self._cut_events_keys is None:
+            self._cut_events_keys = [
+                k.replace('.', '_') for k in self.events_keys
+            ]
+        return self._cut_events_keys
+
 
 class Reader:
     """Reader for one Aanet ROOT file"""
@@ -228,7 +237,7 @@ class AanetReader:
     def events(self):
         if self._events is None:
             self._events = AanetEvents(
-                self.keys.events_keys,
+                self.keys.cut_events_keys,
                 [self._data[key] for key in self.keys.events_keys])
         return self._events
 
@@ -350,7 +359,7 @@ class AanetHits:
 class AanetHit:
     "wrapper for an Aanet hit"
 
-    def __init__(self, keys, values):  # both inputs are lists
+    def __init__(self, keys, values):  # both inputs are lists: keys is a list of str and values is a list of arrays
         self._keys = keys  # list of keys
         self._values = values
         for k, v in zip(self._keys, self._values):
@@ -372,6 +381,12 @@ class AanetHit:
     def __repr__(self):
         return str(self)
 
+    # def is_empty(array):
+    #     if array.size:
+    #         return False
+    #     else:
+    #         return True
+
 
 class AanetTracks:
     "wrapper for Aanet tracks, manages the display of all tracks in one event"
@@ -386,7 +401,6 @@ class AanetTracks:
             setattr(self, k, v)
 
     def __getitem__(self, item):
-        # return self._values[item]
         return AanetTrack(self._keys, [v[item] for v in self._values],
                           fit_keys=self._fit_keys)
 

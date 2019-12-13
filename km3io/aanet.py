@@ -46,7 +46,7 @@ class AanetKeys:
     def hits_keys(self):
         if self._hits_keys is None:
             fake_branches = [
-                'hits.usr'
+                'hits.usr', 'hits.usr_names'
             ]  # these keys are existent in old aanet files but are not read by lazyarrays
             tree = uproot.open(self._file_path)['E']['hits']
             self._hits_keys = [
@@ -72,7 +72,7 @@ class AanetKeys:
     @property
     def mc_hits_keys(self):
         if self._mc_hits_keys is None:
-            fake_branches = ['mc_hits.usr']
+            fake_branches = ['mc_hits.usr', 'mc_hits.usr_names']
             tree = uproot.open(self._file_path)['E']['Evt']['mc_hits']
             self._mc_hits_keys = [
                 key.decode('utf8') for key in tree.keys()

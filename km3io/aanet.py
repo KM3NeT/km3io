@@ -45,8 +45,14 @@ class AanetKeys:
     @property
     def hits_keys(self):
         if self._hits_keys is None:
+            fake_branches = [
+                'hits.usr'
+            ]  # these keys are existent in old aanet files but are not read by lazyarrays
             tree = uproot.open(self._file_path)['E']['hits']
-            self._hits_keys = [key.decode('utf8') for key in tree.keys()]
+            self._hits_keys = [
+                key.decode('utf8') for key in tree.keys()
+                if key.decode('utf8') not in fake_branches
+            ]
         return self._hits_keys
 
     @property
@@ -66,8 +72,12 @@ class AanetKeys:
     @property
     def mc_hits_keys(self):
         if self._mc_hits_keys is None:
+            fake_branches = ['mc_hits.usr']
             tree = uproot.open(self._file_path)['E']['Evt']['mc_hits']
-            self._mc_hits_keys = [key.decode('utf8') for key in tree.keys()]
+            self._mc_hits_keys = [
+                key.decode('utf8') for key in tree.keys()
+                if key.decode('utf8') not in fake_branches
+            ]
         return self._mc_hits_keys
 
     @property
@@ -99,6 +109,7 @@ class AanetKeys:
     @property
     def fit_keys(self):
         if self._fit_keys is None:
+            # these are hardcoded because they are not accessible through aanet files
             self._fit_keys = [
                 'JGANDALF_BETA0_RAD', 'JGANDALF_BETA1_RAD', 'JGANDALF_CHI2',
                 'JGANDALF_NUMBER_OF_HITS', 'JENERGY_ENERGY', 'JENERGY_CHI2',

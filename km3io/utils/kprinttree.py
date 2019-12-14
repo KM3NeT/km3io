@@ -16,13 +16,16 @@ Options:
 """
 import uproot
 
+
 def print_tree(filename):
     f = uproot.open(filename)
-    for key, ttree in f.items():
+    for key in f.keys():
         try:
-            print("{:<30} : {:>9} items".format(key.decode(), len(ttree)))
+            print("{:<30} : {:>9} items".format(key.decode(), len(f[key])))
         except TypeError:
             print("{}".format(key.decode()))
+        except NotImplementedError:
+            print("{} (TStreamerSTL)".format(key.decode()))
 
 
 def main():
@@ -34,6 +37,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-    	
-

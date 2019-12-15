@@ -1,6 +1,7 @@
 import uproot
 
-BASKET_CACHE_SIZE = 23 * 1024**2  # [byte] DON T FORGET TO INCLUDE THIS FOR LARGE DATA SET!!!
+# 110 MB based on the size of the largest basket found so far in km3net
+BASKET_CACHE_SIZE = 110 * 1024**2
 
 
 class AanetKeys:
@@ -47,8 +48,8 @@ class AanetKeys:
     def hits_keys(self):
         if self._hits_keys is None:
             fake_branches = [
-                'hits.usr', 'hits.usr_names'
-            ]  # these keys are existent in old aanet files but are not read by lazyarrays
+                'hits.usr'
+            ]  # to be treated like trks.usr and trks.usr_names
             tree = uproot.open(self._file_path)['E']['hits']
             self._hits_keys = [
                 key.decode('utf8') for key in tree.keys()
@@ -61,7 +62,7 @@ class AanetKeys:
         if self._tracks_keys is None:
             fake_branches = [
                 'trks.usr_data',  # a solution can be tree['trks.usr_data'].array(uproot.asdtype(">i4"))
-                'trks.usr_names'
+                'trks.usr'
             ]  # can be accessed using tree['trks.usr_names'].array()
             tree = uproot.open(self._file_path)['E']['Evt']['trks']
             self._tracks_keys = [
@@ -73,7 +74,7 @@ class AanetKeys:
     @property
     def mc_hits_keys(self):
         if self._mc_hits_keys is None:
-            fake_branches = ['mc_hits.usr', 'mc_hits.usr_names']
+            fake_branches = ['mc_hits.usr']
             tree = uproot.open(self._file_path)['E']['Evt']['mc_hits']
             self._mc_hits_keys = [
                 key.decode('utf8') for key in tree.keys()
@@ -84,7 +85,7 @@ class AanetKeys:
     @property
     def mc_tracks_keys(self):
         if self._mc_tracks_keys is None:
-            fake_branches = ['mc_trks.usr_data', 'mc_trks.usr_names'
+            fake_branches = ['mc_trks.usr_data', 'mc_trks.usr'
                              ]  # same solution as above can be used
             tree = uproot.open(self._file_path)['E']['Evt']['mc_trks']
             self._mc_tracks_keys = [
@@ -159,7 +160,8 @@ class Reader:
             path-like object that points to the file of ineterst.
         """
         self._file_path = file_path
-        self._data = uproot.open(self._file_path)['E'].lazyarrays()
+        self._data = uproot.open(self._file_path)['E'].lazyarrays(
+            basketcache=uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE))
         self._keys = None
 
     def __getitem__(self, key):
@@ -213,16 +215,15 @@ class AanetReader:
         if data is not None:
             self._data = data
         else:
-            self._data = uproot.open(self._file_path)['E'].lazyarrays()
+            self._data = uproot.open(self._file_path)['E'].lazyarrays(
+                basketcache=uproot.cache.ThreadSafeArrayCache(
+                    BASKET_CACHE_SIZE))
         self._events = None
         self._hits = None
         self._tracks = None
         self._mc_hits = None
         self._mc_tracks = None
         self._keys = None
-
-    # def __getitem__(self, item):
-    #     return AanetEvents(self._events_keys, [self._data[key] for key in self.events])
 
     def __getitem__(self, item):
         return AanetReader(file_path=self._file_path, data=self._data[item])
@@ -288,9 +289,12 @@ class AanetEvents:
         return AanetEvent(self._keys, [v[item] for v in self._values])
 
     def __len__(self):
-        return len(
-            self._values[0]
-        )  # I don't like this being explicit, what if values is empty ...
+        try:
+            return len(
+                self._values[0]
+            )
+        except IndexError:
+            return 0
 
     def __str__(self):
         return "Number of events: {}".format(len(self))
@@ -299,7 +303,8 @@ class AanetEvents:
     #     return f'{self.__class__.__name__}({self._keys}, {self._values})'
 
     def __repr__(self):
-        return str(self)
+        return "<{}: {} parsed events>".format(self.__class__.__name__,
+                                               len(self))
 
 
 class AanetEvent:
@@ -316,9 +321,6 @@ class AanetEvent:
             "{:15} {:^10} {:>10}".format(k, ':', str(v))
             for k, v in zip(self._keys, self._values)
         ])
-
-    # def __repr__(self):
-    #     return f'{self.__class__.__name__}({self._keys}, {self._values})'
 
     def __repr__(self):
         return str(self)
@@ -348,9 +350,6 @@ class AanetHits:
     def __str__(self):
         return "Number of hits: {}".format(len(self))
 
-    # def __repr__(self):
-    #     return f'{self.__class__.__name__}({self._keys}, {self._values})'
-
     def __repr__(self):
         return "<{}: {} parsed elements>".format(self.__class__.__name__,
                                                  len(self))
@@ -359,7 +358,9 @@ class AanetHits:
 class AanetHit:
     "wrapper for an Aanet hit"
 
-    def __init__(self, keys, values):  # both inputs are lists: keys is a list of str and values is a list of arrays
+    def __init__(
+            self, keys, values
+    ):  # both inputs are lists: keys is a list of str and values is a list of arrays
         self._keys = keys  # list of keys
         self._values = values
         for k, v in zip(self._keys, self._values):
@@ -375,13 +376,10 @@ class AanetHit:
         # return self._values[item]
         return self._values[item]
 
-    # def __repr__(self):
-    #     return f'{self.__class__.__name__}({self._keys}, {self._values})'
-
     def __repr__(self):
         return str(self)
 
-    # def is_empty(array):
+    # def _is_empty(array):
     #     if array.size:
     #         return False
     #     else:
@@ -414,9 +412,6 @@ class AanetTracks:
         return "Number of tracks: {}".format(
             len(self))  # this  is not correct when reader.tracks is called
 
-    # def __repr__(self):
-    #     return f'{self.__class__.__name__}({self._keys}, {self._values})'
-
     def __repr__(self):
         return "<{}: {} parsed elements>".format(self.__class__.__name__,
                                                  len(self))
@@ -445,9 +440,6 @@ class AanetTrack:
 
     def __getitem__(self, item):
         return self._values[item]
-
-    # def __repr__(self):
-    #     return f'{self.__class__.__name__}({self._keys}, {self._values})'
 
     def __repr__(self):
         return str(self)

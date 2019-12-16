@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from km3io.aanet import *
+from km3io.aanet import Reader, AanetEvents, AanetHits, AanetTracks
 from km3io import AanetReader
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
@@ -276,7 +276,8 @@ class TestAanetTracks(unittest.TestCase):
         self.assertEqual(len(AanetTracks(['whatever'], [])), 0)
 
     def test_repr(self):
-        self.assertEqual(repr(self.tracks), '<AanetTracks: 10 parsed elements>')
+        self.assertEqual(repr(self.tracks),
+                         '<AanetTracks: 10 parsed elements>')
 
     def test_str(self):
         self.assertEqual(str(self.tracks), 'Number of tracks: 10')

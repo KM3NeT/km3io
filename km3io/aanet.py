@@ -30,7 +30,7 @@ class AanetKeys:
 
     def __str__(self):
         return '\n'.join([
-            "Events keys are:\n\t" + '\n\t'.join(self.events_keys),
+            "Events keys are:\n\t" + "\n\t".join(self.events_keys),
             "Hits keys are:\n\t" + '\n\t'.join(self.hits_keys),
             "Tracks keys are:\n\t" + '\n\t'.join(self.tracks_keys),
             "Mc hits keys are:\n\t" + '\n\t'.join(self.mc_hits_keys),
@@ -38,7 +38,8 @@ class AanetKeys:
         ])
 
     def __repr__(self):
-        return f'{self.__class__.__name__}("{self._file_path}")'
+        return str(self)
+        # return f'{self.__class__.__name__}("{self._file_path}")'
 
     @property
     def events_keys(self):
@@ -274,10 +275,7 @@ class Reader:
         return self._data[key]
 
     def __len__(self):
-        try:
-            return len(self._data)
-        except IndexError:
-            return 0
+        return len(self._data)
 
     def __repr__(self):
         return "<{}: {} entries>".format(self.__class__.__name__, len(self))
@@ -323,6 +321,9 @@ class AanetReader:
 
     def __getitem__(self, item):
         return AanetReader(file_path=self._file_path, data=self._data[item])
+
+    def __len__(self):
+        return len(self._data)
 
     @property
     def keys(self):

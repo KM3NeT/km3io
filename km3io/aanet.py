@@ -72,7 +72,7 @@ class AanetKeys:
         """
         if self._hits_keys is None:
             fake_branches = [
-                'hits.usr'
+                'hits.usr', 'hits.usr_names'
             ]  # to be treated like trks.usr and trks.usr_names
             tree = uproot.open(self._file_path)['E']['hits']
             self._hits_keys = [
@@ -95,7 +95,7 @@ class AanetKeys:
             # a solution can be tree['trks.usr_data'].array(
             # uproot.asdtype(">i4"))
             fake_branches = [
-                'trks.usr_data', 'trks.usr'
+                'trks.usr_data', 'trks.usr', 'trks.usr_names'
             ]  # can be accessed using tree['trks.usr_names'].array()
             tree = uproot.open(self._file_path)['E']['Evt']['trks']
             self._tracks_keys = [
@@ -115,7 +115,7 @@ class AanetKeys:
             except those found in fake branches.
         """
         if self._mc_hits_keys is None:
-            fake_branches = ['mc_hits.usr']
+            fake_branches = ['mc_hits.usr', 'mc_hits.usr_names']
             tree = uproot.open(self._file_path)['E']['Evt']['mc_hits']
             self._mc_hits_keys = [
                 key.decode('utf8') for key in tree.keys()
@@ -134,8 +134,9 @@ class AanetKeys:
             except those found in fake branches.
         """
         if self._mc_tracks_keys is None:
-            fake_branches = ['mc_trks.usr_data', 'mc_trks.usr'
-                             ]  # same solution as above can be used
+            fake_branches = [
+                'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.usr_names'
+            ]  # same solution as above can be used
             tree = uproot.open(self._file_path)['E']['Evt']['mc_trks']
             self._mc_tracks_keys = [
                 key.decode('utf8') for key in tree.keys()
@@ -271,6 +272,15 @@ class Reader:
             raise KeyError(
                 "'{}' is not a valid key or is a fake branch.".format(key))
         return self._data[key]
+
+    def __len__(self):
+        try:
+            return len(self._data)
+        except IndexError:
+            return 0
+
+    def __repr__(self):
+        return "<{}: {} entries>".format(self.__class__.__name__, len(self))
 
     @property
     def keys(self):
@@ -483,14 +493,11 @@ class AanetHits:
             setattr(self, k, v)
 
     def __getitem__(self, item):
-        # return self._values[item]
         return AanetHit(self._keys, [v[item] for v in self._values])
 
     def __len__(self):
         try:
-            return len(
-                self._values[0]
-            )  # this is missleading and it sometimes prints the # of events
+            return len(self._values[0])
         except IndexError:
             return 0
 
@@ -570,8 +577,7 @@ class AanetTracks:
             return 0
 
     def __str__(self):
-        return "Number of tracks: {}".format(
-            len(self))  # this  is not correct when reader.tracks is called
+        return "Number of tracks: {}".format(len(self))
 
     def __repr__(self):
         return "<{}: {} parsed elements>".format(self.__class__.__name__,

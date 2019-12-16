@@ -1,10 +1,237 @@
 import uproot
 
+# 110 MB based on the size of the largest basket found so far in km3net
+BASKET_CACHE_SIZE = 110 * 1024**2
 
-class AanetReader:
+
+class AanetKeys:
+    """wrapper for aanet keys"""
+    def __init__(self, file_path):
+        """AanetKeys is a class that reads all the available keys in an aanet
+        file and adapts the keys format to Python format.
+
+        Parameters
+        ----------
+        file_path : path-like object
+            Path to the aanet file of interest. It can be a str or any python
+            path-like object that points to the file of ineterst.
+        """
+        self._file_path = file_path
+        self._events_keys = None
+        self._hits_keys = None
+        self._tracks_keys = None
+        self._mc_hits_keys = None
+        self._mc_tracks_keys = None
+        self._valid_keys = None
+        self._fit_keys = None
+        self._cut_hits_keys = None
+        self._cut_tracks_keys = None
+        self._cut_events_keys = None
+
+    def __str__(self):
+        return '\n'.join([
+            "Events keys are:\n\t" + "\n\t".join(self.events_keys),
+            "Hits keys are:\n\t" + '\n\t'.join(self.hits_keys),
+            "Tracks keys are:\n\t" + '\n\t'.join(self.tracks_keys),
+            "Mc hits keys are:\n\t" + '\n\t'.join(self.mc_hits_keys),
+            "Mc tracks keys are:\n\t" + '\n\t'.join(self.mc_tracks_keys)
+        ])
+
+    def __repr__(self):
+        return str(self)
+        # return f'{self.__class__.__name__}("{self._file_path}")'
+
+    @property
+    def events_keys(self):
+        """reads events keys from an aanet file.
+
+        Returns
+        -------
+        list of str
+            list of all events keys found in an aanet file,
+            except those found in fake branches.
+        """
+        if self._events_keys is None:
+            fake_branches = ['Evt', 'AAObject', 'TObject', 't']
+            t_baskets = ['t.fSec', 't.fNanoSec']
+            tree = uproot.open(self._file_path)['E']['Evt']
+            self._events_keys = [
+                key.decode('utf-8') for key in tree.keys()
+                if key.decode('utf-8') not in fake_branches
+            ] + t_baskets
+        return self._events_keys
+
+    @property
+    def hits_keys(self):
+        """reads hits keys from an aanet file.
+
+        Returns
+        -------
+        list of str
+            list of all hits keys found in an aanet file,
+            except those found in fake branches.
+        """
+        if self._hits_keys is None:
+            fake_branches = [
+                'hits.usr', 'hits.usr_names'
+            ]  # to be treated like trks.usr and trks.usr_names
+            tree = uproot.open(self._file_path)['E']['hits']
+            self._hits_keys = [
+                key.decode('utf8') for key in tree.keys()
+                if key.decode('utf8') not in fake_branches
+            ]
+        return self._hits_keys
+
+    @property
+    def tracks_keys(self):
+        """reads tracks keys from an aanet file.
+
+        Returns
+        -------
+        list of str
+            list of all tracks keys found in an aanet file,
+            except those found in fake branches.
+        """
+        if self._tracks_keys is None:
+            # a solution can be tree['trks.usr_data'].array(
+            # uproot.asdtype(">i4"))
+            fake_branches = [
+                'trks.usr_data', 'trks.usr', 'trks.usr_names'
+            ]  # can be accessed using tree['trks.usr_names'].array()
+            tree = uproot.open(self._file_path)['E']['Evt']['trks']
+            self._tracks_keys = [
+                key.decode('utf8') for key in tree.keys()
+                if key.decode('utf8') not in fake_branches
+            ]
+        return self._tracks_keys
+
+    @property
+    def mc_hits_keys(self):
+        """reads mc hits keys from an aanet file.
+
+        Returns
+        -------
+        list of str
+            list of all mc hits keys found in an aanet file,
+            except those found in fake branches.
+        """
+        if self._mc_hits_keys is None:
+            fake_branches = ['mc_hits.usr', 'mc_hits.usr_names']
+            tree = uproot.open(self._file_path)['E']['Evt']['mc_hits']
+            self._mc_hits_keys = [
+                key.decode('utf8') for key in tree.keys()
+                if key.decode('utf8') not in fake_branches
+            ]
+        return self._mc_hits_keys
+
+    @property
+    def mc_tracks_keys(self):
+        """reads mc tracks keys from an aanet file.
+
+        Returns
+        -------
+        list of str
+            list of all mc tracks keys found in an aanet file,
+            except those found in fake branches.
+        """
+        if self._mc_tracks_keys is None:
+            fake_branches = [
+                'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.usr_names'
+            ]  # same solution as above can be used
+            tree = uproot.open(self._file_path)['E']['Evt']['mc_trks']
+            self._mc_tracks_keys = [
+                key.decode('utf8') for key in tree.keys()
+                if key.decode('utf8') not in fake_branches
+            ]
+        return self._mc_tracks_keys
+
+    @property
+    def valid_keys(self):
+        """constructs a list of all valid keys to be read from an Aanet event file.
+        Returns
+        -------
+        list of str
+            list of all valid keys.
+    """
+        if self._valid_keys is None:
+            self._valid_keys = (self.events_keys + self.hits_keys +
+                                self.tracks_keys + self.mc_tracks_keys +
+                                self.mc_hits_keys)
+        return self._valid_keys
+
+    @property
+    def fit_keys(self):
+        """constructs a list of fit parameters, not yet outsourced in an aanet file.
+
+        Returns
+        -------
+        list of str
+            list of all "trks.fitinf" keys.
+        """
+        if self._fit_keys is None:
+            # these are hardcoded because they are not outsourced in aanet file
+            self._fit_keys = [
+                'JGANDALF_BETA0_RAD', 'JGANDALF_BETA1_RAD', 'JGANDALF_CHI2',
+                'JGANDALF_NUMBER_OF_HITS', 'JENERGY_ENERGY', 'JENERGY_CHI2',
+                'JGANDALF_LAMBDA', 'JGANDALF_NUMBER_OF_ITERATIONS',
+                'JSTART_NPE_MIP', 'JSTART_NPE_MIP_TOTAL',
+                'JSTART_LENGTH_METRES', 'JVETO_NPE', 'JVETO_NUMBER_OF_HITS',
+                'JENERGY_MUON_RANGE_METRES', 'JENERGY_NOISE_LIKELIHOOD',
+                'JENERGY_NDF', 'JENERGY_NUMBER_OF_HITS', 'JCOPY_Z_M'
+            ]
+        return self._fit_keys
+
+    @property
+    def cut_hits_keys(self):
+        """adapts hits keys for instance variables format in a Python class.
+
+        Returns
+        -------
+        list of str
+            list of adapted hits keys.
+        """
+        if self._cut_hits_keys is None:
+            self._cut_hits_keys = [
+                k.split('hits.')[1].replace('.', '_') for k in self.hits_keys
+            ]
+        return self._cut_hits_keys
+
+    @property
+    def cut_tracks_keys(self):
+        """adapts tracks keys for instance variables format in a Python class.
+
+        Returns
+        -------
+        list of str
+            list of adapted tracks keys.
+        """
+        if self._cut_tracks_keys is None:
+            self._cut_tracks_keys = [
+                k.split('trks.')[1].replace('.', '_') for k in self.tracks_keys
+            ]
+        return self._cut_tracks_keys
+
+    @property
+    def cut_events_keys(self):
+        """adapts events keys for instance variables format in a Python class.
+
+        Returns
+        -------
+        list of str
+            list of adapted events keys.
+        """
+        if self._cut_events_keys is None:
+            self._cut_events_keys = [
+                k.replace('.', '_') for k in self.events_keys
+            ]
+        return self._cut_events_keys
+
+
+class Reader:
     """Reader for one Aanet ROOT file"""
     def __init__(self, file_path):
-        """ AanetReader class is a Aanet ROOT file wrapper
+        """ AanetReader class is a Aanet ROOT file reader. This class is a
+        "very" low level I/O.
 
         Parameters
         ----------
@@ -12,17 +239,13 @@ class AanetReader:
             Path to the file of interest. It can be a str or any python
             path-like object that points to the file of ineterst.
         """
-        self.file_path = file_path
-        self.data = uproot.open(self.file_path)['E']
-        self.lazy_data = self.data.lazyarrays()
-        self._events_keys = None
-        self._hits_keys = None
-        self._tracks_keys = None
-        self._mc_hits_keys = None
-        self._mc_tracks_keys = None
+        self._file_path = file_path
+        self._data = uproot.open(self._file_path)['E'].lazyarrays(
+            basketcache=uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE))
+        self._keys = None
 
     def __getitem__(self, key):
-        """reads data stored in the branch of interest in an event tree.
+        """reads data stored in the branch of interest in an Evt tree.
 
         Parameters
         ----------
@@ -41,78 +264,360 @@ class AanetReader:
 
         Raises
         ------
-        KeyEroor
+        KeyError
             Some branches in an Aanet file structure are "fake branches" and do
             not contain data. Therefore, the keys corresponding to these fake
             branches are not read.
         """
-        if key not in self.keys() and not isinstance(key, int):
+        if key not in self.keys.valid_keys and not isinstance(key, int):
             raise KeyError(
                 "'{}' is not a valid key or is a fake branch.".format(key))
-        return self.lazy_data[key]
+        return self._data[key]
 
     def __len__(self):
-        return len(self.lazy_data)
+        return len(self._data)
 
     def __repr__(self):
-        return '\n'.join([
-            "Number of events: {}".format(self.__len__()),
-            "Events keys are:\n\t" + '\n\t'.join(self.events_keys),
-            "Hits keys are:\n\t" + '\n\t'.join(self.hits_keys),
-            "Tracks keys are:\n\t" + '\n\t'.join(self.tracks_keys),
-            "Mc hits keys are:\n\t" + '\n\t'.join(self.mc_hits_keys),
-            "Mc tracks keys are:\n\t" + '\n\t'.join(self.mc_tracks_keys)
-        ])
+        return "<{}: {} entries>".format(self.__class__.__name__, len(self))
 
+    @property
     def keys(self):
-        """constructs a list of all valid keys to be read from an Aanet event file.
+        """wrapper for all keys in an aanet file.
 
         Returns
         -------
-        list
-            list of all valid keys.
+        Class
+            AanetKeys.
         """
-        return self.events_keys + self.hits_keys + self.tracks_keys + self.mc_tracks_keys + self.mc_hits_keys
+        if self._keys is None:
+            self._keys = AanetKeys(self._file_path)
+        return self._keys
+
+
+class AanetReader:
+    """reader for Aanet ROOT files"""
+    def __init__(self, file_path, data=None):
+        """ AanetReader class is an aanet ROOT file wrapper
+
+        Parameters
+        ----------
+        file_path : path-like object
+            Path to the file of interest. It can be a str or any python
+            path-like object that points to the file of ineterst.
+        """
+        self._file_path = file_path
+        if data is not None:
+            self._data = data
+        else:
+            self._data = uproot.open(self._file_path)['E'].lazyarrays(
+                basketcache=uproot.cache.ThreadSafeArrayCache(
+                    BASKET_CACHE_SIZE))
+        self._events = None
+        self._hits = None
+        self._tracks = None
+        self._mc_hits = None
+        self._mc_tracks = None
+        self._keys = None
+
+    def __getitem__(self, item):
+        return AanetReader(file_path=self._file_path, data=self._data[item])
+
+    def __len__(self):
+        return len(self._data)
 
     @property
-    def events_keys(self):
-        if self._events_keys is None:
-            fake_branches = ['Evt', 'AAObject', 'TObject', 't']
-            t_baskets = ['t.fSec', 't.fNanoSec']
-            self._events_keys = [
-                key.decode('utf-8') for key in self.data['Evt'].keys()
-                if key.decode('utf-8') not in fake_branches
-            ] + t_baskets
-        return self._events_keys
+    def keys(self):
+        """wrapper for all keys in an aanet file.
+
+        Returns
+        -------
+        Class
+            AanetKeys.
+        """
+        if self._keys is None:
+            self._keys = AanetKeys(self._file_path)
+        return self._keys
 
     @property
-    def hits_keys(self):
-        if self._hits_keys is None:
-            hits_tree = self.data['Evt']['hits']
-            self._hits_keys = [key.decode('utf8') for key in hits_tree.keys()]
-        return self._hits_keys
+    def events(self):
+        """wrapper for aanet events.
+
+        Returns
+        -------
+        Class
+            AanetEvents.
+        """
+        if self._events is None:
+            self._events = AanetEvents(
+                self.keys.cut_events_keys,
+                [self._data[key] for key in self.keys.events_keys])
+        return self._events
 
     @property
-    def tracks_keys(self):
-        if self._tracks_keys is None:
-            tracks_tree = self.data['Evt']['trks']
-            self._tracks_keys = [
-                key.decode('utf8') for key in tracks_tree.keys()
-            ]
-        return self._tracks_keys
+    def hits(self):
+        """wrapper for aanet hits.
+
+        Returns
+        -------
+        Class
+            AanetHits.
+        """
+        if self._hits is None:
+            self._hits = AanetHits(
+                self.keys.cut_hits_keys,
+                [self._data[key] for key in self.keys.hits_keys])
+        return self._hits
 
     @property
-    def mc_hits_keys(self):
-        if self._mc_hits_keys is None:
-            mc_hits_tree = self.data['Evt']['mc_hits']
-            self._mc_hits_keys = [key.decode('utf8') for key in mc_hits_tree.keys()]
-        return self._mc_hits_keys
+    def tracks(self):
+        """wrapper for aanet tracks.
+
+        Returns
+        -------
+        Class
+            AanetTracks.
+        """
+        if self._tracks is None:
+            self._tracks = AanetTracks(
+                self.keys.cut_tracks_keys,
+                [self._data[key] for key in self.keys.tracks_keys],
+                fit_keys=self.keys.fit_keys)
+        return self._tracks
 
     @property
-    def mc_tracks_keys(self):
-        if self._mc_tracks_keys is None:
-            mc_tracks_tree = self.data['Evt']['mc_trks']
-            self._mc_tracks_keys = [
-                key.decode('utf8') for key in mc_tracks_tree.keys()
-            ]
-        return self._mc_tracks_keys
+    def mc_hits(self):
+        """wrapper for aanet mc hits.
+
+        Returns
+        -------
+        Class
+            AanetHits.
+        """
+        if self._mc_hits is None:
+            self._mc_hits = AanetHits(
+                self.keys.cut_hits_keys,
+                [self._data[key] for key in self.keys.mc_hits_keys])
+        return self._mc_hits
+
+    @property
+    def mc_tracks(self):
+        """wrapper for aanet mc tracks.
+
+        Returns
+        -------
+        Class
+            AanetTracks.
+        """
+        if self._mc_tracks is None:
+            self._mc_tracks = AanetTracks(
+                self.keys.cut_tracks_keys,
+                [self._data[key] for key in self.keys.mc_tracks_keys])
+        return self._mc_tracks
+
+
+class AanetEvents:
+    """wrapper for Aanet events"""
+    def __init__(self, keys, values):
+        """wrapper for aanet events.
+
+        Parameters
+        ----------
+        keys : list of str
+            list of valid events keys.
+        values : list of arrays
+            list of arrays containting events data.
+        """
+        self._keys = keys
+        self._values = values
+        for k, v in zip(self._keys, self._values):
+            setattr(self, k, v)
+
+    def __getitem__(self, item):
+        return AanetEvent(self._keys, [v[item] for v in self._values])
+
+    def __len__(self):
+        try:
+            return len(self._values[0])
+        except IndexError:
+            return 0
+
+    def __str__(self):
+        return "Number of events: {}".format(len(self))
+
+    def __repr__(self):
+        return "<{}: {} parsed events>".format(self.__class__.__name__,
+                                               len(self))
+
+
+class AanetEvent:
+    """wrapper for an Aanet event"""
+    def __init__(self, keys, values):
+        """wrapper for one aanet event.
+
+        Parameters
+        ----------
+        keys : list of str
+            list of valid events keys.
+        values : list of arrays
+            list of arrays containting event data.
+        """
+        self._keys = keys
+        self._values = values
+        for k, v in zip(self._keys, self._values):
+            setattr(self, k, v)
+
+    def __str__(self):
+        return "Aanet event:\n\t" + "\n\t".join([
+            "{:15} {:^10} {:>10}".format(k, ':', str(v))
+            for k, v in zip(self._keys, self._values)
+        ])
+
+    def __repr__(self):
+        return str(self)
+
+
+class AanetHits:
+    """wrapper for Aanet hits, manages the display of all hits in one event"""
+    def __init__(self, keys, values):
+        """wrapper for aanet hits.
+
+        Parameters
+        ----------
+        keys : list of str
+            list of cropped hits keys.
+        values : list of arrays
+            list of arrays containting hits data.
+        """
+        self._keys = keys
+        self._values = values
+        for k, v in zip(self._keys, self._values):
+            setattr(self, k, v)
+
+    def __getitem__(self, item):
+        return AanetHit(self._keys, [v[item] for v in self._values])
+
+    def __len__(self):
+        try:
+            return len(self._values[0])
+        except IndexError:
+            return 0
+
+    def __str__(self):
+        return "Number of hits: {}".format(len(self))
+
+    def __repr__(self):
+        return "<{}: {} parsed elements>".format(self.__class__.__name__,
+                                                 len(self))
+
+
+class AanetHit:
+    """wrapper for an Aanet hit"""
+    def __init__(self, keys, values):
+        """wrapper for one aanet hit.
+
+        Parameters
+        ----------
+        keys : list of str
+            list of cropped hits keys.
+        values : list of arrays
+            list of arrays containting hit data.
+        """
+        self._keys = keys
+        self._values = values
+        for k, v in zip(self._keys, self._values):
+            setattr(self, k, v)
+
+    def __str__(self):
+        return "Aanet hit:\n\t" + "\n\t".join([
+            "{:15} {:^10} {:>10}".format(k, ':', str(v))
+            for k, v in zip(self._keys, self._values)
+        ])
+
+    def __getitem__(self, item):
+        return self._values[item]
+
+    def __repr__(self):
+        return str(self)
+
+    # def _is_empty(array):
+    #     if array.size:
+    #         return False
+    #     else:
+    #         return True
+
+
+class AanetTracks:
+    """wrapper for Aanet tracks"""
+    def __init__(self, keys, values, fit_keys=None):
+        """Summary
+
+        Parameters
+        ----------
+        keys : TYPE
+            Description
+        values : TYPE
+            Description
+        fit_keys : None, optional
+            list of tracks fit information (not yet outsourced in aanet files)
+        """
+        self._keys = keys
+        self._values = values
+        if fit_keys is not None:
+            self._fit_keys = fit_keys
+        for k, v in zip(self._keys, self._values):
+            setattr(self, k, v)
+
+    def __getitem__(self, item):
+        return AanetTrack(self._keys, [v[item] for v in self._values],
+                          fit_keys=self._fit_keys)
+
+    def __len__(self):
+        try:
+            return len(self._values[0])
+        except IndexError:
+            return 0
+
+    def __str__(self):
+        return "Number of tracks: {}".format(len(self))
+
+    def __repr__(self):
+        return "<{}: {} parsed elements>".format(self.__class__.__name__,
+                                                 len(self))
+
+
+class AanetTrack:
+    """wrapper for an Aanet track"""
+    def __init__(self, keys, values, fit_keys=None):
+        """wrapper for one aanet track.
+
+        Parameters
+        ----------
+        keys : list of str
+            list of cropped tracks keys.
+        values : list of arrays
+            list of arrays containting track data.
+        fit_keys : None, optional
+            list of tracks fit information (not yet outsourced in aanet files).
+        """
+        self._keys = keys
+        self._values = values
+        if fit_keys is not None:
+            self._fit_keys = fit_keys
+        for k, v in zip(self._keys, self._values):
+            setattr(self, k, v)
+
+    def __str__(self):
+        return "Aanet track:\n\t" + "\n\t".join([
+            "{:30} {:^2} {:>26}".format(k, ':', str(v))
+            for k, v in zip(self._keys, self._values) if k not in ['fitinf']
+        ]) + "\n\t" + "\n\t".join([
+            "{:30} {:^2} {:>26}".format(k, ':', str(v))
+            for k, v in zip(self._fit_keys, self._values[18]
+                            )  # I don't like 18 being explicit here
+        ])
+
+    def __getitem__(self, item):
+        return self._values[item]
+
+    def __repr__(self):
+        return str(self)

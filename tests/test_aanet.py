@@ -1,17 +1,17 @@
 import unittest
 from pathlib import Path
 
-from km3io.aanet import Reader, AanetEvents, AanetHits, AanetTracks
-from km3io import AanetReader
+from km3io.aanet import Reader, OfflineEvents, OfflineHits, OfflineTracks
+from km3io import OfflineReader
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
-AANET_FILE = SAMPLES_DIR / 'aanet_v2.0.0.root'
-AANET_NUMUCC = SAMPLES_DIR / "numucc.root"  # with mc data
+OFFLINE_FILE = SAMPLES_DIR / 'aanet_v2.0.0.root'
+OFFLINE_NUMUCC = SAMPLES_DIR / "numucc.root"  # with mc data
 
 
-class TestAanetKeys(unittest.TestCase):
+class TestOfflineKeys(unittest.TestCase):
     def setUp(self):
-        self.keys = AanetReader(AANET_FILE).keys
+        self.keys = OfflineReader(OFFLINE_FILE).keys
 
     def test_repr(self):
         reader_repr = repr(self.keys)
@@ -48,7 +48,7 @@ class TestAanetKeys(unittest.TestCase):
 
 class TestReader(unittest.TestCase):
     def setUp(self):
-        self.r = Reader(AANET_FILE)
+        self.r = Reader(OFFLINE_FILE)
         self.lengths = {0: 176, 1: 125, -1: 105}
         self.total_item_count = 1434
 
@@ -89,7 +89,7 @@ class TestReader(unittest.TestCase):
                              list(ts[0][:3]))
 
     def test_reading_keys(self):
-        # there are 106 "valid" keys in Aanet file
+        # there are 106 "valid" keys in an offline file
         self.assertEqual(len(self.r.keys.valid_keys), 106)
 
         # there are 20 hits keys
@@ -112,12 +112,12 @@ class TestReader(unittest.TestCase):
         self.assertEqual(Nevents, 10)
 
 
-class TestAanetReader(unittest.TestCase):
+class TestOfflineReader(unittest.TestCase):
     def setUp(self):
-        self.r = AanetReader(AANET_FILE)
+        self.r = OfflineReader(OFFLINE_FILE)
         self.Nevents = 10
-        self.selected_data = AanetReader(AANET_FILE,
-                                         data=self.r._data[0])._data
+        self.selected_data = OfflineReader(OFFLINE_FILE,
+                                           data=self.r._data[0])._data
 
     def test_item_selection(self):
         # test class instance with data=None option
@@ -133,9 +133,9 @@ class TestAanetReader(unittest.TestCase):
         self.assertEqual(Nevents, self.Nevents)
 
 
-class TestAanetEvents(unittest.TestCase):
+class TestOfflineEvents(unittest.TestCase):
     def setUp(self):
-        self.events = AanetReader(AANET_FILE).events
+        self.events = OfflineReader(OFFLINE_FILE).events
         self.hits = {0: 176, 1: 125, -1: 105}
         self.Nevents = 10
 
@@ -156,32 +156,33 @@ class TestAanetEvents(unittest.TestCase):
 
     def test_IndexError(self):
         # test handling IndexError with empty lists/arrays
-        self.assertEqual(len(AanetEvents(['whatever'], [])), 0)
+        self.assertEqual(len(OfflineEvents(['whatever'], [])), 0)
 
     def test_str(self):
         self.assertEqual(str(self.events), 'Number of events: 10')
 
     def test_repr(self):
-        self.assertEqual(repr(self.events), '<AanetEvents: 10 parsed events>')
+        self.assertEqual(repr(self.events),
+                         '<OfflineEvents: 10 parsed events>')
 
 
-class TestAanetEvent(unittest.TestCase):
+class TestOfflineEvent(unittest.TestCase):
     def setUp(self):
-        self.event = AanetReader(AANET_FILE).events[0]
+        self.event = OfflineReader(OFFLINE_FILE).events[0]
 
     def test_str(self):
-        self.assertEqual(repr(self.event).split('\n\t')[0], 'Aanet event:')
+        self.assertEqual(repr(self.event).split('\n\t')[0], 'offline event:')
         self.assertEqual(
             repr(self.event).split('\n\t')[2],
             'det_id              :              44')
 
 
-class TestAanetHits(unittest.TestCase):
+class TestOfflineHits(unittest.TestCase):
     def setUp(self):
-        self.hits = AanetReader(AANET_FILE).hits
+        self.hits = OfflineReader(OFFLINE_FILE).hits
         self.lengths = {0: 176, 1: 125, -1: 105}
         self.total_item_count = 1434
-        self.r_mc = AanetReader(AANET_NUMUCC)
+        self.r_mc = OfflineReader(OFFLINE_NUMUCC)
         self.Nevents = 10
 
     def test_item_selection(self):
@@ -190,10 +191,10 @@ class TestAanetHits(unittest.TestCase):
 
     def test_IndexError(self):
         # test handling IndexError with empty lists/arrays
-        self.assertEqual(len(AanetHits(['whatever'], [])), 0)
+        self.assertEqual(len(OfflineHits(['whatever'], [])), 0)
 
     def test_repr(self):
-        self.assertEqual(repr(self.hits), '<AanetHits: 10 parsed elements>')
+        self.assertEqual(repr(self.hits), '<OfflineHits: 10 parsed elements>')
 
     def test_str(self):
         self.assertEqual(str(self.hits), 'Number of hits: 10')
@@ -246,25 +247,25 @@ class TestAanetHits(unittest.TestCase):
         self.assertListEqual([677, 687, 689], list(pmt_ids[0][:3]))
 
 
-class TestAanetHit(unittest.TestCase):
+class TestOfflineHit(unittest.TestCase):
     def setUp(self):
-        self.hit = AanetReader(AANET_FILE)[0].hits[0]
+        self.hit = OfflineReader(OFFLINE_FILE)[0].hits[0]
 
     def test_item_selection(self):
         self.assertEqual(self.hit[0], self.hit.id)
         self.assertEqual(self.hit[1], self.hit.dom_id)
 
     def test_str(self):
-        self.assertEqual(repr(self.hit).split('\n\t')[0], 'Aanet hit:')
+        self.assertEqual(repr(self.hit).split('\n\t')[0], 'offline hit:')
         self.assertEqual(
             repr(self.hit).split('\n\t')[2],
             'dom_id              :       806451572')
 
 
-class TestAanetTracks(unittest.TestCase):
+class TestOfflineTracks(unittest.TestCase):
     def setUp(self):
-        self.tracks = AanetReader(AANET_FILE).tracks
-        self.r_mc = AanetReader(AANET_NUMUCC)
+        self.tracks = OfflineReader(OFFLINE_FILE).tracks
+        self.r_mc = OfflineReader(OFFLINE_NUMUCC)
         self.Nevents = 10
 
     def test_item_selection(self):
@@ -273,11 +274,11 @@ class TestAanetTracks(unittest.TestCase):
 
     def test_IndexError(self):
         # test handling IndexError with empty lists/arrays
-        self.assertEqual(len(AanetTracks(['whatever'], [])), 0)
+        self.assertEqual(len(OfflineTracks(['whatever'], [])), 0)
 
     def test_repr(self):
         self.assertEqual(repr(self.tracks),
-                         '<AanetTracks: 10 parsed elements>')
+                         '<OfflineTracks: 10 parsed elements>')
 
     def test_str(self):
         self.assertEqual(str(self.tracks), 'Number of tracks: 10')
@@ -306,16 +307,16 @@ class TestAanetTracks(unittest.TestCase):
                              list(dir_z[0][:3]))
 
 
-class TestAanetTrack(unittest.TestCase):
+class TestOfflineTrack(unittest.TestCase):
     def setUp(self):
-        self.track = AanetReader(AANET_FILE)[0].tracks[0]
+        self.track = OfflineReader(OFFLINE_FILE)[0].tracks[0]
 
     def test_item_selection(self):
         self.assertEqual(self.track[0], self.track.fUniqueID)
         self.assertEqual(self.track[10], self.track.E)
 
     def test_str(self):
-        self.assertEqual(repr(self.track).split('\n\t')[0], 'Aanet track:')
+        self.assertEqual(repr(self.track).split('\n\t')[0], 'offline track:')
         self.assertEqual(
             repr(self.track).split('\n\t')[28],
             'JGANDALF_LAMBDA                :      4.2409761837248484e-12')

@@ -4,16 +4,16 @@ import uproot
 BASKET_CACHE_SIZE = 110 * 1024**2
 
 
-class AanetKeys:
-    """wrapper for aanet keys"""
+class OfflineKeys:
+    """wrapper for offline keys"""
     def __init__(self, file_path):
-        """AanetKeys is a class that reads all the available keys in an aanet
+        """OfflineKeys is a class that reads all the available keys in an offline
         file and adapts the keys format to Python format.
 
         Parameters
         ----------
         file_path : path-like object
-            Path to the aanet file of interest. It can be a str or any python
+            Path to the offline file of interest. It can be a str or any python
             path-like object that points to the file of ineterst.
         """
         self._file_path = file_path
@@ -43,12 +43,12 @@ class AanetKeys:
 
     @property
     def events_keys(self):
-        """reads events keys from an aanet file.
+        """reads events keys from an offline file.
 
         Returns
         -------
         list of str
-            list of all events keys found in an aanet file,
+            list of all events keys found in an offline file,
             except those found in fake branches.
         """
         if self._events_keys is None:
@@ -63,12 +63,12 @@ class AanetKeys:
 
     @property
     def hits_keys(self):
-        """reads hits keys from an aanet file.
+        """reads hits keys from an offline file.
 
         Returns
         -------
         list of str
-            list of all hits keys found in an aanet file,
+            list of all hits keys found in an offline file,
             except those found in fake branches.
         """
         if self._hits_keys is None:
@@ -84,12 +84,12 @@ class AanetKeys:
 
     @property
     def tracks_keys(self):
-        """reads tracks keys from an aanet file.
+        """reads tracks keys from an offline file.
 
         Returns
         -------
         list of str
-            list of all tracks keys found in an aanet file,
+            list of all tracks keys found in an offline file,
             except those found in fake branches.
         """
         if self._tracks_keys is None:
@@ -107,12 +107,12 @@ class AanetKeys:
 
     @property
     def mc_hits_keys(self):
-        """reads mc hits keys from an aanet file.
+        """reads mc hits keys from an offline file.
 
         Returns
         -------
         list of str
-            list of all mc hits keys found in an aanet file,
+            list of all mc hits keys found in an offline file,
             except those found in fake branches.
         """
         if self._mc_hits_keys is None:
@@ -126,12 +126,12 @@ class AanetKeys:
 
     @property
     def mc_tracks_keys(self):
-        """reads mc tracks keys from an aanet file.
+        """reads mc tracks keys from an offline file.
 
         Returns
         -------
         list of str
-            list of all mc tracks keys found in an aanet file,
+            list of all mc tracks keys found in an offline file,
             except those found in fake branches.
         """
         if self._mc_tracks_keys is None:
@@ -147,7 +147,7 @@ class AanetKeys:
 
     @property
     def valid_keys(self):
-        """constructs a list of all valid keys to be read from an Aanet event file.
+        """constructs a list of all valid keys to be read from an offline event file.
         Returns
         -------
         list of str
@@ -161,7 +161,7 @@ class AanetKeys:
 
     @property
     def fit_keys(self):
-        """constructs a list of fit parameters, not yet outsourced in an aanet file.
+        """constructs a list of fit parameters, not yet outsourced in an offline file.
 
         Returns
         -------
@@ -169,7 +169,8 @@ class AanetKeys:
             list of all "trks.fitinf" keys.
         """
         if self._fit_keys is None:
-            # these are hardcoded because they are not outsourced in aanet file
+            # these are hardcoded because they are not outsourced in offline
+            # files
             self._fit_keys = [
                 'JGANDALF_BETA0_RAD', 'JGANDALF_BETA1_RAD', 'JGANDALF_CHI2',
                 'JGANDALF_NUMBER_OF_HITS', 'JENERGY_ENERGY', 'JENERGY_CHI2',
@@ -228,9 +229,9 @@ class AanetKeys:
 
 
 class Reader:
-    """Reader for one Aanet ROOT file"""
+    """Reader for one offline ROOT file"""
     def __init__(self, file_path):
-        """ AanetReader class is a Aanet ROOT file reader. This class is a
+        """ Reader class is an offline ROOT file reader. This class is a
         "very" low level I/O.
 
         Parameters
@@ -265,9 +266,9 @@ class Reader:
         Raises
         ------
         KeyError
-            Some branches in an Aanet file structure are "fake branches" and do
-            not contain data. Therefore, the keys corresponding to these fake
-            branches are not read.
+            Some branches in an offline file structure are "fake branches" and
+            do not contain data. Therefore, the keys corresponding to these
+            fake branches are not read.
         """
         if key not in self.keys.valid_keys and not isinstance(key, int):
             raise KeyError(
@@ -282,22 +283,22 @@ class Reader:
 
     @property
     def keys(self):
-        """wrapper for all keys in an aanet file.
+        """wrapper for all keys in an offline file.
 
         Returns
         -------
         Class
-            AanetKeys.
+            OfflineKeys.
         """
         if self._keys is None:
-            self._keys = AanetKeys(self._file_path)
+            self._keys = OfflineKeys(self._file_path)
         return self._keys
 
 
-class AanetReader:
-    """reader for Aanet ROOT files"""
+class OfflineReader:
+    """reader for offline ROOT files"""
     def __init__(self, file_path, data=None):
-        """ AanetReader class is an aanet ROOT file wrapper
+        """ OfflineReader class is an offline ROOT file wrapper
 
         Parameters
         ----------
@@ -320,65 +321,65 @@ class AanetReader:
         self._keys = None
 
     def __getitem__(self, item):
-        return AanetReader(file_path=self._file_path, data=self._data[item])
+        return OfflineReader(file_path=self._file_path, data=self._data[item])
 
     def __len__(self):
         return len(self._data)
 
     @property
     def keys(self):
-        """wrapper for all keys in an aanet file.
+        """wrapper for all keys in an offline file.
 
         Returns
         -------
         Class
-            AanetKeys.
+            OfflineKeys.
         """
         if self._keys is None:
-            self._keys = AanetKeys(self._file_path)
+            self._keys = OfflineKeys(self._file_path)
         return self._keys
 
     @property
     def events(self):
-        """wrapper for aanet events.
+        """wrapper for offline events.
 
         Returns
         -------
         Class
-            AanetEvents.
+            OfflineEvents.
         """
         if self._events is None:
-            self._events = AanetEvents(
+            self._events = OfflineEvents(
                 self.keys.cut_events_keys,
                 [self._data[key] for key in self.keys.events_keys])
         return self._events
 
     @property
     def hits(self):
-        """wrapper for aanet hits.
+        """wrapper for offline hits.
 
         Returns
         -------
         Class
-            AanetHits.
+            OfflineHits.
         """
         if self._hits is None:
-            self._hits = AanetHits(
+            self._hits = OfflineHits(
                 self.keys.cut_hits_keys,
                 [self._data[key] for key in self.keys.hits_keys])
         return self._hits
 
     @property
     def tracks(self):
-        """wrapper for aanet tracks.
+        """wrapper for offline tracks.
 
         Returns
         -------
         Class
-            AanetTracks.
+            OfflineTracks.
         """
         if self._tracks is None:
-            self._tracks = AanetTracks(
+            self._tracks = OfflineTracks(
                 self.keys.cut_tracks_keys,
                 [self._data[key] for key in self.keys.tracks_keys],
                 fit_keys=self.keys.fit_keys)
@@ -386,39 +387,39 @@ class AanetReader:
 
     @property
     def mc_hits(self):
-        """wrapper for aanet mc hits.
+        """wrapper for offline mc hits.
 
         Returns
         -------
         Class
-            AanetHits.
+            OfflineHits.
         """
         if self._mc_hits is None:
-            self._mc_hits = AanetHits(
+            self._mc_hits = OfflineHits(
                 self.keys.cut_hits_keys,
                 [self._data[key] for key in self.keys.mc_hits_keys])
         return self._mc_hits
 
     @property
     def mc_tracks(self):
-        """wrapper for aanet mc tracks.
+        """wrapper for offline mc tracks.
 
         Returns
         -------
         Class
-            AanetTracks.
+            OfflineTracks.
         """
         if self._mc_tracks is None:
-            self._mc_tracks = AanetTracks(
+            self._mc_tracks = OfflineTracks(
                 self.keys.cut_tracks_keys,
                 [self._data[key] for key in self.keys.mc_tracks_keys])
         return self._mc_tracks
 
 
-class AanetEvents:
-    """wrapper for Aanet events"""
+class OfflineEvents:
+    """wrapper for offline events"""
     def __init__(self, keys, values):
-        """wrapper for aanet events.
+        """wrapper for offline events.
 
         Parameters
         ----------
@@ -433,7 +434,7 @@ class AanetEvents:
             setattr(self, k, v)
 
     def __getitem__(self, item):
-        return AanetEvent(self._keys, [v[item] for v in self._values])
+        return OfflineEvent(self._keys, [v[item] for v in self._values])
 
     def __len__(self):
         try:
@@ -449,10 +450,10 @@ class AanetEvents:
                                                len(self))
 
 
-class AanetEvent:
-    """wrapper for an Aanet event"""
+class OfflineEvent:
+    """wrapper for an offline event"""
     def __init__(self, keys, values):
-        """wrapper for one aanet event.
+        """wrapper for one offline event.
 
         Parameters
         ----------
@@ -467,7 +468,7 @@ class AanetEvent:
             setattr(self, k, v)
 
     def __str__(self):
-        return "Aanet event:\n\t" + "\n\t".join([
+        return "offline event:\n\t" + "\n\t".join([
             "{:15} {:^10} {:>10}".format(k, ':', str(v))
             for k, v in zip(self._keys, self._values)
         ])
@@ -476,10 +477,10 @@ class AanetEvent:
         return str(self)
 
 
-class AanetHits:
-    """wrapper for Aanet hits, manages the display of all hits in one event"""
+class OfflineHits:
+    """wrapper for offline hits"""
     def __init__(self, keys, values):
-        """wrapper for aanet hits.
+        """wrapper for offline hits.
 
         Parameters
         ----------
@@ -494,7 +495,7 @@ class AanetHits:
             setattr(self, k, v)
 
     def __getitem__(self, item):
-        return AanetHit(self._keys, [v[item] for v in self._values])
+        return OfflineHit(self._keys, [v[item] for v in self._values])
 
     def __len__(self):
         try:
@@ -510,10 +511,10 @@ class AanetHits:
                                                  len(self))
 
 
-class AanetHit:
-    """wrapper for an Aanet hit"""
+class OfflineHit:
+    """wrapper for an offline hit"""
     def __init__(self, keys, values):
-        """wrapper for one aanet hit.
+        """wrapper for one offline hit.
 
         Parameters
         ----------
@@ -528,7 +529,7 @@ class AanetHit:
             setattr(self, k, v)
 
     def __str__(self):
-        return "Aanet hit:\n\t" + "\n\t".join([
+        return "offline hit:\n\t" + "\n\t".join([
             "{:15} {:^10} {:>10}".format(k, ':', str(v))
             for k, v in zip(self._keys, self._values)
         ])
@@ -546,8 +547,8 @@ class AanetHit:
     #         return True
 
 
-class AanetTracks:
-    """wrapper for Aanet tracks"""
+class OfflineTracks:
+    """wrapper for offline tracks"""
     def __init__(self, keys, values, fit_keys=None):
         """Summary
 
@@ -558,7 +559,8 @@ class AanetTracks:
         values : TYPE
             Description
         fit_keys : None, optional
-            list of tracks fit information (not yet outsourced in aanet files)
+            list of tracks fit information (not yet outsourced in offline
+            files).
         """
         self._keys = keys
         self._values = values
@@ -568,8 +570,8 @@ class AanetTracks:
             setattr(self, k, v)
 
     def __getitem__(self, item):
-        return AanetTrack(self._keys, [v[item] for v in self._values],
-                          fit_keys=self._fit_keys)
+        return OfflineTrack(self._keys, [v[item] for v in self._values],
+                            fit_keys=self._fit_keys)
 
     def __len__(self):
         try:
@@ -585,10 +587,10 @@ class AanetTracks:
                                                  len(self))
 
 
-class AanetTrack:
-    """wrapper for an Aanet track"""
+class OfflineTrack:
+    """wrapper for an offline track"""
     def __init__(self, keys, values, fit_keys=None):
-        """wrapper for one aanet track.
+        """wrapper for one offline track.
 
         Parameters
         ----------
@@ -597,7 +599,8 @@ class AanetTrack:
         values : list of arrays
             list of arrays containting track data.
         fit_keys : None, optional
-            list of tracks fit information (not yet outsourced in aanet files).
+            list of tracks fit information (not yet outsourced in offline
+            files).
         """
         self._keys = keys
         self._values = values
@@ -607,7 +610,7 @@ class AanetTrack:
             setattr(self, k, v)
 
     def __str__(self):
-        return "Aanet track:\n\t" + "\n\t".join([
+        return "offline track:\n\t" + "\n\t".join([
             "{:30} {:^2} {:>26}".format(k, ':', str(v))
             for k, v in zip(self._keys, self._values) if k not in ['fitinf']
         ]) + "\n\t" + "\n\t".join([

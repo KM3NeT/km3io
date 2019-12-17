@@ -17,54 +17,111 @@ This software provides a set of Python classes to read KM3NeT ROOT files
 without having ROOT, Jpp or aanet installed. It only depends on Python 3.5+ and
 the amazing uproot package and gives you access to the data via numpy arrays.
 
-Beware that this package is in the development phase, so the API will change
-until version ``1.0.0`` is released!
+It's very easy to use and according to the `uproot <https://github.com/scikit-hep/uproot>`__ benchmarks, it is able to outperform the ROOT I/O performance. 
 
-It's very easy to use and according to the uproot benchmarks, it is able to
-outperform the ROOT I/O performance. To install it::
+**Note:** Beware that this package is in the development phase, so the API will change until version ``1.0.0`` is released!
 
-    pip install km3io
+Installation
+============
+
+Install km3io using pip::
+
+    pip install km3io 
 
 To get the latest (stable) development release::
 
     pip install git+https://git.km3net.de/km3py/km3io.git
 
-Quick intro to read Jpp files
------------------------------
+**Reminder:** km3io is **not** dependent on aanet, ROOT or Jpp! 
 
-Currently only events (the ``KM3NET_EVENT`` tree) are supported but timeslices
-and summaryslices will be implemented very soon.
+Questions
+=========
+
+If you have a question about km3io, please proceed as follows:
+
+- Read the documentation below.
+- Explore the `examples <https://km3py.pages.km3net.de/km3io/examples.html>`__ in the documentation.
+- Haven't you found an answer to your question in the documentation, post a git issue with your question showing us an example of what you have tried first, and what you would like to do.
+- Have you noticed a bug, please post it in a git issue, we appreciate your contribution.
+
+Tutorial
+========
+
+**Table of contents:**
+
+* `Introduction <#introduction>`__
+
+  * `Overview of daq files <#overview-of-daq-files>`__
+
+  * `Overview of offline files <#overview-of-offline-files>`__
+
+* `Daq files reader <#daq-files-reader>`__
+
+* `Offline files reader <#offline-file-reader>`__
+
+Introduction
+------------
+
+Most of km3net data is stored in root files. These root files are either created with `Jpp <https://git.km3net.de/common/jpp>`__ or `aanet <https://git.km3net.de/common/aanet>`__ software. A root file created with 
+`Jpp <https://git.km3net.de/common/jpp>`__ is often referred to as "a Jpp root file". Similarly, a root file created with `aanet <https://git.km3net.de/common/aanet>`__ is often referred to as "an aanet file". In km3io, an aanet root file will always be reffered to as an ``offline file``, while a Jpp root file will always be referred to as a ``daq file``.
+
+km3io is a Python package that provides a set of classes (``DaqReader`` and ``OfflineReader``) to read both daq root files and offline root files without any dependency to aanet, Jpp or ROOT. 
+
+Data in km3io is often returned as a "lazyarray", a "jagged lazyarray", "a jagged array" or a Numpy array. A lazyarray is an array-like object that reads data on demand! In a lazyarray, only the first and the last chunks of data are read in memory. A lazyarray can be used with all Numpy's universal `functions <https://docs.scipy.org/doc/numpy/referenceufuncs.html>`__. Here is how a lazyarray looks like:
+
+.. code-block:: python3
+
+    # <ChunkedArray [5971 5971 5971 ... 5971 5971 5971] at 0x7fb2341ad810>
+
+
+A jagged array, is a 2+ dimentional array with different arrays lengths. In other words, a jagged array is an array of arrays of different sizes. So a jagged lazyarray is simply a jagged array of lazyarrays with different sizes. Here is how a jagged lazyarray looks like:
+
+
+.. code-block:: python3
+
+    # <JaggedArray [[102 102 102 ... 11517 11518 11518] [] [101 101 102 ... 11518 11518 11518] ... [101 101 102 ... 11516 11516 11517] [] [101 101 101 ... 11517 11517 11518]] at 0x7f74b0ef8810>
+
+
+Overview of daq files
+"""""""""""""""""""""
+# info needed here
+
+Overview of offline files
+"""""""""""""""""""""""""
+
+# info needed here
+
+Daq files reader
+----------------
+
+# an update is needed here?
+
+Currently only events (the ``KM3NET_EVENT`` tree) are supported but timeslices and summaryslices will be implemented very soon.
 
 Let's have a look at some ORCA data (``KM3NeT_00000044_00005404.root``)
 
-To get a lazy ragged array of the events::
+To get a lazy ragged array of the events:
 
-    >>> import km3io as ki
-    >>> events = ki.JppReader("KM3NeT_00000044_00005404.root").events
+.. code-block:: python3
 
-That's it! Now let's have a look at the hits data::
+  import km3io as ki
+  events = ki.JppReader("KM3NeT_00000044_00005404.root").events
 
-    >>> events
-    Number of events: 17023
-    >>> events[23].snapshot_hits.tot
-    array([28, 22, 17, 29,  5, 27, 24, 26, 21, 28, 26, 21, 26, 24, 17, 28, 23,
-           29, 27, 24, 23, 26, 29, 25, 18, 28, 24, 28, 26, 20, 25, 31, 28, 23,
-           26, 21, 30, 33, 27, 16, 23, 24, 19, 24, 27, 22, 23, 21, 25, 16, 28,
-           22, 22, 29, 24, 29, 24, 24, 25, 25, 21, 31, 26, 28, 30, 42, 28],
-          dtype=uint8)
 
-Quick intro to read Aanet files
--------------------------------
+That's it! Now let's have a look at the hits data:
 
-Currently, only one Aanet event file can be read. The next version of km3io
-will be able to read multiple Aanet files (from the same simulation!). Data
-is always returned as a "lazyarray". A lazyarray is an array-like object that
-reads data on demand. Here, only the first and last chunks of data are read in
-memory, and not all data in the array. The output can be used with all Numpy's
-universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>.
+.. code-block:: python3
 
-Let's have a look at some events data from ORCA 4 lines simulations - run id
-5971 (``datav6.0test.jchain.aanet.00005971.root``)
+  events
+  # Number of events: 17023
+  events[23].snapshot_hits.tot
+  # array([28, 22, 17, 29,  5, 27, 24, 26, 21, 28, 26, 21, 26, 24, 17, 28, 23,29, 27, 24, 23, 26, 29, 25, 18, 28, 24, 28, 26, 20, 25, 31, 28, 23, 26, 21, 30, 33, 27, 16, 23, 24, 19, 24, 27, 22, 23, 21, 25, 16, 28, 22, 22, 29, 24, 29, 24, 24, 25, 25, 21, 31, 26, 28, 30, 42, 28], dtype=uint8)
+
+
+Offline files reader
+--------------------
+
+Let's have a look at some muons data from ORCA 4 lines simulations - run id 5971 (``datav6.0test.jchain.aanet.00005971.root``). 
 
 To get a lazy ragged array of all data::
 

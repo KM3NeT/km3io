@@ -550,14 +550,14 @@ class OfflineHit:
 class OfflineTracks:
     """wrapper for offline tracks"""
     def __init__(self, keys, values, fit_keys=None):
-        """Summary
+        """wrapper for offline tracks
 
         Parameters
         ----------
-        keys : TYPE
-            Description
-        values : TYPE
-            Description
+        keys : list of str
+            list of cropped tracks keys.
+        values : list of arrays
+            list of arrays containting tracks data.
         fit_keys : None, optional
             list of tracks fit information (not yet outsourced in offline
             files).

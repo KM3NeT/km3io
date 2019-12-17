@@ -273,7 +273,7 @@ In an offline file, there are 5 main trees with data:
 
 with km3io, these trees can be accessed with a simple tab completion: 
 
-.. image:: https://git.km3net.de/km3py/km3io/reader.png
+.. image:: https://git.km3net.de/km3py/km3io/raw/master/examples/pictures/events.png
 
 In the following, we will explore each tree using km3io package. 
 
@@ -296,7 +296,7 @@ to get the total number of events in the events tree:
 
 the branches stored in the events tree in an offline file can be easily accessed with a tab completion as seen below:
 
-.. image:: /home/zineb/Desktop/events.png
+.. image:: https://git.km3net.de/km3py/km3io/raw/master/examples/pictures/events.png
 
 to get data from the events tree, chose any branch of interest with the tab completion, the following is a non exaustive set of examples. 
 
@@ -394,7 +394,7 @@ this shows that in our offline file, there are 10 hits trees (because we have 10
 
 to have access to all data in a specific branche from the hits tree, you can use the tab completion:
 
-.. image:: /home/zineb/Desktop/hits.png
+.. image:: https://git.km3net.de/km3py/km3io/raw/master/examples/pictures/hits.png
 
 to get ALL the dom ids in all hits trees in our offline file:
 
@@ -502,7 +502,7 @@ this shows that in our offline file, there are 10 parsed elements (events), each
 
 to have access to all data in a specific branche from the tracks tree, you can use the tab completion:
 
-.. image:: /home/zineb/Desktop/tracks.png
+.. image:: https://git.km3net.de/km3py/km3io/raw/master/examples/pictures/tracks.png
 
 to get ALL the cos(zenith angle) in all tracks tree in our offline file:
 
@@ -611,7 +611,7 @@ to read mc hits data:
 
 that's it! All branches in mc hits tree can be accessed in the exact same way described in the section `reading hits data <#reading-hits-data>`__ . All data is easily accesible and if you are stuck, hit tab key to see all the available branches:
 
-.. image:: /home/zineb/Desktop/mc_hits.png
+.. image:: https://git.km3net.de/km3py/km3io/raw/master/examples/pictures/mc_hits.png
 
 reading mc tracks data
 """"""""""""""""""""""
@@ -625,4 +625,4 @@ to read mc tracks data:
 
 that's it! All branches in mc tracks tree can be accessed in the exact same way described in the section `reading tracks data <#reading-tracks-data>`__ . All data is easily accesible and if you are stuck, hit tab key to see all the available branches:
 
-.. image:: /home/zineb/Desktop/mc_tracks.png
+.. image:: https://git.km3net.de/km3py/km3io/raw/master/examples/pictures/mc_tracks.png

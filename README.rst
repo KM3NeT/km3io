@@ -390,7 +390,7 @@ to read data in hits tree with km3io:
     >>> r.hits
     <OfflineHits: 10 parsed elements>
 
-this shows that in our offline file, there are 10 hits trees (because we have 10 events and each event has a hits tree!). 
+this shows that in our offline file, there are 10 events, with each event is associated a hits trees. 
 
 to have access to all data in a specific branche from the hits tree, you can use the tab completion:
 

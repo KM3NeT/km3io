@@ -22,7 +22,7 @@ def print_tree(filename):
     for key in f.keys():
         try:
             print("{:<30} : {:>9} items".format(key.decode(), len(f[key])))
-        except TypeError:
+        except (TypeError, KeyError):
             print("{}".format(key.decode()))
         except NotImplementedError:
             print("{} (TStreamerSTL)".format(key.decode()))

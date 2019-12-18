@@ -3,6 +3,13 @@ Unreleased changes
 
 Version 0
 ---------
+0.5.1 / 2019-12-18
+~~~~~~~~~~~~~~~~~~
+* Cosmetics
+
+0.5.0 / 2019-12-16
+~~~~~~~~~~~~~~~~~~
+* Massive update of the aanet data format reader
 
 0.4.0 / 2019-11-22
 ~~~~~~~~~~~~~~~~~~~

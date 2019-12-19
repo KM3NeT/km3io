@@ -79,7 +79,7 @@ class SummmarySlices:
     def headers(self):
         if self._headers is None:
             self._headers = self._read_headers()
-        return self._slices
+        return self._headers
 
     @property
     def slices(self):

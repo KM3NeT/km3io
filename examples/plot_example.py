@@ -16,7 +16,7 @@ import km3io
 # Just pass a filename to the reader class and get access to the event tree
 # with:
 
-f = km3io.DAQReader("samples/jpp_v12.0.0.root")
+f = km3io.DAQReader("samples/daq_v1.0.0.root")
 
 #####################################################
 # Note that only some meta information is read into memory.

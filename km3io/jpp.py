@@ -74,6 +74,7 @@ class SummmarySlices:
         self._slices = None
         self._headers = None
         self._rates = None
+        self._ch_selector = ["ch{}".format(c) for c in range(31)]
 
     @property
     def headers(self):
@@ -90,8 +91,7 @@ class SummmarySlices:
     @property
     def rates(self):
         if self._rates is None:
-            self._rates = self.slices[["dom_id"] +
-                                      ["ch{}".format(c) for c in range(31)]]
+            self._rates = self.slices[["dom_id"] + self._ch_selector]
         return self._rates
 
     def _read_summaryslices(self):
@@ -102,7 +102,7 @@ class SummmarySlices:
                 uproot.asdtype([("dom_id", "i4"), ("dq_status", "u4"),
                                 ("hrv", "u4"), ("fifo", "u4"),
                                 ("status3", "u4"), ("status4", "u4")] +
-                               [("ch{}".format(c), "u1") for c in range(31)])),
+                               [(c, "u1") for c in self._ch_selector])),
                             skipbytes=10),
             basketcache=uproot.cache.ThreadSafeArrayCache(
                 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE))

@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Jpp things were renamed to DAQ things (;
 * Reading of summary slices is done!
 
 Version 0

@@ -54,7 +54,7 @@ Tutorial
 
   * `Overview of offline files <#overview-of-offline-files>`__
 
-* `Daq files reader <#daq-files-reader>`__
+* `DAQ files reader <#daq-files-reader>`__
 
 * `Offline files reader <#offline-file-reader>`__
 
@@ -75,7 +75,7 @@ Introduction
 Most of km3net data is stored in root files. These root files are either created with `Jpp <https://git.km3net.de/common/jpp>`__ or `aanet <https://git.km3net.de/common/aanet>`__ software. A root file created with 
 `Jpp <https://git.km3net.de/common/jpp>`__ is often referred to as "a Jpp root file". Similarly, a root file created with `aanet <https://git.km3net.de/common/aanet>`__ is often referred to as "an aanet file". In km3io, an aanet root file will always be reffered to as an ``offline file``, while a Jpp root file will always be referred to as a ``daq file``.
 
-km3io is a Python package that provides a set of classes (``DaqReader`` and ``OfflineReader``) to read both daq root files and offline root files without any dependency to aanet, Jpp or ROOT. 
+km3io is a Python package that provides a set of classes (``DAQReader`` and ``OfflineReader``) to read both daq root files and offline root files without any dependency to aanet, Jpp or ROOT. 
 
 Data in km3io is often returned as a "lazyarray", a "jagged lazyarray" or a `Numpy <https://docs.scipy.org/doc/numpy>`__ array. A lazyarray is an array-like object that reads data on demand! In a lazyarray, only the first and the last chunks of data are read in memory. A lazyarray can be used with all Numpy's universal `functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`__. Here is how a lazyarray looks like:
 
@@ -101,7 +101,7 @@ Overview of offline files
 
 # info needed here
 
-Daq files reader
+DAQ files reader
 ----------------
 
 # an update is needed here?
@@ -115,7 +115,7 @@ To get a lazy ragged array of the events:
 .. code-block:: python3
 
   import km3io as ki
-  events = ki.JppReader("KM3NeT_00000044_00005404.root").events
+  events = ki.DAQReader("KM3NeT_00000044_00005404.root").events
 
 
 That's it! Now let's have a look at the hits data:

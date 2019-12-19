@@ -23,8 +23,8 @@ def get_rate(value):
         return MINIMAL_RATE_HZ * np.exp(value * RATE_FACTOR)
 
 
-class JppReader:
-    """Reader for Jpp ROOT files"""
+class DAQReader:
+    """Reader for DAQ ROOT files"""
     def __init__(self, filename):
         self.fobj = uproot.open(filename)
         self._events = None
@@ -51,13 +51,13 @@ class JppReader:
                                     (" cnt", "u4"), (" vers", "u2"),
                                     ("trigger_mask", "u8")])),
                                 skipbytes=10))
-            self._events = JppEvents(headers, snapshot_hits, triggered_hits)
+            self._events = DAQEvents(headers, snapshot_hits, triggered_hits)
         return self._events
 
     @property
     def timeslices(self):
         if self._timeslices is None:
-            self._timeslices = JppTimeslices(self.fobj)
+            self._timeslices = DAQTimeslices(self.fobj)
         return self._timeslices
 
     @property
@@ -115,8 +115,8 @@ class SummmarySlices:
                              cntvers=True))
 
 
-class JppTimeslices:
-    """A simple wrapper for Jpp timeslices"""
+class DAQTimeslices:
+    """A simple wrapper for DAQ timeslices"""
     def __init__(self, fobj):
         self.fobj = fobj
         self._timeslices = {}
@@ -157,7 +157,7 @@ class JppTimeslices:
 
     def stream(self, stream, idx):
         ts = self._timeslices[stream]
-        return JppTimeslice(*ts, idx, stream)
+        return DAQTimeslice(*ts, idx, stream)
 
     def __str__(self):
         return "Available timeslice streams: {}".format(', '.join(
@@ -167,8 +167,8 @@ class JppTimeslices:
         return str(self)
 
 
-class JppTimeslice:
-    """A wrapper for a Jpp timeslice"""
+class DAQTimeslice:
+    """A wrapper for a DAQ timeslice"""
     def __init__(self, header, superframe, hits_buffer, idx, stream):
         self.header = header
         self._frames = {}
@@ -212,15 +212,15 @@ class JppTimeslice:
                                          len(self.header))
 
 
-class JppEvents:
-    """A simple wrapper for Jpp events"""
+class DAQEvents:
+    """A simple wrapper for DAQ events"""
     def __init__(self, headers, snapshot_hits, triggered_hits):
         self.headers = headers
         self.snapshot_hits = snapshot_hits
         self.triggered_hits = triggered_hits
 
     def __getitem__(self, item):
-        return JppEvent(self.headers[item], self.snapshot_hits[item],
+        return DAQEvent(self.headers[item], self.snapshot_hits[item],
                         self.triggered_hits[item])
 
     def __len__(self):
@@ -233,15 +233,15 @@ class JppEvents:
         return str(self)
 
 
-class JppEvent:
-    """A wrapper for a Jpp event"""
+class DAQEvent:
+    """A wrapper for a DAQ event"""
     def __init__(self, header, snapshot_hits, triggered_hits):
         self.header = header
         self.snapshot_hits = snapshot_hits
         self.triggered_hits = triggered_hits
 
     def __str__(self):
-        return "Jpp event with {} snapshot hits and {} triggered hits".format(
+        return "DAQ event with {} snapshot hits and {} triggered hits".format(
             len(self.snapshot_hits), len(self.triggered_hits))
 
     def __repr__(self):

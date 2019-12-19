@@ -2,15 +2,15 @@ import os
 import re
 import unittest
 
-from km3io import JppReader
+from km3io import DAQReader
 
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 
 
-class TestJppEvents(unittest.TestCase):
+class TestDAQEvents(unittest.TestCase):
     def setUp(self):
-        self.events = JppReader(os.path.join(SAMPLES_DIR,
-                                             "jpp_v12.0.0.root")).events
+        self.events = DAQReader(os.path.join(SAMPLES_DIR,
+                                             "daq_v1.0.0.root")).events
 
     def test_index_lookup(self):
         assert 3 == len(self.events)
@@ -22,10 +22,10 @@ class TestJppEvents(unittest.TestCase):
         assert re.match(".*events.*3", self.events.__repr__())
 
 
-class TestJppEvent(unittest.TestCase):
+class TestDAQEvent(unittest.TestCase):
     def setUp(self):
-        self.event = JppReader(os.path.join(SAMPLES_DIR,
-                                            "jpp_v12.0.0.root")).events[0]
+        self.event = DAQReader(os.path.join(SAMPLES_DIR,
+                                            "daq_v1.0.0.root")).events[0]
 
     def test_str(self):
         assert re.match(".*event.*96.*snapshot.*18.*triggered",
@@ -36,10 +36,10 @@ class TestJppEvent(unittest.TestCase):
                         self.event.__repr__())
 
 
-class TestJppEventsSnapshotHits(unittest.TestCase):
+class TestDAQEventsSnapshotHits(unittest.TestCase):
     def setUp(self):
-        self.events = JppReader(os.path.join(SAMPLES_DIR,
-                                             "jpp_v12.0.0.root")).events
+        self.events = DAQReader(os.path.join(SAMPLES_DIR,
+                                             "daq_v1.0.0.root")).events
         self.lengths = {0: 96, 1: 124, -1: 78}
         self.total_item_count = 298
 
@@ -75,10 +75,10 @@ class TestJppEventsSnapshotHits(unittest.TestCase):
         assert all(c < 31 for c in hits.channel_id.max())
 
 
-class TestJppEventsTriggeredHits(unittest.TestCase):
+class TestDAQEventsTriggeredHits(unittest.TestCase):
     def setUp(self):
-        self.events = JppReader(os.path.join(SAMPLES_DIR,
-                                             "jpp_v12.0.0.root")).events
+        self.events = DAQReader(os.path.join(SAMPLES_DIR,
+                                             "daq_v1.0.0.root")).events
         self.lengths = {0: 18, 1: 53, -1: 9}
         self.total_item_count = 80
 
@@ -116,10 +116,10 @@ class TestJppEventsTriggeredHits(unittest.TestCase):
         assert all(c < 31 for c in hits.channel_id.max())
 
 
-class TestJppTimeslices(unittest.TestCase):
+class TestDAQTimeslices(unittest.TestCase):
     def setUp(self):
-        self.ts = JppReader(os.path.join(SAMPLES_DIR,
-                                         "jpp_v12.0.0.root")).timeslices
+        self.ts = DAQReader(os.path.join(SAMPLES_DIR,
+                                         "daq_v1.0.0.root")).timeslices
 
     def test_data_lengths(self):
         assert 3 == len(self.ts._timeslices["default"][0])
@@ -140,10 +140,10 @@ class TestJppTimeslices(unittest.TestCase):
         assert "SN" in s
 
 
-class TestJppTimeslice(unittest.TestCase):
+class TestDAQTimeslice(unittest.TestCase):
     def setUp(self):
-        self.ts = JppReader(os.path.join(SAMPLES_DIR,
-                                         "jpp_v12.0.0.root")).timeslices
+        self.ts = DAQReader(os.path.join(SAMPLES_DIR,
+                                         "daq_v1.0.0.root")).timeslices
         self.n_frames = {"L1": [69, 69, 69], "SN": [64, 66, 68]}
 
     def test_str(self):
@@ -156,8 +156,8 @@ class TestJppTimeslice(unittest.TestCase):
 
 class TestSummaryslices(unittest.TestCase):
     def setUp(self):
-        self.ss = JppReader(os.path.join(SAMPLES_DIR,
-                                         "jpp_v12.0.0.root")).summaryslices
+        self.ss = DAQReader(os.path.join(SAMPLES_DIR,
+                                         "daq_v1.0.0.root")).summaryslices
 
     def test_headers(self):
         assert 3 == len(self.ss.headers)

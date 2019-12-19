@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Reading of summary slices is done!
 
 Version 0
 ---------

@@ -1,6 +1,26 @@
 import uproot
+import numpy as np
+import numba as nb
 
 TIMESLICE_FRAME_BASKET_CACHE_SIZE = 23 * 1024**2  # [byte]
+SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
+MINIMAL_RATE_HZ = 2.0e3
+MAXIMAL_RATE_HZ = 2.0e6
+RATE_FACTOR = np.log(MAXIMAL_RATE_HZ / MINIMAL_RATE_HZ) / 255
+
+
+@nb.vectorize([
+    nb.int32(nb.int8),
+    nb.int32(nb.int16),
+    nb.int32(nb.int32),
+    nb.int32(nb.int64)
+])
+def get_rate(value):
+    """Return the rate in Hz from the short int value"""
+    if value == 0:
+        return 0
+    else:
+        return MINIMAL_RATE_HZ * np.exp(value * RATE_FACTOR)
 
 
 class JppReader:
@@ -9,6 +29,7 @@ class JppReader:
         self.fobj = uproot.open(filename)
         self._events = None
         self._timeslices = None
+        self._summaryslices = None
 
     @property
     def events(self):
@@ -38,6 +59,60 @@ class JppReader:
         if self._timeslices is None:
             self._timeslices = JppTimeslices(self.fobj)
         return self._timeslices
+
+    @property
+    def summaryslices(self):
+        if self._summaryslices is None:
+            self._summaryslices = SummmarySlices(self.fobj)
+        return self._summaryslices
+
+
+class SummmarySlices:
+    """A wrapper for summary slices"""
+    def __init__(self, fobj):
+        self.fobj = fobj
+        self._slices = None
+        self._headers = None
+        self._rates = None
+
+    @property
+    def headers(self):
+        if self._headers is None:
+            self._headers = self._read_headers()
+        return self._slices
+
+    @property
+    def slices(self):
+        if self._slices is None:
+            self._slices = self._read_summaryslices()
+        return self._slices
+
+    @property
+    def rates(self):
+        if self._rates is None:
+            self._rates = self.slices[["dom_id"] +
+                                      ["ch{}".format(c) for c in range(31)]]
+        return self._rates
+
+    def _read_summaryslices(self):
+        """Reads a lazyarray of summary slices"""
+        tree = self.fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
+        return tree[b'vector<KM3NETDAQ::JDAQSummaryFrame>'].lazyarray(
+            uproot.asjagged(uproot.astable(
+                uproot.asdtype([("dom_id", "i4"), ("dq_status", "u4"),
+                                ("hrv", "u4"), ("fifo", "u4"),
+                                ("status3", "u4"), ("status4", "u4")] +
+                               [("ch{}".format(c), "u1") for c in range(31)])),
+                            skipbytes=10),
+            basketcache=uproot.cache.ThreadSafeArrayCache(
+                SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE))
+
+    def _read_headers(self):
+        """Reads a lazyarray of summary slice headers"""
+        tree = self.fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
+        return tree[b'KM3NETDAQ::JDAQSummarysliceHeader'].lazyarray(
+            uproot.interpret(tree[b'KM3NETDAQ::JDAQSummarysliceHeader'],
+                             cntvers=True))
 
 
 class JppTimeslices:

@@ -152,3 +152,23 @@ class TestJppTimeslice(unittest.TestCase):
             for i in range(len(n_frames)):
                 s = str(self.ts.stream(stream, i))
                 assert re.match("{}.*{}".format(stream, n_frames[i]), s)
+
+
+class TestSummaryslices(unittest.TestCase):
+    def setUp(self):
+        self.ss = JppReader(os.path.join(SAMPLES_DIR,
+                                         "jpp_v12.0.0.root")).summaryslices
+
+    def test_headers(self):
+        assert 3 == len(self.ss.headers)
+        self.assertListEqual([44, 44, 44], list(self.ss.headers.detector_id))
+        self.assertListEqual([6633, 6633, 6633], list(self.ss.headers.run))
+        self.assertListEqual([126, 127, 128],
+                             list(self.ss.headers.frame_index))
+        assert 806451572 == self.ss.slices[0].dom_id[0]
+
+    def test_slices(self):
+        assert 3 == len(self.ss.slices)
+
+    def test_rates(self):
+        assert 3 == len(self.ss.rates)

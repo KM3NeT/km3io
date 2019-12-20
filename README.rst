@@ -273,7 +273,7 @@ In an offline file, there are 5 main trees with data:
 
 with km3io, these trees can be accessed with a simple tab completion: 
 
-.. image:: https://git.km3net.de/km3py/km3io/raw/master/examples/pictures/events.png
+.. image:: https://git.km3net.de/km3py/km3io/raw/master/examples/pictures/reader.png
 
 In the following, we will explore each tree using km3io package. 
 

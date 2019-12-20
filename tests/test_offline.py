@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from km3io.aanet import Reader, OfflineEvents, OfflineHits, OfflineTracks
+from km3io.offline import Reader, OfflineEvents, OfflineHits, OfflineTracks
 from km3io import OfflineReader
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'

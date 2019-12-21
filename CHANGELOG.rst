@@ -1,10 +1,14 @@
 Unreleased changes
 ------------------
-* Jpp things were renamed to DAQ things (;
-* Reading of summary slices is done!
+
 
 Version 0
 ---------
+0.6.0 / 2019-12-21
+~~~~~~~~~~~~~~~~~~
+* Jpp things were renamed to DAQ things (;
+* Reading of summary slices is done!
+
 0.5.1 / 2019-12-18
 ~~~~~~~~~~~~~~~~~~
 * Cosmetics

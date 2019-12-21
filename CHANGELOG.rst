@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.6.1 / 2019-12-21
+~~~~~~~~~~~~~~~~~~
+* Minor cleanup
+
 0.6.0 / 2019-12-21
 ~~~~~~~~~~~~~~~~~~
 * Jpp things were renamed to DAQ things (;

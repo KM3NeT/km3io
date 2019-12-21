@@ -2,7 +2,7 @@ import os
 import re
 import unittest
 
-from km3io import DAQReader
+from km3io.daq import DAQReader, get_rate
 
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 
@@ -172,3 +172,17 @@ class TestSummaryslices(unittest.TestCase):
 
     def test_rates(self):
         assert 3 == len(self.ss.rates)
+
+
+class TestGetReate(unittest.TestCase):
+    def test_zero(self):
+        assert 0 == get_rate(0)
+
+    def test_some_values(self):
+        assert 2054 == get_rate(1)
+        assert 55987 == get_rate(123)
+        assert 1999999 == get_rate(255)
+
+    def test_vectorized_input(self):
+        self.assertListEqual([2054], list(get_rate([1])))
+        self.assertListEqual([2054, 2111, 2169], list(get_rate([1,2,3])))

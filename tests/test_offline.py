@@ -309,8 +309,10 @@ class TestOfflineTracks(unittest.TestCase):
     def test_slicing(self):
         tracks = self.tracks
         assert 10 == len(tracks)
-        track_selection = tracks[2:4]
-        assert 3 == len(track_selection)
+        track_selection = tracks[2:7]
+        assert 5 == len(track_selection)
+        track_selection_2 = tracks[1:3]
+        assert 2 == len(track_selection_2)
 
 
 class TestOfflineTrack(unittest.TestCase):

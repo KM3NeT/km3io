@@ -306,6 +306,12 @@ class TestOfflineTracks(unittest.TestCase):
         self.assertListEqual([0.230189, 0.230189, 0.218663],
                              list(dir_z[0][:3]))
 
+    def test_slicing(self):
+        tracks = self.tracks
+        assert 10 == len(tracks)
+        track_selection = tracks[2:4]
+        assert 3 == len(track_selection)
+
 
 class TestOfflineTrack(unittest.TestCase):
     def setUp(self):

@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.6.2 / 2019-12-22
+~~~~~~~~~~~~~~~~~~
+* Fixes slicing of ``OfflineTracks``
+
 0.6.1 / 2019-12-21
 ~~~~~~~~~~~~~~~~~~
 * Minor cleanup

@@ -419,6 +419,11 @@ class TestOfflineTracks(unittest.TestCase):
             self.assertListEqual(list(tracks.E[:, 0][_slice]),
                                  list(tracks[_slice].E[:, 0]))
 
+    def test_slicing_via_columns(self):
+        tracks = self.tracks
+        data = tracks[['E', 'lik']]
+        assert 1 == data.E
+
 
 class TestOfflineTrack(unittest.TestCase):
     def setUp(self):

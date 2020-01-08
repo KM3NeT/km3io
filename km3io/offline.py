@@ -1,5 +1,6 @@
 import uproot
 import numpy as np
+
 import warnings
 import km3io.definitions.trigger
 import km3io.definitions.fitparameters
@@ -794,6 +795,11 @@ class OfflineTracks:
         if isinstance(item, int):
             return OfflineTrack(self._keys, [v[item] for v in self._values],
                                 fitparameters=self._fitparameters)
+        elif isinstance(item, list) and all(isinstance(i, str) for i in item):
+            cols = item
+            data = [getattr(self, c) for c in cols]
+            dtype = dict(names=cols, formats=[d.dtype for d in data])
+            return np.rec.fromarrays(data, dtype=dtype)
         else:
             return OfflineTracks(self._keys, [v[item] for v in self._values],
                                  fitparameters=self._fitparameters)

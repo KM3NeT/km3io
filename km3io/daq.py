@@ -4,6 +4,11 @@ import numba as nb
 
 TIMESLICE_FRAME_BASKET_CACHE_SIZE = 23 * 1024**2  # [byte]
 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
+
+# Parameters for PMT rate conversions, since the rates in summary slices are
+# stored as a single byte to save space. The values from 0-255 can be decoded
+# using the `get_rate(value)` function, which will yield the actual rate
+# in Hz.
 MINIMAL_RATE_HZ = 2.0e3
 MAXIMAL_RATE_HZ = 2.0e6
 RATE_FACTOR = np.log(MAXIMAL_RATE_HZ / MINIMAL_RATE_HZ) / 255

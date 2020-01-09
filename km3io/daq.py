@@ -120,15 +120,7 @@ class DAQTimeslices:
     def __init__(self, fobj):
         self.fobj = fobj
         self._timeslices = {}
-        self._read_default_stream()
         self._read_streams()
-
-    def _read_default_stream(self):
-        """Read the default KM3NET_TIMESLICE stream"""
-        tree = self.fobj[b'KM3NET_TIMESLICE'][b'KM3NET_TIMESLICE']
-        headers = tree[b'KM3NETDAQ::JDAQTimesliceHeader']
-        superframes = tree[b'vector<KM3NETDAQ::JDAQSuperFrame>']
-        self._timeslices['default'] = (headers, superframes)
 
     def _read_streams(self):
         """Read the L0, L1, L2 and SN streams if available"""

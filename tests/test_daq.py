@@ -122,7 +122,6 @@ class TestDAQTimeslices(unittest.TestCase):
                                          "daq_v1.0.0.root")).timeslices
 
     def test_data_lengths(self):
-        assert 3 == len(self.ts._timeslices["default"][0])
         assert 3 == len(self.ts._timeslices["L1"][0])
         assert 3 == len(self.ts._timeslices["SN"][0])
         with self.assertRaises(KeyError):
@@ -135,7 +134,6 @@ class TestDAQTimeslices(unittest.TestCase):
 
     def test_str(self):
         s = str(self.ts)
-        assert "default" in s
         assert "L1" in s
         assert "SN" in s
 

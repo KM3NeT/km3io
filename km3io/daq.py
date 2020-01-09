@@ -2,7 +2,7 @@ import uproot
 import numpy as np
 import numba as nb
 
-TIMESLICE_FRAME_BASKET_CACHE_SIZE = 23 * 1024**2  # [byte]
+TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
 
 # Parameters for PMT rate conversions, since the rates in summary slices are

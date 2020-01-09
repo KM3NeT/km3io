@@ -129,6 +129,10 @@ class TestDAQTimeslices(unittest.TestCase):
         with self.assertRaises(KeyError):
             assert 0 == len(self.ts._timeslices["L0"][0])
 
+    def test_streams(self):
+        self.ts.stream("L1", 0)
+        self.ts.stream("SN", 0)
+
     def test_reading_frames(self):
         assert 8 == len(self.ts.stream("SN", 1).frames[808447186])
 

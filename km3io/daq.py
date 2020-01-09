@@ -129,10 +129,9 @@ class DAQTimeslices:
 
     def _read_streams(self):
         """Read the L0, L1, L2 and SN streams if available"""
-        streams = [
+        streams = set(
             s.split(b"KM3NET_TIMESLICE_")[1].split(b';')[0]
-            for s in self.fobj.keys() if b"KM3NET_TIMESLICE_" in s
-        ]
+            for s in self.fobj.keys() if b"KM3NET_TIMESLICE_" in s)
         for stream in streams:
             tree = self.fobj[b'KM3NET_TIMESLICE_' +
                              stream][b'KM3NETDAQ::JDAQTimeslice']

@@ -1,7 +1,7 @@
 The km3io Python package
 ========================
 
-.. image:: https://git.km3net.de/km3py/km3io/badges/master/build.svg
+.. image:: https://git.km3net.de/km3py/km3io/badges/master/pipeline.svg
     :target: https://git.km3net.de/km3py/km3io/pipelines
 
 .. image:: https://git.km3net.de/km3py/km3io/badges/master/coverage.svg

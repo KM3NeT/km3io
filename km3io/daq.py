@@ -140,11 +140,11 @@ class DAQTimeslices:
             if len(headers) == 0:
                 continue
             superframes = tree[b'vector<KM3NETDAQ::JDAQSuperFrame>']
+            hits_dtype = np.dtype([("pmt", "u1"), ("tdc", "<u4"),
+                                   ("tot", "u1")])
             hits_buffer = superframes[
                 b'vector<KM3NETDAQ::JDAQSuperFrame>.buffer'].lazyarray(
-                    uproot.asjagged(uproot.astable(
-                        uproot.asdtype([("pmt", "u1"), ("tdc", "u4"),
-                                        ("tot", "u1")])),
+                    uproot.asjagged(uproot.astable(uproot.asdtype(hits_dtype)),
                                     skipbytes=6),
                     basketcache=uproot.cache.ThreadSafeArrayCache(
                         TIMESLICE_FRAME_BASKET_CACHE_SIZE))

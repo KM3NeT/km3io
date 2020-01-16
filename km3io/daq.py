@@ -29,7 +29,11 @@ def get_rate(value):
 
 def get_number_udp_packets(value):
     """Return the number of received UDP packets based on the dq_status value"""
-    return value & 0x7FFF
+    return np.bitwise_and(value & 0x7FFF)
+
+def has_udp_trailer(value)
+    """Returns the UDP Trailer flag based on on the fifo field value"""
+    return np.any(np.bitwise_and(value, np.leftshift(1,31)))
 
 class DAQReader:
     """Reader for DAQ ROOT files"""

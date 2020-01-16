@@ -27,6 +27,9 @@ def get_rate(value):
     else:
         return MINIMAL_RATE_HZ * np.exp(value * RATE_FACTOR)
 
+def get_number_udp_packets(value):
+    """Return the number of received UDP packets based on the dq_status value"""
+    return value & 0x7FFF
 
 class DAQReader:
     """Reader for DAQ ROOT files"""

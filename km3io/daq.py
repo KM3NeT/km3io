@@ -29,7 +29,7 @@ def get_rate(value):
 
 def get_number_udp_packets(value):
     """Return the number of received UDP packets based on the dq_status value"""
-    return np.bitwise_and(value & 0x7FFF)
+    return np.bitwise_and(value, 0x7FFF)
 
 def has_udp_trailer(value):
     """Returns the UDP Trailer flag based on on the fifo field value"""

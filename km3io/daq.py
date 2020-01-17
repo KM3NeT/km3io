@@ -31,7 +31,7 @@ def get_rate(value):
 class DAQReader:
     """Reader for DAQ ROOT files"""
     def __init__(self, filename):
-        self.fobj = uproot.open(filename)
+        self._fobj = uproot.open(filename)
         self._events = None
         self._timeslices = None
         self._summaryslices = None
@@ -39,7 +39,7 @@ class DAQReader:
     @property
     def events(self):
         if self._events is None:
-            tree = self.fobj["KM3NET_EVENT"]
+            tree = self._fobj["KM3NET_EVENT"]
 
             headers = tree["KM3NETDAQ::JDAQEventHeader"].array(
                 uproot.interpret(tree["KM3NETDAQ::JDAQEventHeader"],
@@ -62,20 +62,20 @@ class DAQReader:
     @property
     def timeslices(self):
         if self._timeslices is None:
-            self._timeslices = DAQTimeslices(self.fobj)
+            self._timeslices = DAQTimeslices(self._fobj)
         return self._timeslices
 
     @property
     def summaryslices(self):
         if self._summaryslices is None:
-            self._summaryslices = SummmarySlices(self.fobj)
+            self._summaryslices = SummmarySlices(self._fobj)
         return self._summaryslices
 
 
 class SummmarySlices:
     """A wrapper for summary slices"""
     def __init__(self, fobj):
-        self.fobj = fobj
+        self._fobj = fobj
         self._slices = None
         self._headers = None
         self._rates = None
@@ -101,7 +101,7 @@ class SummmarySlices:
 
     def _read_summaryslices(self):
         """Reads a lazyarray of summary slices"""
-        tree = self.fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
+        tree = self._fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
         return tree[b'vector<KM3NETDAQ::JDAQSummaryFrame>'].lazyarray(
             uproot.asjagged(uproot.astable(
                 uproot.asdtype([("dom_id", "i4"), ("dq_status", "u4"),
@@ -114,7 +114,7 @@ class SummmarySlices:
 
     def _read_headers(self):
         """Reads a lazyarray of summary slice headers"""
-        tree = self.fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
+        tree = self._fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
         return tree[b'KM3NETDAQ::JDAQSummarysliceHeader'].lazyarray(
             uproot.interpret(tree[b'KM3NETDAQ::JDAQSummarysliceHeader'],
                              cntvers=True))
@@ -123,7 +123,7 @@ class SummmarySlices:
 class DAQTimeslices:
     """A simple wrapper for DAQ timeslices"""
     def __init__(self, fobj):
-        self.fobj = fobj
+        self._fobj = fobj
         self._timeslices = {}
         self._read_streams()
 
@@ -131,10 +131,10 @@ class DAQTimeslices:
         """Read the L0, L1, L2 and SN streams if available"""
         streams = set(
             s.split(b"KM3NET_TIMESLICE_")[1].split(b';')[0]
-            for s in self.fobj.keys() if b"KM3NET_TIMESLICE_" in s)
+            for s in self._fobj.keys() if b"KM3NET_TIMESLICE_" in s)
         for stream in streams:
-            tree = self.fobj[b'KM3NET_TIMESLICE_' +
-                             stream][b'KM3NETDAQ::JDAQTimeslice']
+            tree = self._fobj[b'KM3NET_TIMESLICE_' +
+                              stream][b'KM3NETDAQ::JDAQTimeslice']
             headers = tree[b'KM3NETDAQ::JDAQTimesliceHeader'][
                 b'KM3NETDAQ::JDAQHeader'][b'KM3NETDAQ::JDAQChronometer']
             if len(headers) == 0:

@@ -52,7 +52,7 @@ def get_channel_flags(value):
 
 def get_number_udp_packets(value):
     """Returns the number of received UDP packets (dq_status)"""
-    return np.bitwise_and(value & 0x7FFF)
+    return np.bitwise_and(value, 0x7FFF)
 
 
 def get_udp_max_sequence_number(value):

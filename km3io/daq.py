@@ -27,13 +27,43 @@ def get_rate(value):
     else:
         return MINIMAL_RATE_HZ * np.exp(value * RATE_FACTOR)
 
+
+def unpack_bits(value):
+    """Helper to unpack bits to bool flags (little endian)"""
+    value = np.array(value).astype(np.int64)
+    value = value.reshape(-1, 1)
+    value = value.view(np.uint8)
+    value = np.flip(value, axis=1)
+    length = value.shape[0]
+    return np.unpackbits(value).reshape(length, -1).astype(bool)
+
+
+def get_fifo_status(value):
+    """Returns the fifo status (fifo)"""
+    return np.any(np.bitwise_and(value, 2**31))
+
+
+def get_channel_flags(value):
+    """Returns the hrv/fifo flags for the PMT channels (hrv/fifo)"""
+    channel_bits = np.bitwise_and(value, 0x3FFFFFFF)
+    flags = unpack_bits(channel_bits)
+    return np.flip(flags, axis=1)[:, :31]
+
+
 def get_number_udp_packets(value):
-    """Return the number of received UDP packets based on the dq_status value"""
+    """Returns the number of received UDP packets (dq_status)"""
     return np.bitwise_and(value & 0x7FFF)
 
-def has_udp_trailer(value)
-    """Returns the UDP Trailer flag based on on the fifo field value"""
-    return np.any(np.bitwise_and(value, np.leftshift(1,31)))
+
+def get_udp_max_sequence_number(value):
+    """Returns the maximum sequence number of the received UDP packets (dq_status)"""
+    return np.right_shift(value, 16)
+
+
+def has_udp_trailer(value):
+    """Returns the UDP Trailer flag (fifo)"""
+    return np.any(np.bitwise_and(value, np.leftshift(1, 31)))
+
 
 class DAQReader:
     """Reader for DAQ ROOT files"""

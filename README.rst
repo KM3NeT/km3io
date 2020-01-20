@@ -598,6 +598,41 @@ to get a specific value from track 0 in event 0, let's say for example the likli
     >>>r[0].tracks[0].lik
     294.6407542676734
 
+to get the reconstruction parameters, first take a look at the available reconstruction keys: 
+
+.. code-block:: python3
+
+    >>>r.tracks.reco.dtype.names
+    ['JGANDALF_BETA0_RAD',
+     'JGANDALF_BETA1_RAD',
+     'JGANDALF_CHI2',
+     'JGANDALF_NUMBER_OF_HITS',
+     'JENERGY_ENERGY',
+     'JENERGY_CHI2',
+     'JGANDALF_LAMBDA',
+     'JGANDALF_NUMBER_OF_ITERATIONS',
+     'JSTART_NPE_MIP',
+     'JSTART_NPE_MIP_TOTAL',
+     'JSTART_LENGTH_METRES',
+     'JVETO_NPE',
+     'JVETO_NUMBER_OF_HITS',
+     'JENERGY_MUON_RANGE_METRES',
+     'JENERGY_NOISE_LIKELIHOOD',
+     'JENERGY_NDF',
+     'JENERGY_NUMBER_OF_HITS']
+
+the keys above can also be accessed with a tab completion:
+
+.. image:: https://git.km3net.de/km3py/km3io/raw/master/examples/pictures/reco.png
+
+to get an array of a parameter of interest, let's say `'JENERGY_ENERGY'`:
+
+.. code-block:: python3
+
+    >>>r.tracks.reco['JENERGY_ENERGY']
+    >>>array([99.10458562, 99.10458562, 99.10458562, 37.85515249, 99.10458562,
+        7.16916787, 99.10458562, 99.10458562, 49.13672986, 20.35137468])
+
 
 reading mc hits data
 """"""""""""""""""""

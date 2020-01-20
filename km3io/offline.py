@@ -319,12 +319,26 @@ class OfflineReader:
         self._mc_hits = None
         self._mc_tracks = None
         self._keys = None
+        self._header = None
 
     def __getitem__(self, item):
         return OfflineReader(file_path=self._file_path, data=self._data[item])
 
     def __len__(self):
         return len(self._data)
+
+    @property
+    def header(self):
+        if self._header is None:
+            fobj = uproot.open(self._file_path)
+            if b'Head;1' in fobj.keys():
+                for n, x in fobj['Head']._map_3c_string_2c_string_3e_.items():
+                    print("{:15s} {}".format(n.decode("utf-8"), x))
+                    self._header = fobj['Head']._map_3c_string_2c_string_3e_
+            if b'Header;1' in fobj.keys():
+                print('not yet accessible')
+        return self._header
+
 
     @property
     def keys(self):

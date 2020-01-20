@@ -325,6 +325,14 @@ class TestOfflineTracks(unittest.TestCase):
                 list(tracks[_slice].E[:,0])
             )
 
+    def test_reco_data(self):
+        reco = self.tracks.reco
+        self.assertEqual(10, reco.size)
+        E = reco['JENERGY_ENERGY']
+        self.assertListEqual([99.10458562488608, 99.10458562488608, 99.10458562488608],
+                             E[:3].tolist())
+
+
 
 class TestOfflineTrack(unittest.TestCase):
     def setUp(self):

@@ -179,8 +179,8 @@ class OfflineKeys:
                 'JSTART_NPE_MIP', 'JSTART_NPE_MIP_TOTAL',
                 'JSTART_LENGTH_METRES', 'JVETO_NPE', 'JVETO_NUMBER_OF_HITS',
                 'JENERGY_MUON_RANGE_METRES', 'JENERGY_NOISE_LIKELIHOOD',
-                'JENERGY_NDF', 'JENERGY_NUMBER_OF_HITS'
-            ]  # 'JCOPY_Z_M' is the last element, not found in files!
+                'JENERGY_NDF', 'JENERGY_NUMBER_OF_HITS', 'JCOPY_Z_M'
+            ]  
         return self._fit_keys
 
     @property
@@ -600,7 +600,8 @@ class OfflineTracks:
     @property
     def reco(self):
         if self._reco is None:
-            keys = ", ".join(self._fit_keys)
+            # the last key is not found in files
+            keys = ", ".join(self._fit_keys[:-1]) 
             # i[0] is the reco data of the track with the highest likelihood
             # 18 is always the position of fit info
             fit_data = np.array([i[0] for i in self._values[18] if len(i)!=0])

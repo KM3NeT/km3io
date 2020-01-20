@@ -1,4 +1,5 @@
 import uproot
+import numpy as np
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
@@ -178,8 +179,8 @@ class OfflineKeys:
                 'JSTART_NPE_MIP', 'JSTART_NPE_MIP_TOTAL',
                 'JSTART_LENGTH_METRES', 'JVETO_NPE', 'JVETO_NUMBER_OF_HITS',
                 'JENERGY_MUON_RANGE_METRES', 'JENERGY_NOISE_LIKELIHOOD',
-                'JENERGY_NDF', 'JENERGY_NUMBER_OF_HITS', 'JCOPY_Z_M'
-            ]
+                'JENERGY_NDF', 'JENERGY_NUMBER_OF_HITS'
+            ]  # 'JCOPY_Z_M' is the last element, not found in files!
         return self._fit_keys
 
     @property
@@ -416,6 +417,8 @@ class OfflineReader:
         return self._mc_tracks
 
 
+
+
 class OfflineEvents:
     """wrapper for offline events"""
     def __init__(self, keys, values):
@@ -564,6 +567,7 @@ class OfflineTracks:
         """
         self._keys = keys
         self._values = values
+        self._reco = None
         if fit_keys is not None:
             self._fit_keys = fit_keys
         for k, v in zip(self._keys, self._values):
@@ -592,6 +596,16 @@ class OfflineTracks:
     def __repr__(self):
         return "<{}: {} parsed elements>".format(self.__class__.__name__,
                                                  len(self))
+
+    @property
+    def reco(self):
+        if self._reco is None:
+            keys = ", ".join(self._fit_keys)
+            # i[0] is the reco data of the track with the highest likelihood
+            # 18 is always the position of fit info
+            fit_data = np.array([i[0] for i in self._values[18] if len(i)!=0])
+            self._reco = np.core.records.fromarrays(fit_data.transpose(), names=keys)
+        return self._reco
 
 
 class OfflineTrack:

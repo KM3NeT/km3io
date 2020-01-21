@@ -150,6 +150,8 @@ class DAQTimeslices:
                         TIMESLICE_FRAME_BASKET_CACHE_SIZE))
             self._timeslices[stream.decode("ascii")] = (headers, superframes,
                                                         hits_buffer)
+            setattr(self, stream.decode("ascii"),
+                    DAQTimesliceStream(headers, superframes, hits_buffer))
 
     def stream(self, stream, idx):
         ts = self._timeslices[stream]
@@ -161,6 +163,21 @@ class DAQTimeslices:
 
     def __repr__(self):
         return str(self)
+
+
+class DAQTimesliceStream:
+    def __init__(self, headers, superframes, hits_buffer):
+        # self.headers = headers.lazyarray(
+        #     uproot.asjagged(uproot.astable(
+        #         uproot.asdtype(
+        #             np.dtype([('a', 'i4'), ('b', 'i4'), ('c', 'i4'),
+        #                       ('d', 'i4'), ('e', 'i4')]))),
+        #                     skipbytes=6),
+        #     basketcache=uproot.cache.ThreadSafeArrayCache(
+        #         TIMESLICE_FRAME_BASKET_CACHE_SIZE))
+        self.headers = headers
+        self.superframes = superframes
+        self._hits_buffer = hits_buffer
 
 
 class DAQTimeslice:

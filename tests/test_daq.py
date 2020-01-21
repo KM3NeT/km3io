@@ -174,13 +174,6 @@ class TestSummaryslices(unittest.TestCase):
 
     def test_rates(self):
         assert 3 == len(self.ss.rates)
-        s = self.ss.slices[0]
-        example_frame = s[s.dom_id == 808981510]
-        self.assertAlmostEqual(get_rate(example_frame.ch0[0]), 15253.97)
-        self.assertAlmostEqual(get_rate(example_frame.ch1[0]), 17466.52)
-        self.assertAlmostEqual(get_rate(example_frame.ch2[0]), 18438.93)
-        self.assertAlmostEqual(get_rate(example_frame.ch3[0]), 23529.80)
-        self.assertAlmostEqual(get_rate(example_frame.ch4[0]), 20549.19)
 
 
 class TestGetRate(unittest.TestCase):
@@ -194,4 +187,4 @@ class TestGetRate(unittest.TestCase):
 
     def test_vectorized_input(self):
         self.assertListEqual([2054], list(get_rate([1])))
-        self.assertListEqual([2054, 2111, 2169], list(get_rate([1, 2, 3])))
+        self.assertListEqual([2054, 2111, 2169], list(get_rate([1,2,3])))

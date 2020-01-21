@@ -176,7 +176,7 @@ class TestSummaryslices(unittest.TestCase):
         assert 3 == len(self.ss.rates)
 
 
-class TestGetReate(unittest.TestCase):
+class TestGetRate(unittest.TestCase):
     def test_zero(self):
         assert 0 == get_rate(0)
 

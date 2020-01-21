@@ -2,7 +2,7 @@ import os
 import re
 import unittest
 
-from km3io.daq import DAQReader, get_rate
+from km3io.daq import DAQReader, get_rate, get_fifo_status
 
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 
@@ -175,6 +175,13 @@ class TestSummaryslices(unittest.TestCase):
     def test_rates(self):
         assert 3 == len(self.ss.rates)
 
+    def test_fifo(self):
+        s = self.ss.slices[0]
+        dct_fifo_stat = {808981510: True, 808981523: False, 808981672: False, 808974773: False}
+        for dom_id, fifo_status in dct_fifo_stat.items():
+            frame = s[s.dom_id == dom_id]
+            assert get_fifo_status(frame.fifo[0]) == fifo_status
+
 
 class TestGetReate(unittest.TestCase):
     def test_zero(self):
@@ -187,4 +194,4 @@ class TestGetReate(unittest.TestCase):
 
     def test_vectorized_input(self):
         self.assertListEqual([2054], list(get_rate([1])))
-        self.assertListEqual([2054, 2111, 2169], list(get_rate([1,2,3])))
+        self.assertListEqual([2054, 2111, 2169], list(get_rate([1, 2, 3])))

@@ -2,7 +2,7 @@ import os
 import re
 import unittest
 
-from km3io.daq import DAQReader, get_rate, get_fifo_status
+from km3io.daq import DAQReader, get_rate, get_fifo_status, has_udp_trailer, get_udp_max_sequence_number
 
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 
@@ -175,12 +175,74 @@ class TestSummaryslices(unittest.TestCase):
     def test_rates(self):
         assert 3 == len(self.ss.rates)
 
+    @unittest.skip  #TODO
     def test_fifo(self):
         s = self.ss.slices[0]
-        dct_fifo_stat = {808981510: True, 808981523: False, 808981672: False, 808974773: False}
+        dct_fifo_stat = {
+            808981510: True,
+            808981523: False,
+            808981672: False,
+            808974773: False
+        }
         for dom_id, fifo_status in dct_fifo_stat.items():
             frame = s[s.dom_id == dom_id]
             assert get_fifo_status(frame.fifo[0]) == fifo_status
+
+    def test_has_udp_trailer(self):
+        s = self.ss.slices[0]
+        dct_udp_trailer = {
+            806451572: True,
+            806455814: True,
+            806465101: True,
+            806483369: True,
+            806487219: True,
+            806487226: True,
+            806487231: True,
+            808432835: True,
+            808435278: True,
+            808447180: True,
+            808447186: True
+        }
+        for dom_id, udp_trailer in dct_udp_trailer.items():
+            frame = s[s.dom_id == dom_id]
+            assert has_udp_trailer(frame.fifo[0]) == udp_trailer
+
+    def test_max_sequence_number(self):
+        s = self.ss.slices[0]
+        dct_seq_numbers = {
+            808974758: 18,
+            808974773: 26,
+            808974811: 25,
+            808974972: 41,
+            808976377: 35,
+            808979567: 20,
+            808979721: 17,
+            808979729: 25,
+            808981510: 35,
+            808981523: 27,
+            808981672: 17,
+            808981812: 34,
+            808981864: 18,
+            808982018: 21,
+            808982041: 27,
+            808982077: 32,
+            808982547: 20,
+            808984711: 26,
+            808996773: 31,
+            808997793: 21,
+            809006037: 26,
+            809007627: 18,
+            809503416: 28,
+            809521500: 31,
+            809524432: 21,
+            809526097: 23,
+            809544058: 21,
+            809544061: 23
+        }
+        for dom_id, max_sequence_number in dct_seq_numbers.items():
+            frame = s[s.dom_id == dom_id]
+            assert get_udp_max_sequence_number(
+                frame.dq_status[0]) == max_sequence_number
 
 
 class TestGetReate(unittest.TestCase):

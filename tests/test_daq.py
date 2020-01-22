@@ -379,13 +379,19 @@ class TestSummaryslices(unittest.TestCase):
                 False, False, False, False, False, False, False, False, False,
                 False, False, False, False, False, False, False, False, False,
                 False, False, False, False
+            ],
+            808981510: [
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, True, True, False, False,
+                False, True, False, True, True, True, True, True, True, False,
+                False, True, False
             ]
         }
         for dom_id, fifo_flags in dct_fifo_flags.items():
             frame = s[s.dom_id == dom_id]
             assert any([
-                a == b
-                for a, b in zip(get_channel_flags(frame.fifo[0])[0], fifo_flags)
+                a == b for a, b in zip(
+                    get_channel_flags(frame.fifo[0])[0], fifo_flags)
             ])
 
 

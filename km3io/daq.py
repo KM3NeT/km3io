@@ -29,7 +29,13 @@ def get_rate(value):
 
 
 def unpack_bits(value):
-    """Helper to unpack bits to bool flags (little endian)"""
+    """Helper to unpack bits to bool flags (little endian)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
     value = np.array(value).astype(np.int32)
     value = value.reshape(-1, 1)
     value = value.view(np.uint8)

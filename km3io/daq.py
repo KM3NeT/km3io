@@ -56,7 +56,13 @@ def get_udp_max_sequence_number(value):
 
 
 def has_udp_trailer(value):
-    """Returns the UDP Trailer flag (fifo)"""
+    """Returns the UDP Trailer flag (fifo)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
     return np.any(np.bitwise_and(value, np.left_shift(1, 31)))
 
 

@@ -45,7 +45,13 @@ def unpack_bits(value):
 
 
 def get_channel_flags(value):
-    """Returns the hrv/fifo flags for the PMT channels (hrv/fifo)"""
+    """Returns the hrv/fifo flags for the PMT channels (hrv/fifo)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
     channel_bits = np.bitwise_and(value, 0x3FFFFFFF)
     flags = unpack_bits(channel_bits)
     return np.flip(flags, axis=1)[:, :31]

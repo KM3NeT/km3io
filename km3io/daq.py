@@ -63,7 +63,13 @@ def get_number_udp_packets(value):
 
 
 def get_udp_max_sequence_number(value):
-    """Returns the maximum sequence number of the received UDP packets (dq_status)"""
+    """Returns the maximum sequence number of the received UDP packets (dq_status)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
     return np.right_shift(value, 16)
 
 

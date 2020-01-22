@@ -2,7 +2,7 @@ import os
 import re
 import unittest
 
-from km3io.daq import DAQReader, get_rate, get_fifo_status, has_udp_trailer, get_udp_max_sequence_number, get_channel_flags, get_number_udp_packets
+from km3io.daq import DAQReader, get_rate, has_udp_trailer, get_udp_max_sequence_number, get_channel_flags, get_number_udp_packets
 
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 

@@ -38,11 +38,6 @@ def unpack_bits(value):
     return np.unpackbits(value).reshape(length, -1).astype(bool)
 
 
-def get_fifo_status(value):
-    """Returns the fifo status (fifo)"""
-    return np.any(np.bitwise_and(value, 2**31))
-
-
 def get_channel_flags(value):
     """Returns the hrv/fifo flags for the PMT channels (hrv/fifo)"""
     channel_bits = np.bitwise_and(value, 0x3FFFFFFF)

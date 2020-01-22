@@ -29,8 +29,14 @@ def get_rate(value):
 
 
 def unpack_bits(value):
-    """Helper to unpack bits to bool flags (little endian)"""
-    value = np.array(value).astype(np.int64)
+    """Helper to unpack bits to bool flags (little endian)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
+    value = np.array(value).astype(np.int32)
     value = value.reshape(-1, 1)
     value = value.view(np.uint8)
     value = np.flip(value, axis=1)
@@ -39,24 +45,48 @@ def unpack_bits(value):
 
 
 def get_channel_flags(value):
-    """Returns the hrv/fifo flags for the PMT channels (hrv/fifo)"""
+    """Returns the hrv/fifo flags for the PMT channels (hrv/fifo)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
     channel_bits = np.bitwise_and(value, 0x3FFFFFFF)
     flags = unpack_bits(channel_bits)
     return np.flip(flags, axis=1)[:, :31]
 
 
 def get_number_udp_packets(value):
-    """Returns the number of received UDP packets (dq_status)"""
+    """Returns the number of received UDP packets (dq_status)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
     return np.bitwise_and(value, 0x7FFF)
 
 
 def get_udp_max_sequence_number(value):
-    """Returns the maximum sequence number of the received UDP packets (dq_status)"""
+    """Returns the maximum sequence number of the received UDP packets (dq_status)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
     return np.right_shift(value, 16)
 
 
 def has_udp_trailer(value):
-    """Returns the UDP Trailer flag (fifo)"""
+    """Returns the UDP Trailer flag (fifo)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
     return np.any(np.bitwise_and(value, np.left_shift(1, 31)))
 
 

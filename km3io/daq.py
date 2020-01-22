@@ -46,7 +46,13 @@ def get_channel_flags(value):
 
 
 def get_number_udp_packets(value):
-    """Returns the number of received UDP packets (dq_status)"""
+    """Returns the number of received UDP packets (dq_status)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
     return np.bitwise_and(value, 0x7FFF)
 
 

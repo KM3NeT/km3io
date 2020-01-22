@@ -30,7 +30,7 @@ def get_rate(value):
 
 def unpack_bits(value):
     """Helper to unpack bits to bool flags (little endian)"""
-    value = np.array(value).astype(np.int64)
+    value = np.array(value).astype(np.int32)
     value = value.reshape(-1, 1)
     value = value.view(np.uint8)
     value = np.flip(value, axis=1)

@@ -245,7 +245,7 @@ class TestSummaryslices(unittest.TestCase):
         }
         for dom_id, high_rate_veto in dct_high_rate_veto.items():
             frame = s[s.dom_id == dom_id]
-            assert any(get_channel_flags(s.hrv[0])[0]) == high_rate_veto
+            assert any(get_channel_flags(frame.hrv[0])[0]) == high_rate_veto
 
     def test_max_sequence_number(self):
         s = self.ss.slices[0]

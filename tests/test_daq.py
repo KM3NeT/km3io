@@ -175,7 +175,6 @@ class TestSummaryslices(unittest.TestCase):
     def test_rates(self):
         assert 3 == len(self.ss.rates)
 
-    @unittest.skip  #TODO
     def test_fifo(self):
         s = self.ss.slices[0]
         dct_fifo_stat = {
@@ -186,7 +185,7 @@ class TestSummaryslices(unittest.TestCase):
         }
         for dom_id, fifo_status in dct_fifo_stat.items():
             frame = s[s.dom_id == dom_id]
-            assert get_fifo_status(frame.fifo[0]) == fifo_status
+            assert any(get_channel_flags(frame.fifo[0])[0]) == fifo_status
 
     def test_has_udp_trailer(self):
         s = self.ss.slices[0]
@@ -345,7 +344,7 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert any([
                 a == b
-                for a, b in zip(get_channel_flags(s.hrv[0])[0], hrv_flags)
+                for a, b in zip(get_channel_flags(frame.hrv[0])[0], hrv_flags)
             ])
 
     def test_fifo_flags(self):
@@ -386,7 +385,7 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert any([
                 a == b
-                for a, b in zip(get_channel_flags(s.fifo[0])[0], fifo_flags)
+                for a, b in zip(get_channel_flags(frame.fifo[0])[0], fifo_flags)
             ])
 
 

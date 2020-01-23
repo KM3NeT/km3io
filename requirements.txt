@@ -1,4 +1,4 @@
 docopt
 numba
-uproot>=3.10.12
+uproot>=3.11.1
 setuptools_scm

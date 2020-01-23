@@ -140,11 +140,58 @@ First, let's read our file:
 .. code-block:: python3
 
   >>> import km3io as ki
-  >>> file = 'datav6.0test.jchain.aanet.00005971.root'
+  >>> file = 'my_file.root'
   >>> r = ki.OfflineReader(file)
-  <km3io.aanet.OfflineReader at 0x7f24cc2bd550>
+  <km3io.offline.OfflineReader at 0x7f24cc2bd550>
 
 and that's it! Note that `file` can be either an str of your file path, or a path-like object. 
+
+To read the file header:
+
+.. code-block:: python3
+
+    >>> r.header
+    DAQ             394
+    PDF             4      58
+    XSecFile        
+    can             0 1027 888.4
+    can_user        0.00 1027.00  888.40
+    coord_origin    0 0 0
+    cut_in          0 0 0 0
+    cut_nu          100 1e+08 -1 1
+    cut_primary     0 0 0 0
+    cut_seamuon     0 0 0 0
+    decay           doesnt happen
+    detector        NOT
+    drawing         Volume
+    end_event       
+    genhencut       2000 0
+    genvol          0 1027 888.4 2.649e+09 100000
+    kcut            2
+    livetime        0 0
+    model           1       2       0       1      12
+    muon_desc_file  
+    ngen            0.1000E+06
+    norma           0 0
+    nuflux          0       3       0 0.500E+00 0.000E+00 0.100E+01 0.300E+01
+    physics         GENHEN 7.2-220514 181116 1138
+    seed            GENHEN 3  305765867         0         0
+    simul           JSirene 11012 11/17/18 07
+    sourcemode      diffuse
+    spectrum        -1.4
+    start_run       1
+    target          isoscalar
+    usedetfile      false
+    xlat_user       0.63297
+    xparam          OFF
+    zed_user        0.00 3450.00
+
+**Note:** not all file header types are supported, so don't be surprised when you get the following warning
+
+.. code-block:: python3
+
+    /home/zineb/km3net/km3net/km3io/km3io/offline.py:341: UserWarning: Your file header has an unsupported format
+    warnings.warn("Your file header has an unsupported format")
 
 To explore all the available branches in our offline file: 
 

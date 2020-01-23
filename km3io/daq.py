@@ -13,6 +13,8 @@ MINIMAL_RATE_HZ = 2.0e3
 MAXIMAL_RATE_HZ = 2.0e6
 RATE_FACTOR = np.log(MAXIMAL_RATE_HZ / MINIMAL_RATE_HZ) / 255
 
+CHANNEL_BITS_TEMPLATE = np.zeros(31, dtype=bool)
+
 
 @nb.vectorize([
     nb.int32(nb.int8),
@@ -28,20 +30,30 @@ def get_rate(value):
         return MINIMAL_RATE_HZ * np.exp(value * RATE_FACTOR)
 
 
-def unpack_bits(value):
-    """Helper to unpack bits to bool flags (little endian)
+@nb.guvectorize(
+    "void(i8, b1[:], b1[:])", "(), (n) -> (n)", target="parallel", nopython=True
+    )
+def unpack_bits(value, bits_template, out):
+    """Return a boolean array for a value's bit representation.
+
+    This function also accepts arrays as input, the output shape will be
+    NxM where N is the number of input values and M the length of the
+    ``bits_template`` array, which is just a dummy array, due to the weird
+    signature system of numba.
 
     Parameters
     ----------
-    value : int32
-        The integer value to be parsed.
+    value: int or np.array(int) with shape (N,)
+        The binary value of containing the bit information
+    bits_template: np.array() with shape (M,)
+        The template for the output array, the only important is its shape
+
+    Returns
+    -------
+    np.array(bool) either with shape (M,) or (N, M)
     """
-    value = np.array(value).astype(np.int32)
-    value = value.reshape(-1, 1)
-    value = value.view(np.uint8)
-    value = np.flip(value, axis=1)
-    length = value.shape[0]
-    return np.unpackbits(value).reshape(length, -1).astype(bool)
+    for i in range(bits_template.shape[0]):
+        out[30 - i] = value & (1 << i) > 0
 
 
 def get_channel_flags(value):
@@ -53,8 +65,8 @@ def get_channel_flags(value):
         The integer value to be parsed.
     """
     channel_bits = np.bitwise_and(value, 0x3FFFFFFF)
-    flags = unpack_bits(channel_bits)
-    return np.flip(flags, axis=1)[:, :31]
+    flags = unpack_bits(channel_bits, CHANNEL_BITS_TEMPLATE)
+    return np.flip(flags, axis=-1)
 
 
 def get_number_udp_packets(value):

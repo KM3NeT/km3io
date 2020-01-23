@@ -132,6 +132,17 @@ class TestOfflineReader(unittest.TestCase):
         # check that there are 10 events
         self.assertEqual(Nevents, self.Nevents)
 
+    def test_reading_header(self):
+        # head is the supported format
+        head = OfflineReader(OFFLINE_NUMUCC).header
+
+        self.assertEqual(float(head['DAQ']), 394)
+        self.assertEqual(float(head['kcut']), 2)
+
+        # test the warning for unsupported fheader format
+        self.assertWarns(UserWarning, self.r.header,
+                         "Your file header has an unsupported format")
+
 
 class TestOfflineEvents(unittest.TestCase):
     def setUp(self):

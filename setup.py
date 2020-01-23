@@ -20,8 +20,8 @@ setup(
     url='http://git.km3net.de/km3py/km3io',
     description='KM3NeT I/O without ROOT',
     long_description=long_description,
-    author='Zineb Aly, Tamas Gal',
-    author_email='zaly@km3net.de, tgal@km3net.de',
+    author='Zineb Aly, Tamas Gal, Johannes Schumann',
+    author_email='zaly@km3net.de, tgal@km3net.de, johannes.schumann@fau.de',
     packages=['km3io'],
     include_package_data=True,
     platforms='any',
@@ -33,9 +33,7 @@ setup(
     install_requires=requirements,
     python_requires='>=3.5',
     entry_points={
-        'console_scripts': [
-            'KPrintTree=km3io.utils.kprinttree:main'
-        ]
+        'console_scripts': ['KPrintTree=km3io.utils.kprinttree:main']
     },
     classifiers=[
         'Intended Audience :: Developers',
@@ -44,4 +42,4 @@ setup(
     ],
 )
 
-__author__ = 'Zineb Aly and Tamas Gal'
+__author__ = 'Zineb Aly, Tamas Gal and Johannes Schumann'

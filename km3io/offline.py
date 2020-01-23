@@ -1,4 +1,5 @@
 import uproot
+import warnings
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
@@ -336,7 +337,7 @@ class OfflineReader:
                     print("{:15s} {}".format(n.decode("utf-8"), x))
                     self._header = fobj['Head']._map_3c_string_2c_string_3e_
             if b'Header;1' in fobj.keys():
-                print('not yet accessible')
+                warnings.warn("Your file header has an unsupported format")
         return self._header
 
 

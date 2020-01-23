@@ -2,7 +2,7 @@ import os
 import re
 import unittest
 
-from km3io.daq import DAQReader, get_rate
+from km3io.daq import DAQReader, get_rate, has_udp_trailer, get_udp_max_sequence_number, get_channel_flags, get_number_udp_packets
 
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 
@@ -175,6 +175,225 @@ class TestSummaryslices(unittest.TestCase):
     def test_rates(self):
         assert 3 == len(self.ss.rates)
 
+    def test_fifo(self):
+        s = self.ss.slices[0]
+        dct_fifo_stat = {
+            808981510: True,
+            808981523: False,
+            808981672: False,
+            808974773: False
+        }
+        for dom_id, fifo_status in dct_fifo_stat.items():
+            frame = s[s.dom_id == dom_id]
+            assert any(get_channel_flags(frame.fifo[0])) == fifo_status
+
+    def test_has_udp_trailer(self):
+        s = self.ss.slices[0]
+        dct_udp_trailer = {
+            806451572: True,
+            806455814: True,
+            806465101: True,
+            806483369: True,
+            806487219: True,
+            806487226: True,
+            806487231: True,
+            808432835: True,
+            808435278: True,
+            808447180: True,
+            808447186: True
+        }
+        for dom_id, udp_trailer in dct_udp_trailer.items():
+            frame = s[s.dom_id == dom_id]
+            assert has_udp_trailer(frame.fifo[0]) == udp_trailer
+
+    def test_high_rate_veto(self):
+        s = self.ss.slices[0]
+        dct_high_rate_veto = {
+            808489014: True,
+            808489117: False,
+            808493910: True,
+            808946818: True,
+            808951460: True,
+            808956908: True,
+            808959411: True,
+            808961448: True,
+            808961480: True,
+            808961504: True,
+            808961655: False,
+            808964815: False,
+            808964852: True,
+            808969848: False,
+            808969857: True,
+            808972593: True,
+            808972598: True,
+            808972698: False,
+            808974758: False,
+            808974773: True,
+            808974811: True,
+            808974972: True,
+            808976377: True,
+            808979567: False,
+            808979721: False,
+            808979729: False,
+            808981510: True,
+            808981523: True,
+            808981672: False,
+            808981812: True,
+            808981864: False,
+            808982018: False
+        }
+        for dom_id, high_rate_veto in dct_high_rate_veto.items():
+            frame = s[s.dom_id == dom_id]
+            assert any(get_channel_flags(frame.hrv[0])) == high_rate_veto
+
+    def test_max_sequence_number(self):
+        s = self.ss.slices[0]
+        dct_seq_numbers = {
+            808974758: 18,
+            808974773: 26,
+            808974811: 25,
+            808974972: 41,
+            808976377: 35,
+            808979567: 20,
+            808979721: 17,
+            808979729: 25,
+            808981510: 35,
+            808981523: 27,
+            808981672: 17,
+            808981812: 34,
+            808981864: 18,
+            808982018: 21,
+            808982041: 27,
+            808982077: 32,
+            808982547: 20,
+            808984711: 26,
+            808996773: 31,
+            808997793: 21,
+            809006037: 26,
+            809007627: 18,
+            809503416: 28,
+            809521500: 31,
+            809524432: 21,
+            809526097: 23,
+            809544058: 21,
+            809544061: 23
+        }
+        for dom_id, max_sequence_number in dct_seq_numbers.items():
+            frame = s[s.dom_id == dom_id]
+            assert get_udp_max_sequence_number(
+                frame.dq_status[0]) == max_sequence_number
+
+    def test_number_udp_packets(self):
+        s = self.ss.slices[0]
+        dct_n_packets = {
+            808451904: 27,
+            808451907: 22,
+            808469129: 20,
+            808472260: 21,
+            808472265: 22,
+            808488895: 20,
+            808488990: 20,
+            808489014: 28,
+            808489117: 22,
+            808493910: 26,
+            808946818: 23,
+            808951460: 37,
+            808956908: 33,
+            808959411: 36,
+            808961448: 28,
+            808961480: 24,
+            808961504: 28,
+            808961655: 20,
+            808964815: 20,
+            808964852: 28,
+            808969848: 21
+        }
+        for dom_id, n_udp_packets in dct_n_packets.items():
+            frame = s[s.dom_id == dom_id]
+            assert get_number_udp_packets(frame.dq_status[0]) == n_udp_packets
+
+    def test_hrv_flags(self):
+        s = self.ss.slices[0]
+        dct_hrv_flags = {
+            809524432: [
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False
+            ],
+            809526097: [
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                True, False, False, False, False, False, False, False, True,
+                False, False, False, False
+            ],
+            809544058: [
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False
+            ],
+            809544061: [
+                False, True, False, False, False, True, False, False, False,
+                False, False, False, False, False, False, True, False, False,
+                False, False, False, True, False, False, False, False, False,
+                False, False, False, False
+            ]
+        }
+        for dom_id, hrv_flags in dct_hrv_flags.items():
+            frame = s[s.dom_id == dom_id]
+            assert any([
+                a == b
+                for a, b in zip(get_channel_flags(frame.hrv[0]), hrv_flags)
+            ])
+
+    def test_fifo_flags(self):
+        s = self.ss.slices[0]
+        dct_fifo_flags = {
+            808982547: [
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False
+            ],
+            808984711: [
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False
+            ],
+            808996773: [
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False
+            ],
+            808997793: [
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False
+            ],
+            809006037: [
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False
+            ],
+            808981510: [
+                False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, True, True, False, False,
+                False, True, False, True, True, True, True, True, True, False,
+                False, True, False
+            ]
+        }
+        for dom_id, fifo_flags in dct_fifo_flags.items():
+            frame = s[s.dom_id == dom_id]
+            assert any([
+                a == b for a, b in zip(
+                    get_channel_flags(frame.fifo[0]), fifo_flags)
+            ])
+
 
 class TestGetRate(unittest.TestCase):
     def test_zero(self):
@@ -187,4 +406,4 @@ class TestGetRate(unittest.TestCase):
 
     def test_vectorized_input(self):
         self.assertListEqual([2054], list(get_rate([1])))
-        self.assertListEqual([2054, 2111, 2169], list(get_rate([1,2,3])))
+        self.assertListEqual([2054, 2111, 2169], list(get_rate([1, 2, 3])))

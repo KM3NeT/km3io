@@ -26,7 +26,7 @@ release = get_distribution('km3io').version
 version = '.'.join(release.split('.')[:2])
 project = 'km3io {}'.format(km3io.__version__)
 copyright = '{0}, Zineb Aly and Tamas Gal'.format(date.today().year)
-author = 'Zineb Aly, Tamas Gal'
+author = 'Zineb Aly, Tamas Gal, Johannes Schumann'
 
 # -- General configuration ---------------------------------------------------
 

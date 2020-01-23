@@ -13,6 +13,8 @@ MINIMAL_RATE_HZ = 2.0e3
 MAXIMAL_RATE_HZ = 2.0e6
 RATE_FACTOR = np.log(MAXIMAL_RATE_HZ / MINIMAL_RATE_HZ) / 255
 
+CHANNEL_BITS_TEMPLATE = np.zeros(31, dtype=bool)
+
 
 @nb.vectorize([
     nb.int32(nb.int8),
@@ -26,6 +28,78 @@ def get_rate(value):
         return 0
     else:
         return MINIMAL_RATE_HZ * np.exp(value * RATE_FACTOR)
+
+
+@nb.guvectorize(
+    "void(i8, b1[:], b1[:])", "(), (n) -> (n)", target="parallel", nopython=True
+    )
+def unpack_bits(value, bits_template, out):
+    """Return a boolean array for a value's bit representation.
+
+    This function also accepts arrays as input, the output shape will be
+    NxM where N is the number of input values and M the length of the
+    ``bits_template`` array, which is just a dummy array, due to the weird
+    signature system of numba.
+
+    Parameters
+    ----------
+    value: int or np.array(int) with shape (N,)
+        The binary value of containing the bit information
+    bits_template: np.array() with shape (M,)
+        The template for the output array, the only important is its shape
+
+    Returns
+    -------
+    np.array(bool) either with shape (M,) or (N, M)
+    """
+    for i in range(bits_template.shape[0]):
+        out[30 - i] = value & (1 << i) > 0
+
+
+def get_channel_flags(value):
+    """Returns the hrv/fifo flags for the PMT channels (hrv/fifo)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
+    channel_bits = np.bitwise_and(value, 0x3FFFFFFF)
+    flags = unpack_bits(channel_bits, CHANNEL_BITS_TEMPLATE)
+    return np.flip(flags, axis=-1)
+
+
+def get_number_udp_packets(value):
+    """Returns the number of received UDP packets (dq_status)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
+    return np.bitwise_and(value, 0x7FFF)
+
+
+def get_udp_max_sequence_number(value):
+    """Returns the maximum sequence number of the received UDP packets (dq_status)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
+    return np.right_shift(value, 16)
+
+
+def has_udp_trailer(value):
+    """Returns the UDP Trailer flag (fifo)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
+    return np.any(np.bitwise_and(value, np.left_shift(1, 31)))
 
 
 class DAQReader:

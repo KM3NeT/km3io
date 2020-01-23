@@ -185,7 +185,7 @@ class TestSummaryslices(unittest.TestCase):
         }
         for dom_id, fifo_status in dct_fifo_stat.items():
             frame = s[s.dom_id == dom_id]
-            assert any(get_channel_flags(frame.fifo[0])[0]) == fifo_status
+            assert any(get_channel_flags(frame.fifo[0])) == fifo_status
 
     def test_has_udp_trailer(self):
         s = self.ss.slices[0]
@@ -244,7 +244,7 @@ class TestSummaryslices(unittest.TestCase):
         }
         for dom_id, high_rate_veto in dct_high_rate_veto.items():
             frame = s[s.dom_id == dom_id]
-            assert any(get_channel_flags(frame.hrv[0])[0]) == high_rate_veto
+            assert any(get_channel_flags(frame.hrv[0])) == high_rate_veto
 
     def test_max_sequence_number(self):
         s = self.ss.slices[0]
@@ -344,7 +344,7 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert any([
                 a == b
-                for a, b in zip(get_channel_flags(frame.hrv[0])[0], hrv_flags)
+                for a, b in zip(get_channel_flags(frame.hrv[0]), hrv_flags)
             ])
 
     def test_fifo_flags(self):
@@ -391,7 +391,7 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert any([
                 a == b for a, b in zip(
-                    get_channel_flags(frame.fifo[0])[0], fifo_flags)
+                    get_channel_flags(frame.fifo[0]), fifo_flags)
             ])
 
 

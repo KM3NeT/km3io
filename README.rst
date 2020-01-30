@@ -602,7 +602,7 @@ to get the reconstruction parameters, first take a look at the available reconst
 
 .. code-block:: python3
 
-    >>>r.tracks.reco.dtype.names
+    >>>r.best_reco.dtype.names
     ['JGANDALF_BETA0_RAD',
      'JGANDALF_BETA1_RAD',
      'JGANDALF_CHI2',
@@ -625,13 +625,62 @@ the keys above can also be accessed with a tab completion:
 
 .. image:: https://git.km3net.de/km3py/km3io/raw/master/examples/pictures/reco.png
 
+to get a numpy `recarray <https://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`__ of all fit data of the best reconstructed track:
+
+.. code-block:: python3
+
+    >>>r.best_reco
+
 to get an array of a parameter of interest, let's say `'JENERGY_ENERGY'`:
 
 .. code-block:: python3
 
-    >>>r.tracks.reco['JENERGY_ENERGY']
-    >>>array([99.10458562, 99.10458562, 99.10458562, 37.85515249, 99.10458562,
-        7.16916787, 99.10458562, 99.10458562, 49.13672986, 20.35137468])
+    >>>r.best_reco['JENERGY_ENERGY']
+    array([1141.87137899, 4708.16378575,  499.7243005 ,  103.54680875,
+        208.6103912 , 1336.52338666,  998.87632267, 1206.54345674,
+         16.28973662])
+
+**Note**: In km3io, the best fit is defined as the track fit with the maximum reconstruction stages. When "nan" is returned, it means that the reconstruction parameter of interest is not found. for example, in the case of muon simulations: if `[1, 2]` are the reconstruction stages, then only the fit parameters corresponding to the stages `[1, 2]` are found in the Offline files, the remaining fit parameters corresponding to the stages `[3, 4, 5]` are all filled with nan.
+
+to get a numpy recarray of the fit data of tracks with specific reconstruction stages, let's say `[1, 2, 3, 4, 5]` in the case of a muon track reconstruction: 
+
+.. code-block:: python3
+
+    >>>r.get_reco_fit([1, 2, 3, 4, 5])
+
+again, to get the reconstruction parameters names: 
+
+.. code-block:: python3
+
+    >>>r.get_reco_fit([1, 2, 3, 4, 5]).dtype.names
+    ('JGANDALF_BETA0_RAD',
+     'JGANDALF_BETA1_RAD',
+     'JGANDALF_CHI2',
+     'JGANDALF_NUMBER_OF_HITS',
+     'JENERGY_ENERGY',
+     'JENERGY_CHI2',
+     'JGANDALF_LAMBDA',
+     'JGANDALF_NUMBER_OF_ITERATIONS',
+     'JSTART_NPE_MIP',
+     'JSTART_NPE_MIP_TOTAL',
+     'JSTART_LENGTH_METRES',
+     'JVETO_NPE',
+     'JVETO_NUMBER_OF_HITS',
+     'JENERGY_MUON_RANGE_METRES',
+     'JENERGY_NOISE_LIKELIHOOD',
+     'JENERGY_NDF',
+     'JENERGY_NUMBER_OF_HITS')
+
+to get the reconstruction data of interest, for example ['JENERGY_ENERGY']: 
+
+.. code-block:: python3
+
+    >>>r.get_reco_fit([1, 2, 3, 4, 5])['JENERGY_ENERGY']
+    array([1141.87137899, 4708.16378575,  499.7243005 ,  103.54680875,
+        208.6103912 , 1336.52338666,  998.87632267, 1206.54345674,
+         16.28973662])
+
+**Note**: When the reconstruction stages of interest are not found in all your data file, an error is raised.
 
 
 reading mc hits data

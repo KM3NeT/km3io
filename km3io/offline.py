@@ -179,7 +179,7 @@ class OfflineKeys:
                 'JSTART_NPE_MIP', 'JSTART_NPE_MIP_TOTAL',
                 'JSTART_LENGTH_METRES', 'JVETO_NPE', 'JVETO_NUMBER_OF_HITS',
                 'JENERGY_MUON_RANGE_METRES', 'JENERGY_NOISE_LIKELIHOOD',
-                'JENERGY_NDF', 'JENERGY_NUMBER_OF_HITS']  # 'JCOPY_Z_M' not anymore in Jpp  
+                'JENERGY_NDF', 'JENERGY_NUMBER_OF_HITS', 'JCOPY_Z_M'] 
         return self._fit_keys
 
     @property
@@ -432,7 +432,7 @@ class OfflineReader:
             a recarray of the best track fit data (reconstruction data).
         """
         if self._best_reco is None:
-            keys = ", ".join(self.keys.fit_keys)
+            keys = ", ".join(self.keys.fit_keys[:-1])
             empty_fit_info = np.array([match for match in
                                         self._find_empty(self.tracks.fitinf)])
             fit_info = [i for i,j in zip(self.tracks.fitinf,
@@ -495,7 +495,7 @@ class OfflineReader:
             ValueError raised when the reconstruction stages of interest
             are not found in the file.
         """
-        keys = ", ".join(self.keys.fit_keys)
+        keys = ", ".join(self.keys.fit_keys[:-1])
         fit_info = self.tracks.fitinf
         rec_stages = np.array([match for match in
                                 self._find_rec_stages(stages)])
@@ -520,7 +520,7 @@ class OfflineReader:
             list of reconstruction stages of interest. for example
             [1, 2, 3, 4, 5].
 
-        Yields
+        Yieldsma
         ------
         generator
             the track id and the index of the reconstruction stages of
@@ -544,7 +544,8 @@ class OfflineReader:
         Parameters
         ----------
         chunk_arr : Chunked array
-            Chunked array or jagged array of data of interest.
+            Chunked array or jagged array of data of interest. For example:
+            km3io.OfflineReader(my_file).tracks.fitinf .
 
         Yields
         ------

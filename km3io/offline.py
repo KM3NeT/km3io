@@ -437,7 +437,7 @@ class OfflineReader:
             self._tracks = OfflineTracks(
                 self.keys.cut_tracks_keys,
                 [self._data[key] for key in self.keys.tracks_keys],
-                fit_keys=self.keys.fit_keys)
+                fitparameters=self.keys.fitparameters)
         return self._tracks
 
     @property
@@ -467,7 +467,8 @@ class OfflineReader:
         if self._mc_tracks is None:
             self._mc_tracks = OfflineTracks(
                 self.keys.cut_tracks_keys,
-                [self._data[key] for key in self.keys.mc_tracks_keys])
+                [self._data[key] for key in self.keys.mc_tracks_keys],
+                fitparameters=self.keys.fitparameters)
         return self._mc_tracks
 
 
@@ -604,7 +605,7 @@ class OfflineHit:
 
 class OfflineTracks:
     """wrapper for offline tracks"""
-    def __init__(self, keys, values, fit_keys=None):
+    def __init__(self, keys, values, fitparameters=None):
         """wrapper for offline tracks
 
         Parameters
@@ -613,26 +614,26 @@ class OfflineTracks:
             list of cropped tracks keys.
         values : list of arrays
             list of arrays containting tracks data.
-        fit_keys : None, optional
-            list of tracks fit information (not yet outsourced in offline
+        fitparameters : None, optional
+            dictionary of tracks fit information (not yet outsourced in offline
             files).
         """
         self._keys = keys
         self._values = values
-        if fit_keys is not None:
-            self._fit_keys = fit_keys
+        if fitparameters is not None:
+            self._fitparameters = fitparameters
         for k, v in zip(self._keys, self._values):
             setattr(self, k, v)
 
     def __getitem__(self, item):
         if isinstance(item, int):
             return OfflineTrack(self._keys, [v[item] for v in self._values],
-                                fit_keys=self._fit_keys)
+                                fitparameters=self._fitparameters)
         else:
             return OfflineTracks(
                 self._keys,
                 [v[item] for v in self._values],
-                fit_keys=self._fit_keys
+                fitparameters=self._fitparameters
             )
 
     def __len__(self):
@@ -651,7 +652,7 @@ class OfflineTracks:
 
 class OfflineTrack:
     """wrapper for an offline track"""
-    def __init__(self, keys, values, fit_keys=None):
+    def __init__(self, keys, values, fitparameters=None):
         """wrapper for one offline track.
 
         Parameters
@@ -660,14 +661,14 @@ class OfflineTrack:
             list of cropped tracks keys.
         values : list of arrays
             list of arrays containting track data.
-        fit_keys : None, optional
-            list of tracks fit information (not yet outsourced in offline
+        fitparameters : None, optional
+            dictionary of tracks fit information (not yet outsourced in offline
             files).
         """
         self._keys = keys
         self._values = values
-        if fit_keys is not None:
-            self._fit_keys = fit_keys
+        if fitparameters is not None:
+            self._fitparameters = fitparameters
         for k, v in zip(self._keys, self._values):
             setattr(self, k, v)
 
@@ -676,10 +677,9 @@ class OfflineTrack:
             "{:30} {:^2} {:>26}".format(k, ':', str(v))
             for k, v in zip(self._keys, self._values) if k not in ['fitinf']
         ]) + "\n\t" + "\n\t".join([
-            "{:30} {:^2} {:>26}".format(k, ':', str(v))
-            for k, v in zip(self._fit_keys, self._values[18]
-                            )  # I don't like 18 being explicit here
-        ])
+            "{:30} {:^2} {:>26}".format(k, ':', str(self._values[18][v]))
+            for k, v in self._fitparameters.items() if len(self._values[18])>v
+        ])  # I don't like 18 being explicit here
 
     def __getitem__(self, item):
         return self._values[item]

@@ -1,5 +1,9 @@
 import uproot
 import warnings
+import km3io.definitions.trigger
+import km3io.definitions.fitparameters
+import km3io.definitions.reconstruction
+
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
@@ -28,6 +32,9 @@ class OfflineKeys:
         self._cut_hits_keys = None
         self._cut_tracks_keys = None
         self._cut_events_keys = None
+        self._trigger = None
+        self._fitparameters = None
+        self._reconstruction = None
 
     def __str__(self):
         return '\n'.join([
@@ -170,17 +177,7 @@ class OfflineKeys:
             list of all "trks.fitinf" keys.
         """
         if self._fit_keys is None:
-            # these are hardcoded because they are not outsourced in offline
-            # files
-            self._fit_keys = [
-                'JGANDALF_BETA0_RAD', 'JGANDALF_BETA1_RAD', 'JGANDALF_CHI2',
-                'JGANDALF_NUMBER_OF_HITS', 'JENERGY_ENERGY', 'JENERGY_CHI2',
-                'JGANDALF_LAMBDA', 'JGANDALF_NUMBER_OF_ITERATIONS',
-                'JSTART_NPE_MIP', 'JSTART_NPE_MIP_TOTAL',
-                'JSTART_LENGTH_METRES', 'JVETO_NPE', 'JVETO_NUMBER_OF_HITS',
-                'JENERGY_MUON_RANGE_METRES', 'JENERGY_NOISE_LIKELIHOOD',
-                'JENERGY_NDF', 'JENERGY_NUMBER_OF_HITS', 'JCOPY_Z_M'
-            ]
+            self._fit_keys = [*self.fitparameters.keys()]
         return self._fit_keys
 
     @property
@@ -227,6 +224,48 @@ class OfflineKeys:
                 k.replace('.', '_') for k in self.events_keys
             ]
         return self._cut_events_keys
+
+    @property
+    def trigger(self):
+        """trigger parameters and their index from km3net-Dataformat.
+
+        Returns
+        -------
+        dict
+            dictionary of trigger parameters and their index in an Offline
+            file.
+        """
+        if self._trigger is None:
+            self._trigger = km3io.definitions.trigger.data
+        return self._trigger
+
+    @property
+    def reconstruction(self):
+        """reconstruction parameters and their index from km3net-Dataformat.
+
+        Returns
+        -------
+        dict
+            dictionary of reconstruction parameters and their index in an
+            Offline file.
+        """
+        if self._reconstruction is None:
+            self._reconstruction = km3io.definitions.reconstruction.data
+        return self._reconstruction
+
+    @property
+    def fitparameters(self):
+        """fit parameters parameters and their index from km3net-Dataformat.
+
+        Returns
+        -------
+        dict
+            dictionary of fit parameters and their index in an Offline
+            file.
+        """
+        if self._fitparameters is None:
+            self._fitparameters = km3io.definitions.fitparameters.data
+        return self._fitparameters
 
 
 class Reader:

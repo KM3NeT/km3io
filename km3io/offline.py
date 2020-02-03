@@ -1,5 +1,6 @@
 import uproot
 import numpy as np
+import warnings
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
@@ -320,12 +321,27 @@ class OfflineReader:
         self._mc_tracks = None
         self._keys = None
         self._best_reco = None
+        self._header = None
 
     def __getitem__(self, item):
         return OfflineReader(file_path=self._file_path, data=self._data[item])
 
     def __len__(self):
         return len(self._data)
+
+    @property
+    def header(self):
+        if self._header is None:
+            fobj = uproot.open(self._file_path)
+            if b'Head;1' in fobj.keys():
+                self._header = {}
+                for n, x in fobj['Head']._map_3c_string_2c_string_3e_.items():
+                    print("{:15s} {}".format(n.decode("utf-8"), x.decode("utf-8")))
+                    self._header[n.decode("utf-8")] = x.decode("utf-8")
+            if b'Header;1' in fobj.keys():
+                warnings.warn("Your file header has an unsupported format")
+        return self._header
+
 
     @property
     def keys(self):

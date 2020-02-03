@@ -4,6 +4,18 @@ Unreleased changes
 
 Version 0
 ---------
+0.8.0 / 2020-01-23
+~~~~~~~~~~~~~~~~~~
+* Offline file headers are now accessible
+
+0.7.0 / 2020-01-23
+~~~~~~~~~~~~~~~~~~
+* Reading of summary slice status information is now supported
+
+0.6.3 / 2020-01-09
+~~~~~~~~~~~~~~~~~~
+* Bugfixes
+
 0.6.2 / 2019-12-22
 ~~~~~~~~~~~~~~~~~~
 * Fixes slicing of ``OfflineTracks``

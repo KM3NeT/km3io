@@ -2,11 +2,18 @@ import uproot
 import numpy as np
 import numba as nb
 
-TIMESLICE_FRAME_BASKET_CACHE_SIZE = 23 * 1024**2  # [byte]
+TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
+
+# Parameters for PMT rate conversions, since the rates in summary slices are
+# stored as a single byte to save space. The values from 0-255 can be decoded
+# using the `get_rate(value)` function, which will yield the actual rate
+# in Hz.
 MINIMAL_RATE_HZ = 2.0e3
 MAXIMAL_RATE_HZ = 2.0e6
 RATE_FACTOR = np.log(MAXIMAL_RATE_HZ / MINIMAL_RATE_HZ) / 255
+
+CHANNEL_BITS_TEMPLATE = np.zeros(31, dtype=bool)
 
 
 @nb.vectorize([
@@ -23,10 +30,82 @@ def get_rate(value):
         return MINIMAL_RATE_HZ * np.exp(value * RATE_FACTOR)
 
 
+@nb.guvectorize(
+    "void(i8, b1[:], b1[:])", "(), (n) -> (n)", target="parallel", nopython=True
+    )
+def unpack_bits(value, bits_template, out):
+    """Return a boolean array for a value's bit representation.
+
+    This function also accepts arrays as input, the output shape will be
+    NxM where N is the number of input values and M the length of the
+    ``bits_template`` array, which is just a dummy array, due to the weird
+    signature system of numba.
+
+    Parameters
+    ----------
+    value: int or np.array(int) with shape (N,)
+        The binary value of containing the bit information
+    bits_template: np.array() with shape (M,)
+        The template for the output array, the only important is its shape
+
+    Returns
+    -------
+    np.array(bool) either with shape (M,) or (N, M)
+    """
+    for i in range(bits_template.shape[0]):
+        out[30 - i] = value & (1 << i) > 0
+
+
+def get_channel_flags(value):
+    """Returns the hrv/fifo flags for the PMT channels (hrv/fifo)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
+    channel_bits = np.bitwise_and(value, 0x3FFFFFFF)
+    flags = unpack_bits(channel_bits, CHANNEL_BITS_TEMPLATE)
+    return np.flip(flags, axis=-1)
+
+
+def get_number_udp_packets(value):
+    """Returns the number of received UDP packets (dq_status)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
+    return np.bitwise_and(value, 0x7FFF)
+
+
+def get_udp_max_sequence_number(value):
+    """Returns the maximum sequence number of the received UDP packets (dq_status)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
+    return np.right_shift(value, 16)
+
+
+def has_udp_trailer(value):
+    """Returns the UDP Trailer flag (fifo)
+
+    Parameters
+    ----------
+    value : int32
+        The integer value to be parsed.
+    """
+    return np.any(np.bitwise_and(value, np.left_shift(1, 31)))
+
+
 class DAQReader:
     """Reader for DAQ ROOT files"""
     def __init__(self, filename):
-        self.fobj = uproot.open(filename)
+        self._fobj = uproot.open(filename)
         self._events = None
         self._timeslices = None
         self._summaryslices = None
@@ -34,7 +113,7 @@ class DAQReader:
     @property
     def events(self):
         if self._events is None:
-            tree = self.fobj["KM3NET_EVENT"]
+            tree = self._fobj["KM3NET_EVENT"]
 
             headers = tree["KM3NETDAQ::JDAQEventHeader"].array(
                 uproot.interpret(tree["KM3NETDAQ::JDAQEventHeader"],
@@ -57,20 +136,20 @@ class DAQReader:
     @property
     def timeslices(self):
         if self._timeslices is None:
-            self._timeslices = DAQTimeslices(self.fobj)
+            self._timeslices = DAQTimeslices(self._fobj)
         return self._timeslices
 
     @property
     def summaryslices(self):
         if self._summaryslices is None:
-            self._summaryslices = SummmarySlices(self.fobj)
+            self._summaryslices = SummmarySlices(self._fobj)
         return self._summaryslices
 
 
 class SummmarySlices:
     """A wrapper for summary slices"""
     def __init__(self, fobj):
-        self.fobj = fobj
+        self._fobj = fobj
         self._slices = None
         self._headers = None
         self._rates = None
@@ -96,7 +175,7 @@ class SummmarySlices:
 
     def _read_summaryslices(self):
         """Reads a lazyarray of summary slices"""
-        tree = self.fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
+        tree = self._fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
         return tree[b'vector<KM3NETDAQ::JDAQSummaryFrame>'].lazyarray(
             uproot.asjagged(uproot.astable(
                 uproot.asdtype([("dom_id", "i4"), ("dq_status", "u4"),
@@ -109,7 +188,7 @@ class SummmarySlices:
 
     def _read_headers(self):
         """Reads a lazyarray of summary slice headers"""
-        tree = self.fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
+        tree = self._fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
         return tree[b'KM3NETDAQ::JDAQSummarysliceHeader'].lazyarray(
             uproot.interpret(tree[b'KM3NETDAQ::JDAQSummarysliceHeader'],
                              cntvers=True))
@@ -118,42 +197,35 @@ class SummmarySlices:
 class DAQTimeslices:
     """A simple wrapper for DAQ timeslices"""
     def __init__(self, fobj):
-        self.fobj = fobj
+        self._fobj = fobj
         self._timeslices = {}
-        self._read_default_stream()
         self._read_streams()
-
-    def _read_default_stream(self):
-        """Read the default KM3NET_TIMESLICE stream"""
-        tree = self.fobj[b'KM3NET_TIMESLICE'][b'KM3NET_TIMESLICE']
-        headers = tree[b'KM3NETDAQ::JDAQTimesliceHeader']
-        superframes = tree[b'vector<KM3NETDAQ::JDAQSuperFrame>']
-        self._timeslices['default'] = (headers, superframes)
 
     def _read_streams(self):
         """Read the L0, L1, L2 and SN streams if available"""
-        streams = [
+        streams = set(
             s.split(b"KM3NET_TIMESLICE_")[1].split(b';')[0]
-            for s in self.fobj.keys() if b"KM3NET_TIMESLICE_" in s
-        ]
+            for s in self._fobj.keys() if b"KM3NET_TIMESLICE_" in s)
         for stream in streams:
-            tree = self.fobj[b'KM3NET_TIMESLICE_' +
-                             stream][b'KM3NETDAQ::JDAQTimeslice']
+            tree = self._fobj[b'KM3NET_TIMESLICE_' +
+                              stream][b'KM3NETDAQ::JDAQTimeslice']
             headers = tree[b'KM3NETDAQ::JDAQTimesliceHeader'][
                 b'KM3NETDAQ::JDAQHeader'][b'KM3NETDAQ::JDAQChronometer']
             if len(headers) == 0:
                 continue
             superframes = tree[b'vector<KM3NETDAQ::JDAQSuperFrame>']
+            hits_dtype = np.dtype([("pmt", "u1"), ("tdc", "<u4"),
+                                   ("tot", "u1")])
             hits_buffer = superframes[
                 b'vector<KM3NETDAQ::JDAQSuperFrame>.buffer'].lazyarray(
-                    uproot.asjagged(uproot.astable(
-                        uproot.asdtype([("pmt", "u1"), ("tdc", "u4"),
-                                        ("tot", "u1")])),
+                    uproot.asjagged(uproot.astable(uproot.asdtype(hits_dtype)),
                                     skipbytes=6),
                     basketcache=uproot.cache.ThreadSafeArrayCache(
                         TIMESLICE_FRAME_BASKET_CACHE_SIZE))
             self._timeslices[stream.decode("ascii")] = (headers, superframes,
                                                         hits_buffer)
+            setattr(self, stream.decode("ascii"),
+                    DAQTimesliceStream(headers, superframes, hits_buffer))
 
     def stream(self, stream, idx):
         ts = self._timeslices[stream]
@@ -165,6 +237,21 @@ class DAQTimeslices:
 
     def __repr__(self):
         return str(self)
+
+
+class DAQTimesliceStream:
+    def __init__(self, headers, superframes, hits_buffer):
+        # self.headers = headers.lazyarray(
+        #     uproot.asjagged(uproot.astable(
+        #         uproot.asdtype(
+        #             np.dtype([('a', 'i4'), ('b', 'i4'), ('c', 'i4'),
+        #                       ('d', 'i4'), ('e', 'i4')]))),
+        #                     skipbytes=6),
+        #     basketcache=uproot.cache.ThreadSafeArrayCache(
+        #         TIMESLICE_FRAME_BASKET_CACHE_SIZE))
+        self.headers = headers
+        self.superframes = superframes
+        self._hits_buffer = hits_buffer
 
 
 class DAQTimeslice:

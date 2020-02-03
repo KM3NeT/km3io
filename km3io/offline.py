@@ -1,4 +1,5 @@
 import uproot
+import numpy as np
 import warnings
 
 # 110 MB based on the size of the largest basket found so far in km3net
@@ -179,8 +180,7 @@ class OfflineKeys:
                 'JSTART_NPE_MIP', 'JSTART_NPE_MIP_TOTAL',
                 'JSTART_LENGTH_METRES', 'JVETO_NPE', 'JVETO_NUMBER_OF_HITS',
                 'JENERGY_MUON_RANGE_METRES', 'JENERGY_NOISE_LIKELIHOOD',
-                'JENERGY_NDF', 'JENERGY_NUMBER_OF_HITS', 'JCOPY_Z_M'
-            ]
+                'JENERGY_NDF', 'JENERGY_NUMBER_OF_HITS', 'JCOPY_Z_M'] 
         return self._fit_keys
 
     @property
@@ -320,6 +320,7 @@ class OfflineReader:
         self._mc_hits = None
         self._mc_tracks = None
         self._keys = None
+        self._best_reco = None
         self._header = None
 
     def __getitem__(self, item):
@@ -430,6 +431,157 @@ class OfflineReader:
                 self.keys.cut_tracks_keys,
                 [self._data[key] for key in self.keys.mc_tracks_keys])
         return self._mc_tracks
+
+    @property
+    def best_reco(self):
+        """returns the best reconstructed track fit data. The best fit is defined
+        as the track fit with the maximum reconstruction stages. When "nan" is
+        returned, it means that the reconstruction parameter of interest is not
+        found. for example, in the case of muon simulations: if [1, 2] are the
+        reconstruction stages, then only the fit parameters corresponding to the
+        stages [1, 2] are found in the Offline files, the remaining fit parameters
+        corresponding to the stages 3, 4, 5 are all filled with nan. 
+
+        Returns
+        -------
+        numpy recarray
+            a recarray of the best track fit data (reconstruction data).
+        """
+        if self._best_reco is None:
+            keys = ", ".join(self.keys.fit_keys[:-1])
+            empty_fit_info = np.array([match for match in
+                                        self._find_empty(self.tracks.fitinf)])
+            fit_info = [i for i,j in zip(self.tracks.fitinf,
+                                        empty_fit_info[:,1]) if j is not None]
+            stages = self._get_max_reco_stages(self.tracks.rec_stages)
+            fit_data = np.array([i[j] for i,j in zip(fit_info, stages[:,2])])
+            rows_size = len(max(fit_data, key=len))
+            equal_size_data = np.vstack([np.hstack([i, np.zeros(rows_size-len(i))
+                                                     + np.nan]) for i in fit_data])
+            self._best_reco = np.core.records.fromarrays(equal_size_data.transpose(),
+                                                         names=keys)
+        return self._best_reco
+
+    def _get_max_reco_stages(self, reco_stages):
+        """find the longest reconstructed track based on the maximum size of 
+        reconstructed stages. 
+
+        Parameters
+        ----------
+        reco_stages : chunked array 
+            chunked array of all the reconstruction stages of all tracks.
+            In km3io, it is accessed with
+            km3io.OfflineReader(my_file).tracks.rec_stages .
+
+        Returns
+        -------
+        numpy array
+            array with 3 columns: *list of the maximum reco_stages
+                                  *lentgh of the maximum reco_stages
+                                  *position of the maximum reco_stages
+        """
+        empty_reco_stages = np.array([match for match in
+                                        self._find_empty(reco_stages)])
+        max_reco_stages = np.array([[max(i, key=len), len(max(i, key=len)),
+                            i.index(max(i, key=len))] for i,j in
+                            zip(reco_stages, empty_reco_stages[:,1])
+                            if j is not None])
+        return max_reco_stages
+
+    def get_reco_fit(self, stages):
+        """construct a numpy recarray of the fit information (reconstruction
+        data) of the tracks reconstructed following the reconstruction stages
+        of interest.
+
+        Parameters
+        ----------
+        stages : list
+            list of reconstruction stages of interest. for example
+            [1, 2, 3, 4, 5].
+
+        Returns
+        -------
+        numpy recarray
+            a recarray of the fit information (reconstruction data) of
+            the tracks of interest.
+
+        Raises
+        ------
+        ValueError
+            ValueError raised when the reconstruction stages of interest
+            are not found in the file.
+        """
+        keys = ", ".join(self.keys.fit_keys[:-1])
+        fit_info = self.tracks.fitinf
+        rec_stages = np.array([match for match in
+                                self._find_rec_stages(stages)])
+        if np.all(rec_stages[:,1]==None):
+            raise ValueError("The stages {} are not found in your file."
+                                .format(str(stages)))
+        else:
+            fit_data = np.array([i[k] for i,j,k in zip(fit_info,
+                                rec_stages[:,0], rec_stages[:,1])
+                                if k is not None])
+            rec_array = np.core.records.fromarrays(fit_data.transpose(),
+                                                    names=keys)
+            return rec_array
+
+    def _find_rec_stages(self, stages):
+        """find the index of reconstruction stages of interest in a
+        list of multiple reconstruction stages.
+
+        Parameters
+        ----------
+        stages : list
+            list of reconstruction stages of interest. for example
+            [1, 2, 3, 4, 5].
+
+        Yieldsma
+        ------
+        generator
+            the track id and the index of the reconstruction stages of
+            interest if found. If the reconstruction stages of interest
+            are not found, None is returned as the stages index.
+        """
+        for trk_index, rec_stages in enumerate(self.tracks.rec_stages):
+            try:
+                stages_index = rec_stages.index(stages)
+            except ValueError:
+                stages_index = None
+                yield trk_index, stages_index
+                continue
+
+            yield trk_index, stages_index
+
+    def _find_empty(self, array):
+        """finds empty lists/arrays in an awkward array
+
+        Parameters
+        ----------
+        array : awkward array
+            Awkward array of data of interest. For example:
+            km3io.OfflineReader(my_file).tracks.fitinf .
+
+        Yields
+        ------
+        generator
+            the empty list id and the index of the empty list. When
+            data structure (list) is simply empty, None is written in the
+            corresponding index. However, when data structure (list) is not
+            empty and does not contain an empty list, then False is written in the
+            corresponding index.
+        """
+        for i, rs in enumerate(array):
+            try:
+                if len(rs)==0:
+                    j = None
+                if len(rs)!=0:
+                    j = rs.index([])
+            except ValueError:
+                j = False  # rs not empty but [] not found
+                yield i, j
+                continue
+            yield i, j
 
 
 class OfflineEvents:

@@ -555,7 +555,7 @@ class OfflineReader:
             empty and does not contain an empty list, then False is written in the
             corresponding index.
         """
-        for i, rs in enumerate(chunk_arr):
+        for i, rs in enumerate(array):
             try:
                 if len(rs)==0:
                     j = None

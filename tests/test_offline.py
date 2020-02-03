@@ -70,7 +70,6 @@ class TestOfflineKeys(unittest.TestCase):
     def test_fitparameters(self):
         # there are 18 parameters in v1.1.2 of km3net-Dataformat
         fit = self.keys.fitparameters
-        keys = self.keys.fit_keys
         values = [i for i in range(18)]
 
         self.assertEqual(18, len([*fit.keys()]))

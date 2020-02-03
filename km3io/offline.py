@@ -538,8 +538,7 @@ class OfflineReader:
             yield trk_index, stages_index
 
     def _find_empty(self, array):
-        """finds empty lists/arrays in a chunked-jagged array of data
-        of interest.
+        """finds empty lists/arrays in an awkward array
 
         Parameters
         ----------

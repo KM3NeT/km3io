@@ -543,7 +543,7 @@ class OfflineReader:
         Parameters
         ----------
         array : awkward array
-            Chunked array or jagged array of data of interest. For example:
+            Awkward array of data of interest. For example:
             km3io.OfflineReader(my_file).tracks.fitinf .
 
         Yields

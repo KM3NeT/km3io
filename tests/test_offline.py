@@ -50,9 +50,10 @@ class TestOfflineKeys(unittest.TestCase):
         trigger = self.keys.trigger
         keys = ['JTRIGGER3DSHOWER', 'JTRIGGERMXSHOWER',
                 'JTRIGGER3DMUON', 'JTRIGGERNB']
+        values = [1, 2, 4, 5]
 
-        self.assertListEqual(keys, [*trigger.keys()])
-        self.assertListEqual([1, 2, 4, 5], [*trigger.values()])
+        for k, v in zip(keys, values):
+            self.assertEqual(v, trigger[k])
 
     def test_reconstruction(self):
         # there are 34 parameters in v1.1.2 of km3net-Dataformat
@@ -63,15 +64,18 @@ class TestOfflineKeys(unittest.TestCase):
         values = [4000, 0, 0, 1, 2, 3, 4, 5]
 
         self.assertEqual(34, len([*reco.keys()]))
-        self.assertListEqual(keys, [*reco.keys()][:8])
-        self.assertListEqual(values, [*reco.values()][:8])
+        for k, v in zip(keys, values):
+            self.assertEqual(v, reco[k])
 
     def test_fitparameters(self):
         # there are 18 parameters in v1.1.2 of km3net-Dataformat
         fit = self.keys.fitparameters
+        keys = self.keys.fit_keys
+        values = [i for i in range(18)]
 
-        self.assertListEqual([*fit.keys()], self.keys.fit_keys)
-        self.assertListEqual([*fit.values()], [i for i in range(18)])
+        self.assertEqual(18, len([*fit.keys()]))
+        for k, v in zip(keys, values):
+            self.assertEqual(v, fit[k])
 
 class TestReader(unittest.TestCase):
     def setUp(self):

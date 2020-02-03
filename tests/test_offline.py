@@ -74,8 +74,8 @@ class TestOfflineKeys(unittest.TestCase):
         values = [i for i in range(18)]
 
         self.assertEqual(18, len([*fit.keys()]))
-        for k, v in zip(keys, values):
-            self.assertEqual(v, fit[k])
+        for k, v in fit.items():
+            self.assertEqual(values[v], fit[k])
 
 class TestReader(unittest.TestCase):
     def setUp(self):

@@ -1,6 +1,10 @@
 import uproot
 import numpy as np
 import warnings
+import km3io.definitions.trigger
+import km3io.definitions.fitparameters
+import km3io.definitions.reconstruction
+
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
@@ -29,6 +33,9 @@ class OfflineKeys:
         self._cut_hits_keys = None
         self._cut_tracks_keys = None
         self._cut_events_keys = None
+        self._trigger = None
+        self._fitparameters = None
+        self._reconstruction = None
 
     def __str__(self):
         return '\n'.join([
@@ -171,16 +178,8 @@ class OfflineKeys:
             list of all "trks.fitinf" keys.
         """
         if self._fit_keys is None:
-            # these are hardcoded because they are not outsourced in offline
-            # files
-            self._fit_keys = [
-                'JGANDALF_BETA0_RAD', 'JGANDALF_BETA1_RAD', 'JGANDALF_CHI2',
-                'JGANDALF_NUMBER_OF_HITS', 'JENERGY_ENERGY', 'JENERGY_CHI2',
-                'JGANDALF_LAMBDA', 'JGANDALF_NUMBER_OF_ITERATIONS',
-                'JSTART_NPE_MIP', 'JSTART_NPE_MIP_TOTAL',
-                'JSTART_LENGTH_METRES', 'JVETO_NPE', 'JVETO_NUMBER_OF_HITS',
-                'JENERGY_MUON_RANGE_METRES', 'JENERGY_NOISE_LIKELIHOOD',
-                'JENERGY_NDF', 'JENERGY_NUMBER_OF_HITS', 'JCOPY_Z_M'] 
+            self._fit_keys = sorted(self.fitparameters, key=self.fitparameters.get, reverse=False)
+            # self._fit_keys = [*fit.keys()]
         return self._fit_keys
 
     @property
@@ -227,6 +226,48 @@ class OfflineKeys:
                 k.replace('.', '_') for k in self.events_keys
             ]
         return self._cut_events_keys
+
+    @property
+    def trigger(self):
+        """trigger parameters and their index from km3net-Dataformat.
+
+        Returns
+        -------
+        dict
+            dictionary of trigger parameters and their index in an Offline
+            file.
+        """
+        if self._trigger is None:
+            self._trigger = km3io.definitions.trigger.data
+        return self._trigger
+
+    @property
+    def reconstruction(self):
+        """reconstruction parameters and their index from km3net-Dataformat.
+
+        Returns
+        -------
+        dict
+            dictionary of reconstruction parameters and their index in an
+            Offline file.
+        """
+        if self._reconstruction is None:
+            self._reconstruction = km3io.definitions.reconstruction.data
+        return self._reconstruction
+
+    @property
+    def fitparameters(self):
+        """fit parameters parameters and their index from km3net-Dataformat.
+
+        Returns
+        -------
+        dict
+            dictionary of fit parameters and their index in an Offline
+            file.
+        """
+        if self._fitparameters is None:
+            self._fitparameters = km3io.definitions.fitparameters.data
+        return self._fitparameters
 
 
 class Reader:
@@ -399,7 +440,7 @@ class OfflineReader:
             self._tracks = OfflineTracks(
                 self.keys.cut_tracks_keys,
                 [self._data[key] for key in self.keys.tracks_keys],
-                fit_keys=self.keys.fit_keys)
+                fitparameters=self.keys.fitparameters)
         return self._tracks
 
     @property
@@ -429,7 +470,8 @@ class OfflineReader:
         if self._mc_tracks is None:
             self._mc_tracks = OfflineTracks(
                 self.keys.cut_tracks_keys,
-                [self._data[key] for key in self.keys.mc_tracks_keys])
+                [self._data[key] for key in self.keys.mc_tracks_keys],
+                fitparameters=self.keys.fitparameters)
         return self._mc_tracks
 
     @property
@@ -717,7 +759,7 @@ class OfflineHit:
 
 class OfflineTracks:
     """wrapper for offline tracks"""
-    def __init__(self, keys, values, fit_keys=None):
+    def __init__(self, keys, values, fitparameters=None):
         """wrapper for offline tracks
 
         Parameters
@@ -726,26 +768,26 @@ class OfflineTracks:
             list of cropped tracks keys.
         values : list of arrays
             list of arrays containting tracks data.
-        fit_keys : None, optional
-            list of tracks fit information (not yet outsourced in offline
+        fitparameters : None, optional
+            dictionary of tracks fit information (not yet outsourced in offline
             files).
         """
         self._keys = keys
         self._values = values
-        if fit_keys is not None:
-            self._fit_keys = fit_keys
+        if fitparameters is not None:
+            self._fitparameters = fitparameters
         for k, v in zip(self._keys, self._values):
             setattr(self, k, v)
 
     def __getitem__(self, item):
         if isinstance(item, int):
             return OfflineTrack(self._keys, [v[item] for v in self._values],
-                                fit_keys=self._fit_keys)
+                                fitparameters=self._fitparameters)
         else:
             return OfflineTracks(
                 self._keys,
                 [v[item] for v in self._values],
-                fit_keys=self._fit_keys
+                fitparameters=self._fitparameters
             )
 
     def __len__(self):
@@ -764,7 +806,7 @@ class OfflineTracks:
 
 class OfflineTrack:
     """wrapper for an offline track"""
-    def __init__(self, keys, values, fit_keys=None):
+    def __init__(self, keys, values, fitparameters=None):
         """wrapper for one offline track.
 
         Parameters
@@ -773,14 +815,14 @@ class OfflineTrack:
             list of cropped tracks keys.
         values : list of arrays
             list of arrays containting track data.
-        fit_keys : None, optional
-            list of tracks fit information (not yet outsourced in offline
+        fitparameters : None, optional
+            dictionary of tracks fit information (not yet outsourced in offline
             files).
         """
         self._keys = keys
         self._values = values
-        if fit_keys is not None:
-            self._fit_keys = fit_keys
+        if fitparameters is not None:
+            self._fitparameters = fitparameters
         for k, v in zip(self._keys, self._values):
             setattr(self, k, v)
 
@@ -789,10 +831,9 @@ class OfflineTrack:
             "{:30} {:^2} {:>26}".format(k, ':', str(v))
             for k, v in zip(self._keys, self._values) if k not in ['fitinf']
         ]) + "\n\t" + "\n\t".join([
-            "{:30} {:^2} {:>26}".format(k, ':', str(v))
-            for k, v in zip(self._fit_keys, self._values[18]
-                            )  # I don't like 18 being explicit here
-        ])
+            "{:30} {:^2} {:>26}".format(k, ':', str(self._values[18][v]))
+            for k, v in self._fitparameters.items() if len(self._values[18])>v
+        ])  # I don't like 18 being explicit here
 
     def __getitem__(self, item):
         return self._values[item]

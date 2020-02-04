@@ -178,7 +178,8 @@ class OfflineKeys:
             list of all "trks.fitinf" keys.
         """
         if self._fit_keys is None:
-            self._fit_keys = [*self.fitparameters.keys()]
+            self._fit_keys = sorted(self.fitparameters, key=self.fitparameters.get, reverse=False)
+            # self._fit_keys = [*fit.keys()]
         return self._fit_keys
 
     @property

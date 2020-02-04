@@ -429,6 +429,4 @@ class TestOfflineTrack(unittest.TestCase):
 
     def test_str(self):
         self.assertEqual(repr(self.track).split('\n\t')[0], 'offline track:')
-        self.assertEqual(
-            repr(self.track).split('\n\t')[28],
-            'JGANDALF_LAMBDA                :      4.2409761837248484e-12')
+        self.assertTrue("JGANDALF_LAMBDA" in repr(self.track))

@@ -42,6 +42,7 @@ dependencies:
 .PHONY: yapf
 yapf:
 	yapf -i -r $(PKGNAME)
+	yapf -i -r tests
 	yapf -i setup.py
 
 .PHONY: all clean install install-dev test  test-nocov flake8 pep8 dependencies docstyle

@@ -148,6 +148,7 @@ The following example shows how to access summary slices, in particular the DOM
 IDs of the slice with the index ``23``:
 
 .. code-block:: python3
+
   >>> f.summaryslices
   <km3io.daq.SummmarySlices at 0x7effcc0e52b0>
   >>> f.summaryslices.slices[23].dom_id
@@ -168,6 +169,7 @@ The ``.dtype`` attribute (or in general, <TAB> completion) is useful to find out
 more about the field structure:
 
 .. code-block:: python3
+
   >>> f.summaryslices.headers.dtype
   dtype([(' cnt', '<u4'), (' vers', '<u2'), (' cnt2', '<u4'), (' vers2',
   '<u2'), (' cnt3', '<u4'), (' vers3', '<u2'), ('detector_id', '<i4'), ('run',
@@ -190,6 +192,7 @@ already accessible (although in ugly ways ;-)
 To access the timeslice data:
 
 .. code-block:: python3
+
   >>> f.timeslices
   Available timeslice streams: L1, SN
   >>> f.timeslices.stream("L1", 24).frames
@@ -204,6 +207,7 @@ the value a numpy array of hits, with the usual fields to access the PMT
 channel, time and ToT:
 
 .. code-block:: python3
+
    >>> f.timeslices.stream("L1", 24).frames[806451572].dtype
    dtype([('pmt', 'u1'), ('tdc', '<u4'), ('tot', 'u1')])
    >>> f.timeslices.stream("L1", 24).frames[806451572].tot

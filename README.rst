@@ -129,92 +129,44 @@ Now let's have a look at the hits data:
 
 The resulting arrays are numpy arrays.
 
-..
-   Reading SummarySlices
-   ~~~~~~~~~~~~~~~~~~~~~
+Reading SummarySlices
+~~~~~~~~~~~~~~~~~~~~~
 
-   The following example shows how to access summary slices, in particular the DOM
-   IDs of the slice with the index ``23``:
+The following example shows how to access summary slices, in particular the DOM
+IDs of the slice with the index ``23``:
 
-   .. code-block:: python3
-     >>> f.summaryslices
-     <km3io.daq.SummmarySlices at 0x7effcc0e52b0>
-     >>> f.summaryslices.slices[23].dom_id
-     array([806451572, 806455814, 806465101, 806483369, 806487219, 806487226,
-          806487231, 808432835, 808435278, 808447180, 808447186, 808451904,
-          808451907, 808469129, 808472260, 808472265, 808488895, 808488990,
-          808489014, 808489117, 808493910, 808946818, 808949744, 808951460,
-          808956908, 808959411, 808961448, 808961480, 808961504, 808961655,
-          808964815, 808964852, 808964883, 808964908, 808969848, 808969857,
-          808972593, 808972598, 808972698, 808974758, 808974773, 808974811,
-          808974972, 808976377, 808979567, 808979721, 808979729, 808981510,
-          808981523, 808981672, 808981812, 808981864, 808982005, 808982018,
-          808982041, 808982066, 808982077, 808982547, 808984711, 808996773,
-          808997793, 809006037, 809007627, 809503416, 809521500, 809524432,
-          809526097, 809544058, 809544061], dtype=int32)
+.. code-block:: python3
+  >>> f.summaryslices
+  <km3io.daq.SummmarySlices at 0x7effcc0e52b0>
+  >>> f.summaryslices.slices[23].dom_id
+  array([806451572, 806455814, 806465101, 806483369, 806487219, 806487226,
+       806487231, 808432835, 808435278, 808447180, 808447186, 808451904,
+       808451907, 808469129, 808472260, 808472265, 808488895, 808488990,
+       808489014, 808489117, 808493910, 808946818, 808949744, 808951460,
+       808956908, 808959411, 808961448, 808961480, 808961504, 808961655,
+       808964815, 808964852, 808964883, 808964908, 808969848, 808969857,
+       808972593, 808972598, 808972698, 808974758, 808974773, 808974811,
+       808974972, 808976377, 808979567, 808979721, 808979729, 808981510,
+       808981523, 808981672, 808981812, 808981864, 808982005, 808982018,
+       808982041, 808982066, 808982077, 808982547, 808984711, 808996773,
+       808997793, 809006037, 809007627, 809503416, 809521500, 809524432,
+       809526097, 809544058, 809544061], dtype=int32)
 
-   The ``.dtype`` attribute (or in general, <TAB> completion) is useful to find out
-   more about the field structure:
+The ``.dtype`` attribute (or in general, <TAB> completion) is useful to find out
+more about the field structure:
 
-   .. code-block:: python3
-     >>> f.summaryslices.headers.dtype
-     dtype([(' cnt', '<u4'), (' vers', '<u2'), (' cnt2', '<u4'), (' vers2',
-     '<u2'), (' cnt3', '<u4'), (' vers3', '<u2'), ('detector_id', '<i4'), ('run',
-     '<i4'), ('frame_index', '<i4'), (' cnt4', '<u4'), (' vers4', '<u2'),
-     ('UTC_seconds', '<u4'), ('UTC_16nanosecondcycles', '<u4')])
-     >>> f.summaryslices.headers.frame_index
-     <ChunkedArray [162 163 173 ... 36001 36002 36003] at 0x7effccd4af10>
+.. code-block:: python3
+  >>> f.summaryslices.headers.dtype
+  dtype([(' cnt', '<u4'), (' vers', '<u2'), (' cnt2', '<u4'), (' vers2',
+  '<u2'), (' cnt3', '<u4'), (' vers3', '<u2'), ('detector_id', '<i4'), ('run',
+  '<i4'), ('frame_index', '<i4'), (' cnt4', '<u4'), (' vers4', '<u2'),
+  ('UTC_seconds', '<u4'), ('UTC_16nanosecondcycles', '<u4')])
+  >>> f.summaryslices.headers.frame_index
+  <ChunkedArray [162 163 173 ... 36001 36002 36003] at 0x7effccd4af10>
 
-   The resulting array is a ``ChunkedArray`` which is an extended version of a
-   numpy array and behaves like one.
+The resulting array is a ``ChunkedArray`` which is an extended version of a
+numpy array and behaves like one.
 
-   Reading Timeslices
-   ~~~~~~~~~~~~~~~~~~
-
-   Timeslices are split into different streams since 2017 and ``km3io`` currently
-   supports everything except L0, i.e. L1, L2 and SN streams. The API is
-   work-in-progress and will be improved in future, however, all the data is
-   already accessible (although in ugly ways ;-)
-
-   To access the timeslice data:
-
-   .. code-block:: python3
-     >>> f.timeslices
-     Available timeslice streams: L1, SN
-     >>> f.timeslices.stream("L1", 24).frames
-     {806451572: <Table [<Row 1577843> <Row 1577844> ... <Row 1578147>],
-      806455814: <Table [<Row 1578148> <Row 1578149> ... <Row 1579446>],
-      806465101: <Table [<Row 1579447> <Row 1579448> ... <Row 1580885>],
-      ...
-     }
-
-   The frames are represented by a dictionary where the key is the ``DOM ID`` and
-   the value a numpy array of hits, with the usual fields to access the PMT
-   channel, time and ToT:
-
-   .. code-block:: python3
-      >>> f.timeslices.stream("L1", 24).frames[806451572].dtype
-      dtype([('pmt', 'u1'), ('tdc', '<u4'), ('tot', 'u1')])
-      >>> f.timeslices.stream("L1", 24).frames[806451572].tot
-      array([29, 21,  8, 29, 22, 20,  1, 37, 11, 22, 11, 22, 12, 20, 29, 94, 26,
-             26, 18, 16, 13, 22,  6, 29, 24, 30, 14, 26, 12, 23,  4, 25,  6, 27,
-              5, 13, 21, 28, 30,  4, 25, 10,  5,  6,  5, 17,  4, 27, 24, 25, 27,
-             28, 32,  6,  3, 15,  3, 20, 33, 30, 30, 20, 28,  6,  7,  3, 14, 12,
-             25, 27, 26, 25, 22, 21, 23,  6, 20, 21,  4,  4, 10, 24, 29, 12, 30,
-              5,  3, 24, 15, 14, 25,  5, 27, 23, 26,  4, 28, 15, 34, 22,  4, 29,
-             24, 26, 29, 23, 25, 28, 14, 31, 27, 26, 27, 28, 23, 54,  4, 25, 11,
-             28, 25, 24,  7, 27, 28, 28, 18,  3, 13, 14, 38, 28,  4, 21, 16, 16,
-              4, 21, 26, 21, 28, 64, 21,  1, 24, 21, 26, 26, 25,  4, 28, 11, 31,
-             10, 24, 24, 28, 10,  6,  4, 20, 26, 18,  5, 18, 24,  5, 27, 23, 20,
-             29, 20,  6, 18,  5, 24, 17, 28, 24, 15, 26, 27, 25,  9,  3, 18,  3,
-             34, 29, 10, 25, 30, 28, 19, 26, 34, 27, 14, 17, 15, 26,  8, 19,  5,
-             27, 13,  5, 27, 46,  3, 25, 13, 30,  9, 21, 12,  1, 32, 25,  8, 30,
-              4, 24, 11,  3, 11, 27,  5, 13,  5, 16, 18,  3, 22, 10,  7, 32, 29,
-             15, 20, 18, 16, 27,  5, 22,  4, 33,  5, 29, 24, 30,  7,  7, 25, 33,
-              7, 20,  8, 30,  4,  4,  6, 26,  8, 24, 22, 12,  6,  3, 21, 28, 11,
-             24, 27, 27,  6, 29,  5, 18, 11, 26,  5, 19, 32, 25,  4, 20, 35, 30,
-              5,  3, 26, 30, 23, 28,  6, 25, 25,  5, 45, 23, 18, 29, 28, 23],
-            dtype=uint8)
 
 
 Overview of offline files

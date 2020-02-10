@@ -222,8 +222,8 @@ class TestOfflineReader(unittest.TestCase):
         self.assertEqual(float(head['kcut']), 2)
 
         # test the warning for unsupported fheader format
-        self.assertWarns(UserWarning, self.r.header,
-                         "Your file header has an unsupported format")
+        with self.assertWarns(UserWarning):
+            self.r.header
 
 
 class TestOfflineEvents(unittest.TestCase):

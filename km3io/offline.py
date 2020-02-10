@@ -5,7 +5,6 @@ import km3io.definitions.trigger
 import km3io.definitions.fitparameters
 import km3io.definitions.reconstruction
 
-
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
 
@@ -178,7 +177,9 @@ class OfflineKeys:
             list of all "trks.fitinf" keys.
         """
         if self._fit_keys is None:
-            self._fit_keys = sorted(self.fitparameters, key=self.fitparameters.get, reverse=False)
+            self._fit_keys = sorted(self.fitparameters,
+                                    key=self.fitparameters.get,
+                                    reverse=False)
             # self._fit_keys = [*fit.keys()]
         return self._fit_keys
 
@@ -377,12 +378,12 @@ class OfflineReader:
             if b'Head;1' in fobj.keys():
                 self._header = {}
                 for n, x in fobj['Head']._map_3c_string_2c_string_3e_.items():
-                    print("{:15s} {}".format(n.decode("utf-8"), x.decode("utf-8")))
+                    print("{:15s} {}".format(n.decode("utf-8"),
+                                             x.decode("utf-8")))
                     self._header[n.decode("utf-8")] = x.decode("utf-8")
             if b'Header;1' in fobj.keys():
                 warnings.warn("Your file header has an unsupported format")
         return self._header
-
 
     @property
     def keys(self):
@@ -491,17 +492,21 @@ class OfflineReader:
         """
         if self._best_reco is None:
             keys = ", ".join(self.keys.fit_keys[:-1])
-            empty_fit_info = np.array([match for match in
-                                        self._find_empty(self.tracks.fitinf)])
-            fit_info = [i for i,j in zip(self.tracks.fitinf,
-                                        empty_fit_info[:,1]) if j is not None]
+            empty_fit_info = np.array(
+                [match for match in self._find_empty(self.tracks.fitinf)])
+            fit_info = [
+                i for i, j in zip(self.tracks.fitinf, empty_fit_info[:, 1])
+                if j is not None
+            ]
             stages = self._get_max_reco_stages(self.tracks.rec_stages)
-            fit_data = np.array([i[j] for i,j in zip(fit_info, stages[:,2])])
+            fit_data = np.array([i[j] for i, j in zip(fit_info, stages[:, 2])])
             rows_size = len(max(fit_data, key=len))
-            equal_size_data = np.vstack([np.hstack([i, np.zeros(rows_size-len(i))
-                                                     + np.nan]) for i in fit_data])
-            self._best_reco = np.core.records.fromarrays(equal_size_data.transpose(),
-                                                         names=keys)
+            equal_size_data = np.vstack([
+                np.hstack([i, np.zeros(rows_size - len(i)) + np.nan])
+                for i in fit_data
+            ])
+            self._best_reco = np.core.records.fromarrays(
+                equal_size_data.transpose(), names=keys)
         return self._best_reco
 
     def _get_max_reco_stages(self, reco_stages):
@@ -522,12 +527,14 @@ class OfflineReader:
                                   *lentgh of the maximum reco_stages
                                   *position of the maximum reco_stages
         """
-        empty_reco_stages = np.array([match for match in
-                                        self._find_empty(reco_stages)])
-        max_reco_stages = np.array([[max(i, key=len), len(max(i, key=len)),
-                            i.index(max(i, key=len))] for i,j in
-                            zip(reco_stages, empty_reco_stages[:,1])
-                            if j is not None])
+        empty_reco_stages = np.array(
+            [match for match in self._find_empty(reco_stages)])
+        max_reco_stages = np.array(
+            [[max(i, key=len),
+              len(max(i, key=len)),
+              i.index(max(i, key=len))]
+             for i, j in zip(reco_stages, empty_reco_stages[:, 1])
+             if j is not None])
         return max_reco_stages
 
     def get_reco_fit(self, stages):
@@ -555,17 +562,21 @@ class OfflineReader:
         """
         keys = ", ".join(self.keys.fit_keys[:-1])
         fit_info = self.tracks.fitinf
-        rec_stages = np.array([match for match in
-                                self._find_rec_stages(stages)])
-        if np.all(rec_stages[:,1]==None):
-            raise ValueError("The stages {} are not found in your file."
-                                .format(str(stages)))
+        rec_stages = np.array(
+            [match for match in self._find_rec_stages(stages)])
+        if np.all(rec_stages[:, 1] == None):
+            raise ValueError(
+                "The stages {} are not found in your file.".format(
+                    str(stages)))
         else:
-            fit_data = np.array([i[k] for i,j,k in zip(fit_info,
-                                rec_stages[:,0], rec_stages[:,1])
-                                if k is not None])
+            fit_data = np.array([
+                i[k]
+                for i, j, k in zip(fit_info, rec_stages[:, 0], rec_stages[:,
+                                                                          1])
+                if k is not None
+            ])
             rec_array = np.core.records.fromarrays(fit_data.transpose(),
-                                                    names=keys)
+                                                   names=keys)
             return rec_array
 
     def _find_rec_stages(self, stages):
@@ -615,9 +626,9 @@ class OfflineReader:
         """
         for i, rs in enumerate(array):
             try:
-                if len(rs)==0:
+                if len(rs) == 0:
                     j = None
-                if len(rs)!=0:
+                if len(rs) != 0:
                     j = rs.index([])
             except ValueError:
                 j = False  # rs not empty but [] not found
@@ -784,11 +795,8 @@ class OfflineTracks:
             return OfflineTrack(self._keys, [v[item] for v in self._values],
                                 fitparameters=self._fitparameters)
         else:
-            return OfflineTracks(
-                self._keys,
-                [v[item] for v in self._values],
-                fitparameters=self._fitparameters
-            )
+            return OfflineTracks(self._keys, [v[item] for v in self._values],
+                                 fitparameters=self._fitparameters)
 
     def __len__(self):
         try:
@@ -831,8 +839,10 @@ class OfflineTrack:
             "{:30} {:^2} {:>26}".format(k, ':', str(v))
             for k, v in zip(self._keys, self._values) if k not in ['fitinf']
         ]) + "\n\t" + "\n\t".join([
-            "{:30} {:^2} {:>26}".format(k, ':', str(getattr(self, 'fitinf')[v]))
-            for k, v in self._fitparameters.items() if len(getattr(self, 'fitinf'))>v
+            "{:30} {:^2} {:>26}".format(k, ':', str(
+                getattr(self, 'fitinf')[v]))
+            for k, v in self._fitparameters.items()
+            if len(getattr(self, 'fitinf')) > v
         ])  # I don't like 18 being explicit here
 
     def __getitem__(self, item):

@@ -30,9 +30,10 @@ def get_rate(value):
         return MINIMAL_RATE_HZ * np.exp(value * RATE_FACTOR)
 
 
-@nb.guvectorize(
-    "void(i8, b1[:], b1[:])", "(), (n) -> (n)", target="parallel", nopython=True
-    )
+@nb.guvectorize("void(i8, b1[:], b1[:])",
+                "(), (n) -> (n)",
+                target="parallel",
+                nopython=True)
 def unpack_bits(value, bits_template, out):
     """Return a boolean array for a value's bit representation.
 

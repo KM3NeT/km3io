@@ -49,8 +49,10 @@ class TestOfflineKeys(unittest.TestCase):
     def test_trigger(self):
         # there are 4 trigger keys in v1.1.2 of km3net-Dataformat
         trigger = self.keys.trigger
-        keys = ['JTRIGGER3DSHOWER', 'JTRIGGERMXSHOWER',
-                'JTRIGGER3DMUON', 'JTRIGGERNB']
+        keys = [
+            'JTRIGGER3DSHOWER', 'JTRIGGERMXSHOWER', 'JTRIGGER3DMUON',
+            'JTRIGGERNB'
+        ]
         values = [1, 2, 4, 5]
 
         for k, v in zip(keys, values):
@@ -59,9 +61,10 @@ class TestOfflineKeys(unittest.TestCase):
     def test_reconstruction(self):
         # there are 34 parameters in v1.1.2 of km3net-Dataformat
         reco = self.keys.reconstruction
-        keys = ['JPP_RECONSTRUCTION_TYPE', 'JMUONFIT', 'JMUONBEGIN',
-                'JMUONPREFIT', 'JMUONSIMPLEX', 'JMUONGANDALF',
-                'JMUONENERGY', 'JMUONSTART']
+        keys = [
+            'JPP_RECONSTRUCTION_TYPE', 'JMUONFIT', 'JMUONBEGIN', 'JMUONPREFIT',
+            'JMUONSIMPLEX', 'JMUONGANDALF', 'JMUONENERGY', 'JMUONSTART'
+        ]
         values = [4000, 0, 0, 1, 2, 3, 4, 5]
 
         self.assertEqual(34, len([*reco.keys()]))
@@ -76,6 +79,7 @@ class TestOfflineKeys(unittest.TestCase):
         self.assertEqual(18, len([*fit.keys()]))
         for k, v in fit.items():
             self.assertEqual(values[v], fit[k])
+
 
 class TestReader(unittest.TestCase):
     def setUp(self):
@@ -168,28 +172,27 @@ class TestOfflineReader(unittest.TestCase):
         fitinf = self.nu.tracks.fitinf
         rec_stages = self.nu.tracks.rec_stages
 
-        empty_fitinf = np.array([match for match in
-                                self.nu._find_empty(fitinf)])
-        empty_stages = np.array([match for match in
-                                self.nu._find_empty(rec_stages)])
+        empty_fitinf = np.array(
+            [match for match in self.nu._find_empty(fitinf)])
+        empty_stages = np.array(
+            [match for match in self.nu._find_empty(rec_stages)])
 
-        self.assertListEqual(empty_fitinf[:5, 1].tolist(), [23, 14,
-                                                            14, 4, None])
-        self.assertListEqual(empty_stages[:5, 1].tolist(), [False, False,
-                                                            False, False,
-                                                            None])
+        self.assertListEqual(empty_fitinf[:5, 1].tolist(),
+                             [23, 14, 14, 4, None])
+        self.assertListEqual(empty_stages[:5, 1].tolist(),
+                             [False, False, False, False, None])
 
     def test_find_rec_stages(self):
-        stages = np.array([match for match in
-                           self.nu._find_rec_stages([1, 2, 3, 4, 5])])
+        stages = np.array(
+            [match for match in self.nu._find_rec_stages([1, 2, 3, 4, 5])])
 
         self.assertListEqual(stages[:5, 1].tolist(), [0, 0, 0, 0, None])
 
     def test_get_reco_fit(self):
-        JGANDALF_BETA0_RAD = [0.0020367251782607574,
-                              0.003306725805622178,
-                              0.0057877124222254885,
-                              0.015581698352185896]
+        JGANDALF_BETA0_RAD = [
+            0.0020367251782607574, 0.003306725805622178, 0.0057877124222254885,
+            0.015581698352185896
+        ]
         reco_fit = self.nu.get_reco_fit([1, 2, 3, 4, 5])['JGANDALF_BETA0_RAD']
 
         self.assertListEqual(JGANDALF_BETA0_RAD, reco_fit[:4].tolist())
@@ -201,18 +204,18 @@ class TestOfflineReader(unittest.TestCase):
         max_reco = self.nu._get_max_reco_stages(rec_stages)
 
         self.assertEqual(len(max_reco.tolist()), 9)
-        self.assertListEqual(max_reco[0].tolist(), [[1, 2, 3, 4, 5],
-                                                    5, 0])
+        self.assertListEqual(max_reco[0].tolist(), [[1, 2, 3, 4, 5], 5, 0])
 
     def test_best_reco(self):
-        JGANDALF_BETA1_RAD = [0.0014177681261476852,
-                              0.002094094517471032,
-                              0.003923368624980349,
-                              0.009491461076780453]
+        JGANDALF_BETA1_RAD = [
+            0.0014177681261476852, 0.002094094517471032, 0.003923368624980349,
+            0.009491461076780453
+        ]
         best = self.nu.best_reco
 
         self.assertEqual(best.size, 9)
-        self.assertEqual(best['JGANDALF_BETA1_RAD'][:4].tolist(), JGANDALF_BETA1_RAD)
+        self.assertEqual(best['JGANDALF_BETA1_RAD'][:4].tolist(),
+                         JGANDALF_BETA1_RAD)
 
     def test_reading_header(self):
         # head is the supported format
@@ -407,16 +410,14 @@ class TestOfflineTracks(unittest.TestCase):
         track_selection_2 = tracks[1:3]
         assert 2 == len(track_selection_2)
         for _slice in [
-            slice(0, 0),
-            slice(0, 1),
-            slice(0, 2),
-            slice(1, 5),
-            slice(3, -2)
+                slice(0, 0),
+                slice(0, 1),
+                slice(0, 2),
+                slice(1, 5),
+                slice(3, -2)
         ]:
-            self.assertListEqual(
-                list(tracks.E[:,0][_slice]),
-                list(tracks[_slice].E[:,0])
-            )
+            self.assertListEqual(list(tracks.E[:, 0][_slice]),
+                                 list(tracks[_slice].E[:, 0]))
 
 
 class TestOfflineTrack(unittest.TestCase):

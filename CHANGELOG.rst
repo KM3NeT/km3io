@@ -1,9 +1,13 @@
 Unreleased changes
 ------------------
-* update of reco data from offline files
 
 Version 0
 ---------
+0.8.1 / 2020-02-10
+~~~~~~~~~~~~~~~~~~
+* update of reco data from offline files
+* Documentation on how to read DAQ data
+
 0.8.0 / 2020-01-23
 ~~~~~~~~~~~~~~~~~~
 * Offline file headers are now accessible

@@ -104,7 +104,7 @@ Overview of offline files
 # info needed here
 
 DAQ files reader
-----------------
+================
 
 ``km3io`` is able to read events, summary slices and timeslices (except the L0
 slices, which is work in progress).

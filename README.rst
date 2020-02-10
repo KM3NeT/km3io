@@ -100,12 +100,12 @@ contain events, timeslics and summary slices.
 
 DAQ files reader
 ----------------
-<!--  -->
-<!-- ``km3io`` is able to read events, summary slices and timeslices (except the L0 -->
-<!-- slices, which is work in progress). -->
-<!--  -->
-<!-- Let's have a look at some ORCA data (``KM3NeT_00000044_00005404.root``) -->
-<!--  -->
+
+``km3io`` is able to read events, summary slices and timeslices (except the L0
+slices, which is work in progress).
+
+Let's have a look at some ORCA data (``KM3NeT_00000044_00005404.root``)
+
 <!-- Reading Events -->
 <!-- ~~~~~~~~~~~~~~ -->
 <!-- To get a lazy ragged array of the events: -->

@@ -56,6 +56,12 @@ Tutorial
 
 * `DAQ files reader <#daq-files-reader>`__
 
+  * `Reading Events <#reading-events>`__
+
+  * `Reading SummarySlices <#reading-summaryslices>`__
+
+  * `Reading Timeslices <#reading-timeslices>`__
+
 * `Offline files reader <#offline-file-reader>`__
 
   * `reading events data <#reading-events-data>`__
@@ -112,7 +118,8 @@ slices, which is work in progress).
 Let's have a look at some ORCA data (``KM3NeT_00000044_00005404.root``)
 
 Reading Events
-~~~~~~~~~~~~~~
+""""""""""""""
+
 To get a lazy ragged array of the events:
 
 .. code-block:: python3
@@ -135,7 +142,7 @@ Now let's have a look at the hits data:
 The resulting arrays are numpy arrays.
 
 Reading SummarySlices
-~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""
 
 The following example shows how to access summary slices, in particular the DOM
 IDs of the slice with the index ``23``:
@@ -173,7 +180,7 @@ The resulting array is a ``ChunkedArray`` which is an extended version of a
 numpy array and behaves like one.
 
 Reading Timeslices
-~~~~~~~~~~~~~~~~~~
+""""""""""""""""""
 
 Timeslices are split into different streams since 2017 and ``km3io`` currently
 supports everything except L0, i.e. L1, L2 and SN streams. The API is
@@ -599,7 +606,7 @@ to get all data of a specific hit (let's say hit 0) from event 0:
 
 .. code-block:: python3
 
-    >>>r[0].hits[0]
+    >>> r[0].hits[0]
     offline hit:
           id                  :               0
           dom_id              :       806451572
@@ -626,7 +633,7 @@ to get a specific value from hit 0 in event 0, let's say for example the dom id:
 
 .. code-block:: python3
 
-    >>>r[0].hits[0].dom_id
+    >>> r[0].hits[0].dom_id
     806451572
 
 reading tracks data
@@ -691,7 +698,7 @@ to get all data of a specific track (let's say track 0) from event 0:
 
 .. code-block:: python3
 
-    >>>r[0].tracks[0]
+    >>> r[0].tracks[0]
     offline track:
           fUniqueID                      :                           0
           fBits                          :                    33554432
@@ -736,14 +743,14 @@ to get a specific value from track 0 in event 0, let's say for example the likli
 
 .. code-block:: python3
 
-    >>>r[0].tracks[0].lik
+    >>> r[0].tracks[0].lik
     294.6407542676734
 
 to get the reconstruction parameters, first take a look at the available reconstruction keys: 
 
 .. code-block:: python3
 
-    >>>r.best_reco.dtype.names
+    >>> r.best_reco.dtype.names
     ['JGANDALF_BETA0_RAD',
      'JGANDALF_BETA1_RAD',
      'JGANDALF_CHI2',
@@ -770,13 +777,13 @@ to get a numpy `recarray <https://docs.scipy.org/doc/numpy/reference/generated/n
 
 .. code-block:: python3
 
-    >>>r.best_reco
+    >>> r.best_reco
 
 to get an array of a parameter of interest, let's say `'JENERGY_ENERGY'`:
 
 .. code-block:: python3
 
-    >>>r.best_reco['JENERGY_ENERGY']
+    >>> r.best_reco['JENERGY_ENERGY']
     array([1141.87137899, 4708.16378575,  499.7243005 ,  103.54680875,
         208.6103912 , 1336.52338666,  998.87632267, 1206.54345674,
          16.28973662])
@@ -787,13 +794,13 @@ to get a numpy recarray of the fit data of tracks with specific reconstruction s
 
 .. code-block:: python3
 
-    >>>r.get_reco_fit([1, 2, 3, 4, 5])
+    >>> r.get_reco_fit([1, 2, 3, 4, 5])
 
 again, to get the reconstruction parameters names: 
 
 .. code-block:: python3
 
-    >>>r.get_reco_fit([1, 2, 3, 4, 5]).dtype.names
+    >>> r.get_reco_fit([1, 2, 3, 4, 5]).dtype.names
     ('JGANDALF_BETA0_RAD',
      'JGANDALF_BETA1_RAD',
      'JGANDALF_CHI2',
@@ -816,7 +823,7 @@ to get the reconstruction data of interest, for example ['JENERGY_ENERGY']:
 
 .. code-block:: python3
 
-    >>>r.get_reco_fit([1, 2, 3, 4, 5])['JENERGY_ENERGY']
+    >>> r.get_reco_fit([1, 2, 3, 4, 5])['JENERGY_ENERGY']
     array([1141.87137899, 4708.16378575,  499.7243005 ,  103.54680875,
         208.6103912 , 1336.52338666,  998.87632267, 1206.54345674,
          16.28973662])
@@ -831,7 +838,7 @@ to read mc hits data:
 
 .. code-block:: python3
 
-    >>>r.mc_hits
+    >>> r.mc_hits
     <OfflineHits: 10 parsed elements>
 
 that's it! All branches in mc hits tree can be accessed in the exact same way described in the section `reading hits data <#reading-hits-data>`__ . All data is easily accesible and if you are stuck, hit tab key to see all the available branches:
@@ -845,7 +852,7 @@ to read mc tracks data:
 
 .. code-block:: python3
 
-    >>>r.mc_tracks
+    >>> r.mc_tracks
     <OfflineTracks: 10 parsed elements>
 
 that's it! All branches in mc tracks tree can be accessed in the exact same way described in the section `reading tracks data <#reading-tracks-data>`__ . All data is easily accesible and if you are stuck, hit tab key to see all the available branches:

@@ -98,8 +98,8 @@ DAQ files, or also called online files, are written by the DataWriter and
 contain events, timeslics and summary slices.
 
 
-<!-- DAQ files reader -->
-<!-- ---------------- -->
+DAQ files reader
+----------------
 <!--  -->
 <!-- ``km3io`` is able to read events, summary slices and timeslices (except the L0 -->
 <!-- slices, which is work in progress). -->

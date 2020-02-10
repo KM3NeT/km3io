@@ -375,13 +375,13 @@ class OfflineReader:
     def header(self):
         if self._header is None:
             fobj = uproot.open(self._file_path)
-            if b'Head;1' in fobj.keys():
+            if 'Head' in fobj:
                 self._header = {}
                 for n, x in fobj['Head']._map_3c_string_2c_string_3e_.items():
                     print("{:15s} {}".format(n.decode("utf-8"),
                                              x.decode("utf-8")))
                     self._header[n.decode("utf-8")] = x.decode("utf-8")
-            if b'Header;1' in fobj.keys():
+            else:
                 warnings.warn("Your file header has an unsupported format")
         return self._header
 

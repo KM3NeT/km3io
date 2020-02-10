@@ -107,7 +107,7 @@ contain events, timeslics and summary slices.
 Overview of offline files
 """""""""""""""""""""""""
 
-# info needed here
+Offline files contain data about events, hits and tracks. 
 
 DAQ files reader
 ----------------

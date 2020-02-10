@@ -831,8 +831,8 @@ class OfflineTrack:
             "{:30} {:^2} {:>26}".format(k, ':', str(v))
             for k, v in zip(self._keys, self._values) if k not in ['fitinf']
         ]) + "\n\t" + "\n\t".join([
-            "{:30} {:^2} {:>26}".format(k, ':', str(self._values[18][v]))
-            for k, v in self._fitparameters.items() if len(self._values[18])>v
+            "{:30} {:^2} {:>26}".format(k, ':', str(getattr(self, 'fitinf')[v]))
+            for k, v in self._fitparameters.items() if len(getattr(self, 'fitinf'))>v
         ])  # I don't like 18 being explicit here
 
     def __getitem__(self, item):

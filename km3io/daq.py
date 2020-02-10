@@ -22,7 +22,7 @@ CHANNEL_BITS_TEMPLATE = np.zeros(31, dtype=bool)
     nb.int32(nb.int32),
     nb.int32(nb.int64)
 ])
-def get_rate(value):
+def get_rate(value):  #pragma: no cover
     """Return the rate in Hz from the short int value"""
     if value == 0:
         return 0
@@ -34,7 +34,7 @@ def get_rate(value):
                 "(), (n) -> (n)",
                 target="parallel",
                 nopython=True)
-def unpack_bits(value, bits_template, out):
+def unpack_bits(value, bits_template, out):  #pragma: no cover
     """Return a boolean array for a value's bit representation.
 
     This function also accepts arrays as input, the output shape will be

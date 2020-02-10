@@ -390,8 +390,8 @@ class TestSummaryslices(unittest.TestCase):
         for dom_id, fifo_flags in dct_fifo_flags.items():
             frame = s[s.dom_id == dom_id]
             assert any([
-                a == b for a, b in zip(
-                    get_channel_flags(frame.fifo[0]), fifo_flags)
+                a == b
+                for a, b in zip(get_channel_flags(frame.fifo[0]), fifo_flags)
             ])
 
 

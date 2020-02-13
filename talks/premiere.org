@@ -102,11 +102,16 @@ Source: https://github.com/scikit-hep/uproot/blob/master/README.rst
   - triggered hits
 - ~JDAQSummaryslices~
   - header information
+  - rates
   - accessor methods for bit flags (HRV, FIFO, UDP status)
+
+#+REVEAL: split
+
 - ~JDAQTimeslices~
   - header information
   - frame hits
-  - currently only L1, L2 and SN streams, the L0 stream is work in progress
+  - currently only L1, L2 and SN streams
+  - L0 stream is work in progress
 
 ** Examples
 *** Opening a run file
@@ -134,7 +139,7 @@ print(a_timeslice.frames.keys())
 #+RESULTS:
 : dict_keys([806451572, 806455814, 806465101, 806483369, 806487219, 806487226, 806487231, 808432835, 808435278, 808447180, 808447186, 808451904, 808451907, 808469129, 808472260, 808472265, 808488895, 808488990, 808489014, 808489117, 808493910, 808946818, 808949744, 808951460, 808956908, 808959411, 808961448, 808961480, 808961504, 808961655, 808964815, 808964852, 808964883, 808964908, 808969848, 808969857, 808972593, 808972598, 808972698, 808974758, 808974773, 808974811, 808974972, 808976377, 808979567, 808979721, 808979729, 808981510, 808981523, 808981672, 808981812, 808981864, 808982005, 808982018, 808982041, 808982066, 808982077, 808982547, 808984711, 808996773, 808997793, 809006037, 809007627, 809503416, 809521500, 809524432, 809526097, 809544058, 809544061])
 
-*** Reading the first 100 ToTs and channel IDs of a frame sent by the DOM 806451572
+*** Reading the first 42 ToTs and channel IDs of a frame sent by the DOM 806451572
 
 #+BEGIN_SRC python :results output replace :session km3io :exports both
 print(a_timeslice.frames[806451572].tot[:42])
@@ -348,7 +353,8 @@ ax.legend(); ax.grid();
 
 * Command line tool(s)
 - We are working on some counter parts to the Jpp tools
-  - ~KPrintTree -f FILENAME~: similar to ~JPrintTree~
+  - ~KPrintTree -f FILENAME~
+  - similar to ~JPrintTree~
   - more to come (feel free to request or contribute)
 
 * Thanks

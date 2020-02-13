@@ -107,7 +107,7 @@ contain events, timeslics and summary slices.
 Overview of offline files
 """""""""""""""""""""""""
 
-Offline files contain data about events, hits and tracks. 
+Offline files contain data about events, hits and tracks. Based on aanet version 2.0.0 documentation, the following tables show the definitions, the types and the units of the branches founds in the events, hits and tracks trees.
 
 .. csv-table:: events keys definitions and units
    :header: "type", "name", "definition"
@@ -133,6 +133,28 @@ Offline files contain data about events, hits and tracks.
     "vec Trk", "mc_trks", "MC: list of MC truth tracks"
     "string", "comment", "user can use this as he/she likes"
     "int", "index", "user can use this as he/she likes"
+
+
+.. csv-table:: hits keys definitions and units
+   :header: "type", "name", "definition"
+   :widths: 20, 20, 80
+
+    "int", "id", "hit id"
+    "int", "dom_id", "module identifier from the data (unique in the detector)"
+    "unsigned int", "channel_id", "PMT channel id {0,1, .., 31} local to module"
+    "unsigned int", "tdc", "hit tdc (=time in ns)"
+    "unsigned int", "tot", "tot value as stored in raw data (int for pyroot)"
+    "int", "trig", "non-zero if the hit is a trigger hit"
+    "int", "pmt_id", "global PMT identifier as found in evt files"
+    "double", "t", "hit time (from calibration or MC truth)"
+    "double", "a", "hit amplitude (in p.e.)"
+    "vec", "pos", "hit position"
+    "vec", "dir", "hit direction i.e. direction of the PMT"
+    "double", "pure_t", "photon time before pmt simultion (MC only)"
+    "double", "pure_a", "amptitude before pmt simution (MC only)"
+    "int", "type", "particle type or parametrisation used for hit (mc only)"
+    "int", "origin", "track id of the track that created this hit"
+    "unsigned", "pattern_flags", "some number that you can use to flag the hit"
 
 
 DAQ files reader

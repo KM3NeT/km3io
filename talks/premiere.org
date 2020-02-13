@@ -50,17 +50,38 @@ pip install -e ~/Dev/km3io
 - [[https://git.km3net.de/km3py/km3io][km3io]]: a tiny Python package with minimal dependencies to read KM3NeT ROOT files
 - *Goal*: provide a **standalone**, **independent** access to KM3NeT data
 - Uses the [[https://github.com/scikit-hep/uproot][uproot]] library to access ROOT data
-- Provides convenient wrapper classes
 - Maximum performance due to [[https://www.numpy.org][numpy]] and [[http://numba.pydata.org][numba]]
 - Data are read lazily:
-  - only loaded into memory when directly accessed
-  - apply several cut masks on huge datasets without reading them into the memory
+  - only loaded when directly accessed
+  - cut masks on huge datasets without loading them
 
 ** uproot
-- Describe the projec
-- describe Scikit-HEP
-- thanks to Jim
-- etc.
+- ROOT I/O (read/write) in pure Python and Numpy
+- Unlike ~PyROOT~ and ~root_numpy~, ~uproot~ does not depend on C++ ROOT
+- Very helpful developers (*Jim Pivarski*, one of the main authors helped a lot to
+  parse KM3NeT ROOT files and we also contributed to uproot)
+- The rate of reading data into arrays with ~uproot~ is shown to be faster than
+  C++ ROOT or ~root_numpy~
+*** uproot rate / ROOT rate
+
+[[file:images/uproot_vs_root.png]]
+
+Source: https://github.com/scikit-hep/uproot/blob/master/README.rst
+
+*** uproot rate / ~root_numpy~ rate
+
+[[file:images/uproot_vs_root_numpy.png]]
+
+Source: https://github.com/scikit-hep/uproot/blob/master/README.rst
+
+** awkward arrays?
+- "Manipulate arrays of complex data structures as easily as Numpy."
+- Variable-length lists (jagged/ragged), deeply nested (record structure),
+  different data types in the same list, etc.
+- https://github.com/scikit-hep/awkward-array
+- A recommended talk (by Jim himself) on this topic in the HEP context:
+  https://www.youtube.com/watch?v=2NxWpU7NArk
+- ~awkward v1.0~ being rewritten in C++ with focus on ~numba~
 
 ** Installation
 - Dependencies:
@@ -73,10 +94,6 @@ pip install -e ~/Dev/km3io
 ** Why is it so cool?
 - Runs on Linux, macOS, Windows, as long as Python 3.5+ is installed
 - Every data is a ~numpy~ array or ~awkward~ array (~numpy~ compatible array of complex data structures)
-** awkward arrays?
-- some details on it
-- maybe the link to the talk which Jim gave on a HEP conference about awkward arrays
-
 * Accessing Online (DAQ) Data
 ** km3io supports the following DAQ datatypes
 - ~JDAQEvent~ (the event dataformat)

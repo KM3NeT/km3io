@@ -1,0 +1,23 @@
+#type,name,comment
+
+int,id,offline event identifier
+int,det_id,detector identifier from DAQ
+int,mc_id,identifier of the MC event (as found in ascii or antcc file)
+int,run_id,DAQ run identifier
+int,mc_run_id,MC run identifier
+int,frame_index,from the raw data
+ULong64_t,trigger_mask,trigger mask from raw data (i.e. the trigger bits)
+ULong64_t,trigger_counter,trigger counter
+unsigned int,overlays,number of overlaying triggered events
+TTimeStamp,t,UTC time of the start of the timeslice the event came from
+vec Hit,hits,list of hits
+vec Trk,trks,list of reconstructed tracks (can be several because of prefits,showers, etc)
+vec double,w,MC: Weights w[0]=w1 & w[1]=w2 &  w[2]]=w3
+vec double,w2list,MC: factors that make up w[1]=w2
+vec double,w3list,MC: atmospheric flux information
+double,mc_t,MC: time of the mc event
+vec Hit,mc_hits,MC: list of MC truth hits
+vec Trk,mc_trks,MC: list of MC truth tracks
+string,comment,user can use this as he/she likes
+int,index,user can use this as he/she likes
+int,flags,user can use this as he/she likes

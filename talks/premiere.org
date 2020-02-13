@@ -7,46 +7,51 @@
 #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h3>%s</h3><p>%A %a</p><p><a href="%u">%u</a></p>
 
 #+Title: km3io
-#+Subtitle: Reading KM3NeT ROOT files without ROOT
-#+Author: Zineb Aly (CPPM) and Tamas Gal (ECAP)
-#+Email: zaly@km3et.de tgal@km3net.de
+#+Subtitle: Reading [KM3NeT] ROOT files without ROOT
+#+Author: Zineb Aly (CPPM), Tamas Gal (ECAP) and Johannes Schumann (ECAP)
+#+Email: zaly@km3et.de, tgal@km3net.de, jschumann@km3net.de
 #+REVEAL_TALK_URL: https://indico.cern.ch/event/878692/
 
 
-* Prerequisites
+* Prerequisites                                                       :noexport:
+
 #+BEGIN_SRC bash :results silent :async t
 python3 -m venv ~/tmp/km3io-premiere-venv
-. ~/tmp/km3io-permiere-venv/bin/activate
-pip install km3io==0.8.1
+. ~/tmp/km3io-premiere-venv/bin/activate
+# pip install km3io==0.8.1
+pip install -e ~/Dev/km3io
 #+END_SRC
 
 #+BEGIN_SRC elisp
-(setq org-babel-python-command "~/tmp/km3io-permiere-venv/bin/python")
+(setq org-babel-python-command "~/tmp/km3io-premiere-venv/bin/python")
 #+END_SRC
 
 #+RESULTS:
-: ~/tmp/km3io-permiere-venv/bin/python
+: ~/tmp/km3io-premiere-venv/bin/python
 
 * km3io
-#+ATTR_REVEAL: :frag (appear)
-- [[https://git.km3net.de/km3py/km3io][km3io]] tiny Python package with minimal dependencies to read KM3NeT ROOT files
+- [[https://git.km3net.de/km3py/km3io][km3io]]: a tiny Python package with minimal dependencies to read KM3NeT ROOT files
+- *Goal*: provide a **standalone**, **independent** access to KM3NeT data
 - Uses the [[https://github.com/scikit-hep/uproot][uproot]] library to access ROOT data
 - Provides convenient wrapper classes
 - Maximum performance due to numpy and numba
-- Data are read lazily
+- Data are read lazily:
   - only loaded into memory when directly accessed
   - apply several cut masks on huge datasets without reading them into the memory
 
 ** Installation
 - Dependencies:
   - Python 3.5+
-  - uproot (installed automatically)
+  - uproot (a small Python package, installed automatically via ~pip~)
+- *No ROOT, Jpp or aanet* required to read ROOT files
 - Releases are published on the official Python package repository:
   - ~pip install km3io~
+** Why is it so cool?
+- Runs on Linux, macOS, Windows, as long as Python 3.5+ is installed
+- Every data is a ~numpy~ array or ~awkward~ array (~numpy~ compatible array of complex data structures)
 
-* Online (DAQ) Data
+* Accessing Online (DAQ) Data
 ** km3io supports the following DAQ datatypes
-#+ATTR_REVEAL: :frag (appear)
 - ~JDAQEvent~ (the event dataformat)
   - header information
   - snapshot hits
@@ -63,16 +68,16 @@ pip install km3io==0.8.1
 *** Opening a run file
 #+BEGIN_SRC python :results output replace :session km3io :exports both
 import km3io
-f = km3io.DAQReader("KM3NeT_00000044_00006880.root")
+f = km3io.DAQReader("KM3NeT_00000044_00006880.root")  # Random run from iRODS
 print(f.events)
-print(f.timeslices)
 print(f.summaryslices)
+print(f.timeslices)
 #+END_SRC
 
 #+RESULTS:
 : Number of events: 115038
+: Number of summaryslices: 182668
 : Available timeslice streams: SN, L1
-: <km3io.daq.SummmarySlices object at 0x7f8ee90cc970>
 
 *** Investigating timeslice frames
 
@@ -87,23 +92,15 @@ print(a_timeslice.frames.keys())
 *** Reading the first 100 ToTs and channel IDs of a frame sent by the DOM 806451572
 
 #+BEGIN_SRC python :results output replace :session km3io :exports both
-print(a_timeslice.frames[806451572].tot[:100])
-print(a_timeslice.frames[806451572].pmt[:100])
+print(a_timeslice.frames[806451572].tot[:42])
+print(a_timeslice.frames[806451572].pmt[:42])
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-[33 16 22 24  7 27  4 31 31 15  5 26 30 24  7 26 26 26 27 15  7  3 63 28
- 26 30 25 24 20  7 23  6 22 22 26 15 29 25 24 22 23 21 26 20 27 27 25 12
- 27 15 21  9 17 27 21 30 29  5 25 24 22 27 34 10 13 17 25 10 15 28 15 20
- 29 24 24  5 16 26 25 33 26 26 26 14 30  6 27 10 18 24 26 49 59 25 31 30
- 23 25 28 11]
-[ 0  9  4 12 13  2 10 10  8  9 27 27 28 18 27  2  6 15  4  2  2 12 27  3
- 15 10 23 14 19  9  9 24 24  6  7 20  7 20 27 22 24 25 22 14 18 27 30 29
- 29 11 28  1  1 11 12 18 29 20 20 19 10 23 21  2  2 16  1  3  3 24 26  9
- 13 10 29 30 30 10 22  0 22 30  6 19 21 25 25 27 27 26 27 25 29  9 10  5
- 13  6 13 11]
-#+end_example
+: [ 4 19  3 35 29 21  1 22  6  6 29 21 29 26  3 27 11  4 27 29 13 23  4 28
+:  21 24  3 10 25 23 28 25  9  6 14  3 10 25 11 31 10  2]
+: [27 27 14 14 18 22 13 13 30 30 12 10 27 13  7  7 15 15 27 11 23 23 12 12
+:  18 22 29 29 21  8  1  7  9  9  6  6 23 23 25 26 10 10]
 
 *** Checking the number of UDP packets in summary slices
 

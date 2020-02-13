@@ -12,8 +12,25 @@
 #+Email: zaly@km3et.de, tgal@km3net.de, jschumann@km3net.de
 #+REVEAL_TALK_URL: https://indico.cern.ch/event/878692/
 
+* Export Options                                         :noexport:
+** Default
+#+BEGIN_SRC elisp
+(setq org-export-exclude-tags '("noexport"))
+#+END_SRC
 
-* Prerequisites                                                       :noexport:
+#+RESULTS:
+| noexport |
+
+** Presentation
+#+BEGIN_SRC elisp
+(setq org-export-exclude-tags '("noexport" "noexportpresentation"))
+#+END_SRC
+
+#+RESULTS:
+| noexport | noexportpresentation |
+
+
+* Prerequisites                                           :noexportpresentation:
 
 #+BEGIN_SRC bash :results silent :async t
 python3 -m venv ~/tmp/km3io-premiere-venv

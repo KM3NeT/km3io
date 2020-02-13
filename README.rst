@@ -110,8 +110,8 @@ Overview of offline files
 Offline files contain data about events, hits and tracks. 
 
 .. csv-table:: events keys definitions and units
-   :file: https://git.km3net.de/km3py/km3io/raw/master/km3io/definitions/events.csv
-   :widths: 30, 30, 70
+   :file: https://git.km3net.de/km3py/km3io/blob/add-offline-keys-definitions/km3io/definitions/events.csv
+   :widths: 20, 20, 60
    :header-rows: 1
 
 DAQ files reader

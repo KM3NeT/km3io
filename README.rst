@@ -178,6 +178,33 @@ Offline files contain data about events, hits and tracks. Based on aanet version
     "vec double", "error_matrix", "(5x5) error covariance matrix (stored as linear vector)"
     "string", "comment", "user comment"
 
+
+.. csv-table:: offline file header definitions
+   :header: "name", "definition"
+   :widths: 40, 80
+
+    "DAQ", "livetime"
+    "cut_primary cut_seamuon cut_in cut_nu", "Emin Emax cosTmin cosTmax"
+    "generator physics simul", "program version date time"
+    "seed", "program level iseed"
+    "PM1_type_area", "type area TTS"
+    "PDF", "i1 i2"
+    "model", "interaction muon scattering numberOfEnergyBins"
+    "can", "zmin zmax r"
+    "genvol", "zmin zmax r volume numberOfEvents"
+    "merge", "time gain"
+    "coord_origin", "x y z"
+    "translate", "x y z"
+    "genhencut", "gDir Emin"
+    "k40", "rate time"
+    "norma", "primaryFlux numberOfPrimaries"
+    "livetime", "numberOfSeconds errorOfSeconds"
+    "flux", "type key file_1 file_2"
+    "spectrum", "alpha"
+    "fixedcan", "xcenter ycenter zmin zmax radius"
+    "start_run", "run_id"
+
+
 DAQ files reader
 ----------------
 

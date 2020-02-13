@@ -107,7 +107,103 @@ contain events, timeslics and summary slices.
 Overview of offline files
 """""""""""""""""""""""""
 
-Offline files contain data about events, hits and tracks. 
+Offline files contain data about events, hits and tracks. Based on aanet version 2.0.0 documentation, the following tables show the definitions, the types and the units of the branches founds in the events, hits and tracks trees. A description of the file header are also displayed.
+
+.. csv-table:: events keys definitions and units
+   :header: "type", "name", "definition"
+   :widths: 20, 20, 80
+
+    "int", "id", "offline event identifier"
+    "int", "det_id", "detector identifier from DAQ"
+    "int", "mc_id", "identifier of the MC event (as found in ascii or antcc file)"
+    "int", "run_id", "DAQ run identifier"
+    "int", "mc_run_id", "MC run identifier"
+    "int", "frame_index", "from the raw data"
+    "ULong64_t", "trigger_mask", "trigger mask from raw data (i.e. the trigger bits)"
+    "ULong64_t", "trigger_counter", "trigger counter"
+    "unsigned int", "overlays", "number of overlaying triggered events"
+    "TTimeStamp", "t", "UTC time of the start of the timeslice the event came from"
+    "vec Hit", "hits", "list of hits"
+    "vec Trk", "trks", "list of reconstructed tracks (can be several because of prefits,showers, etc)"
+    "vec double", "w", "MC: Weights w[0]=w1 & w[1]=w2 &  w[2]]=w3"
+    "vec double", "w2list", "MC: factors that make up w[1]=w2"
+    "vec double", "w3list", "MC: atmospheric flux information"
+    "double", "mc_t", "MC: time of the mc event"
+    "vec Hit", "mc_hits", "MC: list of MC truth hits"
+    "vec Trk", "mc_trks", "MC: list of MC truth tracks"
+    "string", "comment", "user can use this as he/she likes"
+    "int", "index", "user can use this as he/she likes"
+
+
+.. csv-table:: hits keys definitions and units
+   :header: "type", "name", "definition"
+   :widths: 20, 20, 80
+
+    "int", "id", "hit id"
+    "int", "dom_id", "module identifier from the data (unique in the detector)"
+    "unsigned int", "channel_id", "PMT channel id {0,1, .., 31} local to module"
+    "unsigned int", "tdc", "hit tdc (=time in ns)"
+    "unsigned int", "tot", "tot value as stored in raw data (int for pyroot)"
+    "int", "trig", "non-zero if the hit is a trigger hit"
+    "int", "pmt_id", "global PMT identifier as found in evt files"
+    "double", "t", "hit time (from calibration or MC truth)"
+    "double", "a", "hit amplitude (in p.e.)"
+    "vec", "pos", "hit position"
+    "vec", "dir", "hit direction i.e. direction of the PMT"
+    "double", "pure_t", "photon time before pmt simultion (MC only)"
+    "double", "pure_a", "amptitude before pmt simution (MC only)"
+    "int", "type", "particle type or parametrisation used for hit (mc only)"
+    "int", "origin", "track id of the track that created this hit"
+    "unsigned", "pattern_flags", "some number that you can use to flag the hit"
+
+
+.. csv-table:: tracks keys definitions and units
+   :header: "type", "name", "definition"
+   :widths: 20, 20, 80
+
+    "int", "id", "track identifier"
+    "vec", "pos", "position of the track at time t"
+    "vec", "dir", "track direction"
+    "double", "t", "track time (when particle is at pos)"
+    "double", "E", "Energy (either MC truth or reconstructed)"
+    "double", "len", "length if applicable"
+    "double", "lik", "likelihood or lambda value (for aafit: lambda)"
+    "int", "type", "MC: particle type in PDG encoding"
+    "int", "rec_type", "identifyer for the overall fitting algorithm/chain/strategy"
+    "vec int", "rec_stages", "list of identifyers of succesfull fitting stages resulting in this track"
+    "int", "status", "MC status code"
+    "int", "mother_id", "MC id of the parent particle"
+    "vec double", "fitinf", "place to store additional fit info for jgandalf see FitParameters.csv"
+    "vec int", "hit_ids", "list of associated hit-ids (corresponds to Hit::id)"
+    "vec double", "error_matrix", "(5x5) error covariance matrix (stored as linear vector)"
+    "string", "comment", "user comment"
+
+
+.. csv-table:: offline file header definitions
+   :header: "name", "definition"
+   :widths: 40, 80
+
+    "DAQ", "livetime"
+    "cut_primary cut_seamuon cut_in cut_nu", "Emin Emax cosTmin cosTmax"
+    "generator physics simul", "program version date time"
+    "seed", "program level iseed"
+    "PM1_type_area", "type area TTS"
+    "PDF", "i1 i2"
+    "model", "interaction muon scattering numberOfEnergyBins"
+    "can", "zmin zmax r"
+    "genvol", "zmin zmax r volume numberOfEvents"
+    "merge", "time gain"
+    "coord_origin", "x y z"
+    "translate", "x y z"
+    "genhencut", "gDir Emin"
+    "k40", "rate time"
+    "norma", "primaryFlux numberOfPrimaries"
+    "livetime", "numberOfSeconds errorOfSeconds"
+    "flux", "type key file_1 file_2"
+    "spectrum", "alpha"
+    "fixedcan", "xcenter ycenter zmin zmax radius"
+    "start_run", "run_id"
+
 
 DAQ files reader
 ----------------

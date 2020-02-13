@@ -143,11 +143,11 @@ class DAQReader:
     @property
     def summaryslices(self):
         if self._summaryslices is None:
-            self._summaryslices = SummmarySlices(self._fobj)
+            self._summaryslices = SummarySlices(self._fobj)
         return self._summaryslices
 
 
-class SummmarySlices:
+class SummarySlices:
     """A wrapper for summary slices"""
     def __init__(self, fobj):
         self._fobj = fobj
@@ -193,6 +193,9 @@ class SummmarySlices:
         return tree[b'KM3NETDAQ::JDAQSummarysliceHeader'].lazyarray(
             uproot.interpret(tree[b'KM3NETDAQ::JDAQSummarysliceHeader'],
                              cntvers=True))
+
+    def __str__(self):
+        return "Number of summaryslices: {}".format(len(self.headers))
 
 
 class DAQTimeslices:

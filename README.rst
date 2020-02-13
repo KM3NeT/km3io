@@ -246,7 +246,7 @@ IDs of the slice with the index ``23``:
 .. code-block:: python3
 
   >>> f.summaryslices
-  <km3io.daq.SummmarySlices at 0x7effcc0e52b0>
+  <km3io.daq.SummarySlices at 0x7effcc0e52b0>
   >>> f.summaryslices.slices[23].dom_id
   array([806451572, 806455814, 806465101, 806483369, 806487219, 806487226,
        806487231, 808432835, 808435278, 808447180, 808447186, 808451904,

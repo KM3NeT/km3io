@@ -51,21 +51,31 @@ pip install -e ~/Dev/km3io
 - *Goal*: provide a **standalone**, **independent** access to KM3NeT data
 - Uses the [[https://github.com/scikit-hep/uproot][uproot]] library to access ROOT data
 - Provides convenient wrapper classes
-- Maximum performance due to numpy and numba
+- Maximum performance due to [[https://www.numpy.org][numpy]] and [[http://numba.pydata.org][numba]]
 - Data are read lazily:
   - only loaded into memory when directly accessed
   - apply several cut masks on huge datasets without reading them into the memory
+
+** uproot
+- Describe the projec
+- describe Scikit-HEP
+- thanks to Jim
+- etc.
 
 ** Installation
 - Dependencies:
   - Python 3.5+
   - uproot (a small Python package, installed automatically via ~pip~)
+  - no binaries!
 - *No ROOT, Jpp or aanet* required to read ROOT files
 - Releases are published on the official Python package repository:
   - ~pip install km3io~
 ** Why is it so cool?
 - Runs on Linux, macOS, Windows, as long as Python 3.5+ is installed
 - Every data is a ~numpy~ array or ~awkward~ array (~numpy~ compatible array of complex data structures)
+** awkward arrays?
+- some details on it
+- maybe the link to the talk which Jim gave on a HEP conference about awkward arrays
 
 * Accessing Online (DAQ) Data
 ** km3io supports the following DAQ datatypes
@@ -85,7 +95,8 @@ pip install -e ~/Dev/km3io
 *** Opening a run file
 #+BEGIN_SRC python :results output replace :session km3io :exports both
 import km3io
-f = km3io.DAQReader("KM3NeT_00000044_00006880.root")  # Random run from iRODS
+# A run from iRODS
+f = km3io.DAQReader("KM3NeT_00000044_00006880.root")
 print(f.events)
 print(f.summaryslices)
 print(f.timeslices)
@@ -94,7 +105,7 @@ print(f.timeslices)
 #+RESULTS:
 : Number of events: 115038
 : Number of summaryslices: 182668
-: Available timeslice streams: SN, L1
+: Available timeslice streams: L1, SN
 
 *** Investigating timeslice frames
 
@@ -121,6 +132,8 @@ print(a_timeslice.frames[806451572].pmt[:42])
 
 *** Checking the number of UDP packets in summary slices
 
+- functions to parse binary masks and bit positions from the KM3NeT format definitions
+
 #+BEGIN_SRC python :results output replace :session km3io :exports both
 f = km3io.DAQReader("KM3NeT_00000044_00006880.root")
 sumslice = f.summaryslices.slices[23]
@@ -144,14 +157,15 @@ print(km3io.daq.get_number_udp_packets(sumslice.dq_status))
 
 * Offline (MC/reco) Data
 ** Reading offline files (aka aanet-ROOT files)
-#+ATTR_REVEAL: :frag (appear)
 - Events
   - header information
   - hits
-  - tracks (from reconstruction)
-  - MC tracks
 - MC information
+  - MC tracks
+  - MC hits
 - Reco information
+  - tracks
+  - reconstruction info and parameters
 
 ** Opening a reconstructed MUPAGE file
 #+BEGIN_SRC python :results output replace :session km3io :exports both
@@ -160,7 +174,7 @@ print(f)
 #+END_SRC
 
 #+RESULTS:
-: <km3io.offline.OfflineReader object at 0x7f8eeb436e20>
+: <km3io.offline.OfflineReader object at 0x1155bde50>
 
 ** Investigating events and tracks
 #+BEGIN_SRC python :results output replace :session km3io :exports both
@@ -210,7 +224,7 @@ offline hit:
 	pattern_flags       :               0
 #+end_example
 
-*** Tracks
+*** Tracks                                              :noexportpresentation:
 
 #+BEGIN_SRC python :results output replace :session km3io :exports both
 print(f[0].tracks[0])
@@ -262,17 +276,14 @@ offline track:
 ** Extracting the energy of every first reco track in each event
 
 #+BEGIN_SRC python :results output replace :session km3io :exports both
+# from irods:mc/v5.2/mcv5.2.mupage_10T.sirene.jte.1186.root
 f = km3io.OfflineReader("mupage.root")
-print(f.mc_tracks)
-print(f.mc_tracks.id.counts)
-mask = f.mc_tracks.id.counts > 0
+print(f.events)
+# number of tracks per event
+print(f.mc_tracks.E.counts)
+mask = f.mc_tracks.E.counts > 0
 print(f.mc_tracks.E[mask, 0])
 #+END_SRC
-
-#+RESULTS:
-: Number of tracks: 12236
-: [11  2  3 ... 10  1  4]
-: [17.72 73.213 10884.78 1694.332 1221.061 22945.123 11019.418 ...]
 
 * ORCA DU4 RBR Analysis Example
 ** A tiny function to extract track attributes from a list of files

@@ -1,7 +1,7 @@
 #+OPTIONS: num:nil toc:nil reveal_single_file:t
 #+REVEAL_ROOT: ~/opt/reveal.js-3.9.2
-#+REVEAL_TRANS: none
-#+REVEAL_THEME: white
+#+REVEAL_TRANS: linear
+#+REVEAL_THEME: black
 #+REVEAL_MIN_SCALE: 1.0
 #+REVEAL_MAX_SCALE: 1.0
 #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h3>%s</h3><p>%A %a</p><p><a href="%u">%u</a></p>
@@ -57,11 +57,22 @@ pip install -e ~/Dev/km3io
 
 ** uproot
 - ROOT I/O (read/write) in pure Python and Numpy
+- Created by SciKit-HEP ([[https://scikit-hep.org][https://scikit-hep.org]])
+
+  "The Scikit-HEP project is a community-driven and community-oriented project
+  with the aim of providing Particle Physics at large with an ecosystem for
+  data analysis in Python. The project started in Autumn 2016 and is in full swing."
+
+#+REVEAL: split
+
+
 - Unlike ~PyROOT~ and ~root_numpy~, ~uproot~ does not depend on C++ ROOT
 - Very helpful developers (*Jim Pivarski*, one of the main authors helped a lot to
   parse KM3NeT ROOT files and we also contributed to uproot)
 - The rate of reading data into arrays with ~uproot~ is shown to be faster than
   C++ ROOT or ~root_numpy~
+- *It's fast!!!*
+
 *** uproot rate / ROOT rate
 
 [[file:images/uproot_vs_root.png]]
@@ -312,7 +323,7 @@ print(f.mc_tracks.E[mask, 0])
 
 #+BEGIN_SRC python
 def extract_features(files, features):
-    """Return a dict with the features from every best reco track"""
+    """Gather features from the best reco tracks"""
     data = defaultdict(list)
     for f in tqdm(files):
         tracks = km3io.OfflineReader(f).tracks
@@ -328,8 +339,10 @@ def extract_features(files, features):
 
 #+BEGIN_SRC python
 sea_files = glob("data/reco-sea/*aanet*.root")
+mc_files = glob("data/reco-rbr-muatm/*sirene*aanet*.root")
 features = ['E', 'lik', *[e + '_' + q for q in 'xyz' for e in ['pos', 'dir']]]
 sea_data = extract_features(sea_files, features)
+mc_data = extract_features(mc_files, features)
 #+END_SRC
 
 ** Plotting some data with ~matplotlib~
@@ -347,7 +360,7 @@ ax.set_xlabel("energy / GeV")
 ax.legend(); ax.grid();
 #+END_SRC
 
-#+REVEAL: split
+** Energy Distribution Comparison (example)
 
 [[file:./images/orca-du4.png]]
 

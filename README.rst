@@ -107,7 +107,7 @@ contain events, timeslics and summary slices.
 Overview of offline files
 """""""""""""""""""""""""
 
-Offline files contain data about events, hits and tracks. Based on aanet version 2.0.0 documentation, the following tables show the definitions, the types and the units of the branches founds in the events, hits and tracks trees.
+Offline files contain data about events, hits and tracks. Based on aanet version 2.0.0 documentation, the following tables show the definitions, the types and the units of the branches founds in the events, hits and tracks trees. A description of the file header are also displayed.
 
 .. csv-table:: events keys definitions and units
    :header: "type", "name", "definition"
@@ -156,6 +156,27 @@ Offline files contain data about events, hits and tracks. Based on aanet version
     "int", "origin", "track id of the track that created this hit"
     "unsigned", "pattern_flags", "some number that you can use to flag the hit"
 
+
+.. csv-table:: tracks keys definitions and units
+   :header: "type", "name", "definition"
+   :widths: 20, 20, 80
+
+    "int", "id", "track identifier"
+    "vec", "pos", "position of the track at time t"
+    "vec", "dir", "track direction"
+    "double", "t", "track time (when particle is at pos)"
+    "double", "E", "Energy (either MC truth or reconstructed)"
+    "double", "len", "length if applicable"
+    "double", "lik", "likelihood or lambda value (for aafit: lambda)"
+    "int", "type", "MC: particle type in PDG encoding"
+    "int", "rec_type", "identifyer for the overall fitting algorithm/chain/strategy"
+    "vec int", "rec_stages", "list of identifyers of succesfull fitting stages resulting in this track"
+    "int", "status", "MC status code"
+    "int", "mother_id", "MC id of the parent particle"
+    "vec double", "fitinf", "place to store additional fit info for jgandalf see FitParameters.csv"
+    "vec int", "hit_ids", "list of associated hit-ids (corresponds to Hit::id)"
+    "vec double", "error_matrix", "(5x5) error covariance matrix (stored as linear vector)"
+    "string", "comment", "user comment"
 
 DAQ files reader
 ----------------

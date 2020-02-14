@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.8.2 / 2020-02-14
+~~~~~~~~~~~~~~~~~~
+* minor fixes
+
 0.8.1 / 2020-02-10
 ~~~~~~~~~~~~~~~~~~
 * update of reco data from offline files

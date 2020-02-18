@@ -143,9 +143,9 @@ class OfflineKeys:
             except those found in fake branches.
         """
         if self._mc_tracks_keys is None:
-            fake_branches = set([
-                'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.usr_names'
-            ])  # same solution as above can be used
+            fake_branches = set(
+                ['mc_trks.usr_data', 'mc_trks.usr',
+                 'mc_trks.usr_names'])  # same solution as above can be used
             tree = uproot.open(self._file_path)['E']['Evt']['mc_trks']
             self._mc_tracks_keys = [
                 key.decode('utf8') for key in tree.keys()
@@ -568,10 +568,8 @@ class OfflineReader:
                     str(stages)))
         else:
             fit_data = np.array([
-                i[k]
-                for i, j, k in zip(fit_info, rec_stages[:, 0], rec_stages[:,
-                                                                          1])
-                if k is not None
+                i[k] for i, j, k in zip(fit_info, rec_stages[:, 0],
+                                        rec_stages[:, 1]) if k is not None
             ])
             rec_array = np.core.records.fromarrays(fit_data.transpose(),
                                                    names=keys)

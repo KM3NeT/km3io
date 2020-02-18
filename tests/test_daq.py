@@ -394,6 +394,9 @@ class TestSummaryslices(unittest.TestCase):
                 for a, b in zip(get_channel_flags(frame.fifo[0]), fifo_flags)
             ])
 
+    def test_str(self):
+        print(str(self.ss))
+
 
 class TestGetRate(unittest.TestCase):
     def test_zero(self):

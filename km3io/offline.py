@@ -313,7 +313,8 @@ class Reader:
             do not contain data. Therefore, the keys corresponding to these
             fake branches are not read.
         """
-        if key not in self.keys.valid_keys and not isinstance(key, int):
+        keys = self.keys.valid_keys
+        if key not in keys and not isinstance(key, int):
             raise KeyError(
                 "'{}' is not a valid key or is a fake branch.".format(key))
         return self._data[key]
@@ -576,6 +577,127 @@ class OfflineReader:
             rec_array = np.core.records.fromarrays(fit_data.transpose(),
                                                    names=keys)
             return rec_array
+
+    def get_reco_hits(self, stages, keys):
+        """construct a dictionary of hits class data based on the reconstruction
+        stages of interest. For example, if the reconstruction stages of interest
+        are [1, 2, 3, 4, 5], then get_reco_hits method will select the hits data 
+        from the events that were reconstructed following these stages (i.e 
+        [1, 2, 3, 4, 5]).
+
+        Parameters
+        ----------
+        stages : list
+            list of reconstruction stages of interest. for example
+            [1, 2, 3, 4, 5].
+        keys : list of str
+            list of the hits class attributes.
+
+        Returns
+        -------
+        dict
+            dictionary of lazyarrays containing data for each hits attribute requested.
+
+        Raises
+        ------
+        ValueError
+            ValueError raised when the reconstruction stages of interest
+            are not found in the file.
+        """
+        lazy_d = {}
+        rec_stages = np.array(
+            [match for match in self._find_rec_stages(stages)])
+        mask = rec_stages[:, 1] != None
+        if np.all(rec_stages[:, 1] == None):
+            raise ValueError(
+                "The stages {} are not found in your file.".format(
+                    str(stages)))
+        else:
+            for key in keys:
+                lazy_d[key] = getattr(self.hits, key)[mask]
+        return lazy_d
+
+    def get_reco_events(self, stages, keys):
+        """construct a dictionary of events class data based on the reconstruction
+        stages of interest. For example, if the reconstruction stages of interest
+        are [1, 2, 3, 4, 5], then get_reco_events method will select the events data 
+        that were reconstructed following these stages (i.e [1, 2, 3, 4, 5]).
+
+        Parameters
+        ----------
+        stages : list
+            list of reconstruction stages of interest. for example
+            [1, 2, 3, 4, 5].
+        keys : list of str
+            list of the events class attributes.
+
+        Returns
+        -------
+        dict
+            dictionary of lazyarrays containing data for each events attribute requested.
+
+        Raises
+        ------
+        ValueError
+            ValueError raised when the reconstruction stages of interest
+            are not found in the file.
+        """
+        lazy_d = {}
+        rec_stages = np.array(
+            [match for match in self._find_rec_stages(stages)])
+        mask = rec_stages[:, 1] != None
+        if np.all(rec_stages[:, 1] == None):
+            raise ValueError(
+                "The stages {} are not found in your file.".format(
+                    str(stages)))
+        else:
+            for key in keys:
+                lazy_d[key] = getattr(self.events, key)[mask]
+        return lazy_d
+
+    def get_reco_tracks(self, stages, keys):
+        """construct a dictionary of tracks class data based on the reconstruction
+        stages of interest. For example, if the reconstruction stages of interest
+        are [1, 2, 3, 4, 5], then get_reco_tracks method will select tracks data 
+        from the events that were reconstructed following these stages (i.e 
+        [1, 2, 3, 4, 5]).
+
+        Parameters
+        ----------
+        stages : list
+            list of reconstruction stages of interest. for example
+            [1, 2, 3, 4, 5].
+        keys : list of str
+            list of the tracks class attributes.
+
+        Returns
+        -------
+        dict
+            dictionary of lazyarrays containing data for each tracks attribute requested.
+
+        Raises
+        ------
+        ValueError
+            ValueError raised when the reconstruction stages of interest
+            are not found in the file.
+        """
+        lazy_d = {}
+        rec_stages = np.array(
+            [match for match in self._find_rec_stages(stages)])
+        mask = rec_stages[:, 1] != None
+        if np.all(rec_stages[:, 1] == None):
+            raise ValueError(
+                "The stages {} are not found in your file.".format(
+                    str(stages)))
+        else:
+            for key in keys:
+                lazy_d[key] = np.array([
+                    i[k] for i, k in zip(
+                        getattr(self.tracks, key)[mask], rec_stages[:,
+                                                                    1][mask])
+                ])
+
+        return lazy_d
 
     def _find_rec_stages(self, stages):
         """find the index of reconstruction stages of interest in a

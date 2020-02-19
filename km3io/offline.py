@@ -313,7 +313,7 @@ class Reader:
             do not contain data. Therefore, the keys corresponding to these
             fake branches are not read.
         """
-        keys = set(self.keys.valid_keys)
+        keys = self.keys.valid_keys
         if key not in keys and not isinstance(key, int):
             raise KeyError(
                 "'{}' is not a valid key or is a fake branch.".format(key))

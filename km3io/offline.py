@@ -60,7 +60,7 @@ class OfflineKeys:
             except those found in fake branches.
         """
         if self._events_keys is None:
-            fake_branches = set(['Evt', 'AAObject', 'TObject', 't'])
+            fake_branches = ['Evt', 'AAObject', 'TObject', 't']
             t_baskets = ['t.fSec', 't.fNanoSec']
             tree = uproot.open(self._file_path)['E']['Evt']
             self._events_keys = [
@@ -80,9 +80,9 @@ class OfflineKeys:
             except those found in fake branches.
         """
         if self._hits_keys is None:
-            fake_branches = set([
+            fake_branches = [
                 'hits.usr', 'hits.usr_names'
-            ])  # to be treated like trks.usr and trks.usr_names
+            ]  # to be treated like trks.usr and trks.usr_names
             tree = uproot.open(self._file_path)['E']['hits']
             self._hits_keys = [
                 key.decode('utf8') for key in tree.keys()
@@ -103,9 +103,9 @@ class OfflineKeys:
         if self._tracks_keys is None:
             # a solution can be tree['trks.usr_data'].array(
             # uproot.asdtype(">i4"))
-            fake_branches = set([
+            fake_branches = [
                 'trks.usr_data', 'trks.usr', 'trks.usr_names'
-            ])  # can be accessed using tree['trks.usr_names'].array()
+            ]  # can be accessed using tree['trks.usr_names'].array()
             tree = uproot.open(self._file_path)['E']['Evt']['trks']
             self._tracks_keys = [
                 key.decode('utf8') for key in tree.keys()
@@ -124,7 +124,7 @@ class OfflineKeys:
             except those found in fake branches.
         """
         if self._mc_hits_keys is None:
-            fake_branches = set(['mc_hits.usr', 'mc_hits.usr_names'])
+            fake_branches = ['mc_hits.usr', 'mc_hits.usr_names']
             tree = uproot.open(self._file_path)['E']['Evt']['mc_hits']
             self._mc_hits_keys = [
                 key.decode('utf8') for key in tree.keys()
@@ -143,9 +143,9 @@ class OfflineKeys:
             except those found in fake branches.
         """
         if self._mc_tracks_keys is None:
-            fake_branches = set(
-                ['mc_trks.usr_data', 'mc_trks.usr',
-                 'mc_trks.usr_names'])  # same solution as above can be used
+            fake_branches = [
+                'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.usr_names'
+            ]  # same solution as above can be used
             tree = uproot.open(self._file_path)['E']['Evt']['mc_trks']
             self._mc_tracks_keys = [
                 key.decode('utf8') for key in tree.keys()
@@ -313,7 +313,8 @@ class Reader:
             do not contain data. Therefore, the keys corresponding to these
             fake branches are not read.
         """
-        if key not in set(self.keys.valid_keys) and not isinstance(key, int):
+        keys = set(self.keys.valid_keys)
+        if key not in keys and not isinstance(key, int):
             raise KeyError(
                 "'{}' is not a valid key or is a fake branch.".format(key))
         return self._data[key]
@@ -568,10 +569,8 @@ class OfflineReader:
                     str(stages)))
         else:
             fit_data = np.array([
-                i[k]
-                for i, j, k in zip(fit_info, rec_stages[:, 0], rec_stages[:,
-                                                                          1])
-                if k is not None
+                i[k] for i, j, k in zip(fit_info, rec_stages[:, 0],
+                                        rec_stages[:, 1]) if k is not None
             ])
             rec_array = np.core.records.fromarrays(fit_data.transpose(),
                                                    names=keys)
@@ -692,8 +691,8 @@ class OfflineReader:
             for key in keys:
                 lazy_d[key] = np.array([
                     i[k] for i, k in zip(
-                        getattr(self.tracks, key)[mask], rec_stages[:,
-                                                                    1][mask])
+                        getattr(self.tracks, key)[mask], rec_stages[:, 1]
+                        [mask])
                 ])
 
         return lazy_d

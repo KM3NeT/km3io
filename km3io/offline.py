@@ -11,7 +11,6 @@ BASKET_CACHE_SIZE = 110 * 1024**2
 
 class OfflineKeys:
     """wrapper for offline keys"""
-
     def __init__(self, file_path):
         """OfflineKeys is a class that reads all the available keys in an offline
         file and adapts the keys format to Python format.
@@ -274,7 +273,6 @@ class OfflineKeys:
 
 class Reader:
     """Reader for one offline ROOT file"""
-
     def __init__(self, file_path):
         """ Reader class is an offline ROOT file reader. This class is a
         "very" low level I/O.
@@ -342,7 +340,6 @@ class Reader:
 
 class OfflineReader:
     """reader for offline ROOT files"""
-
     def __init__(self, file_path, data=None):
         """ OfflineReader class is an offline ROOT file wrapper
 
@@ -759,7 +756,6 @@ class OfflineReader:
 
 class OfflineEvents:
     """wrapper for offline events"""
-
     def __init__(self, keys, values):
         """wrapper for offline events.
 
@@ -794,7 +790,6 @@ class OfflineEvents:
 
 class OfflineEvent:
     """wrapper for an offline event"""
-
     def __init__(self, keys, values):
         """wrapper for one offline event.
 
@@ -822,7 +817,6 @@ class OfflineEvent:
 
 class OfflineHits:
     """wrapper for offline hits"""
-
     def __init__(self, keys, values):
         """wrapper for offline hits.
 
@@ -857,7 +851,6 @@ class OfflineHits:
 
 class OfflineHit:
     """wrapper for an offline hit"""
-
     def __init__(self, keys, values):
         """wrapper for one offline hit.
 
@@ -894,7 +887,6 @@ class OfflineHit:
 
 class OfflineTracks:
     """wrapper for offline tracks"""
-
     def __init__(self, keys, values, fitparameters=None):
         """wrapper for offline tracks
 
@@ -939,7 +931,6 @@ class OfflineTracks:
 
 class OfflineTrack:
     """wrapper for an offline track"""
-
     def __init__(self, keys, values, fitparameters=None):
         """wrapper for one offline track.
 

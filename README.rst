@@ -928,6 +928,34 @@ to get the reconstruction data of interest, for example ['JENERGY_ENERGY']:
         208.6103912 , 1336.52338666,  998.87632267, 1206.54345674,
          16.28973662])
 
+to get a dictionary of the corresponding hits data (for example dom ids and hits ids)
+
+.. code-block:: python3
+
+    >>> r.get_reco_hits([1,2,3,4,5], ["dom_id", "id"]))
+    {'dom_id': <ChunkedArray [[102 102 102 ... 11517 11518 11518] [101 101 101 ... 11517 11518 11518] [101 101 102 ... 11518 11518 11518] [101 102 102 ... 11516 11517 11518] [101 101 102 ... 11517 11518 11518] [101 101 102 ... 11517 11517 11518] [101 101 102 ... 11516 11516 11517] ...] at 0x7f553ab7f3d0>,
+    'id': <ChunkedArray [[0 0 0 ... 0 0 0] [0 0 0 ... 0 0 0] [0 0 0 ... 0 0 0] [0 0 0 ... 0 0 0] [0 0 0 ... 0 0 0] [0 0 0 ... 0 0 0] [0 0 0 ... 0 0 0] ...] at 0x7f553ab7f890>}
+
+to get a dictionary of the corresponding tracks data (for example position x and y)
+
+.. code-block:: python3
+
+    >>> r.get_reco_tracks([1, 2, 3, 4, 5], ["pos_x", "pos_y"])
+
+    {'pos_x': array([-647.39638136,  448.98490051,  451.12336854,  174.23666051,207.24223984, -460.75770881, -522.58197621,  324.16230509,
+            -436.2319534 ]),
+     'pos_y': array([-138.62068609,   77.58887593,  251.08805881, -114.60614519, 143.61947974,   86.85012087, -263.14983599, -203.14263572,
+             467.75113594])}
+
+to get a dictionary of the corresponding events data (for example det_id and run_id)
+
+.. code-block:: python3
+
+    >>> r.get_reco_events([1, 2, 3, 4, 5], ["run_id", "det_id"])
+
+    {'run_id': <ChunkedArray [1 1 1 1 1 1 1 ...] at 0x7f553b5b2710>,
+     'det_id': <ChunkedArray [20 20 20 20 20 20 20 ...] at 0x7f5558030750>}
+
 **Note**: When the reconstruction stages of interest are not found in all your data file, an error is raised.
 
 

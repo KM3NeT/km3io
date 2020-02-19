@@ -199,6 +199,35 @@ class TestOfflineReader(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.nu.get_reco_fit([1000, 4512, 5625])
 
+    def test_get_reco_hits(self):
+
+        doms = self.nu.get_reco_hits([1, 2, 3, 4, 5], ["dom_id"])["dom_id"]
+
+        self.assertEqual(doms.size, 9)
+        self.assertListEqual(doms[0][0:4].tolist(),
+                             self.nu.hits[0].dom_id[0:4].tolist())
+        with self.assertRaises(ValueError):
+            self.nu.get_reco_hits([1000, 4512, 5625], ["dom_id"])
+
+    def test_get_reco_tracks(self):
+
+        pos = self.nu.get_reco_tracks([1, 2, 3, 4, 5], ["pos_x"])["pos_x"]
+
+        self.assertEqual(pos.size, 9)
+        self.assertEqual(pos[0], self.nu.tracks[0].pos_x[0])
+        with self.assertRaises(ValueError):
+            self.nu.get_reco_tracks([1000, 4512, 5625], ["pos_x"])
+
+    def test_get_reco_events(self):
+
+        hits = self.nu.get_reco_events([1, 2, 3, 4, 5], ["hits"])["hits"]
+
+        self.assertEqual(hits.size, 9)
+        self.assertListEqual(hits[0:4].tolist(),
+                             self.nu.events.hits[0:4].tolist())
+        with self.assertRaises(ValueError):
+            self.nu.get_reco_events([1000, 4512, 5625], ["hits"])
+
     def test_get_max_reco_stages(self):
         rec_stages = self.nu.tracks.rec_stages
         max_reco = self.nu._get_max_reco_stages(rec_stages)

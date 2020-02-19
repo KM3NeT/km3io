@@ -569,8 +569,10 @@ class OfflineReader:
                     str(stages)))
         else:
             fit_data = np.array([
-                i[k] for i, j, k in zip(fit_info, rec_stages[:, 0],
-                                        rec_stages[:, 1]) if k is not None
+                i[k]
+                for i, j, k in zip(fit_info, rec_stages[:, 0], rec_stages[:,
+                                                                          1])
+                if k is not None
             ])
             rec_array = np.core.records.fromarrays(fit_data.transpose(),
                                                    names=keys)
@@ -691,8 +693,8 @@ class OfflineReader:
             for key in keys:
                 lazy_d[key] = np.array([
                     i[k] for i, k in zip(
-                        getattr(self.tracks, key)[mask], rec_stages[:, 1]
-                        [mask])
+                        getattr(self.tracks, key)[mask], rec_stages[:,
+                                                                    1][mask])
                 ])
 
         return lazy_d

@@ -1,0 +1,413 @@
+#+OPTIONS: num:nil toc:nil reveal_single_file:t
+#+REVEAL_ROOT: ~/opt/reveal.js-3.9.2
+#+REVEAL_TRANS: linear
+#+REVEAL_THEME: black
+#+REVEAL_MIN_SCALE: 1.0
+#+REVEAL_MAX_SCALE: 1.0
+#+REVEAL_TITLE_SLIDE: <h1>%t</h1><h3>%s</h3><p>%A %a</p><p><a href="%u">%u</a></p>
+
+#+Title: km3io
+#+Subtitle: Reading [KM3NeT] ROOT files without ROOT
+#+Author: Zineb Aly (CPPM), Tamas Gal (ECAP) and Johannes Schumann (ECAP)
+#+Email: zaly@km3et.de, tgal@km3net.de, jschumann@km3net.de
+#+REVEAL_TALK_URL: https://indico.cern.ch/event/871318/contributions/3740124
+
+* Export Options                                         :noexport:
+** Default
+#+BEGIN_SRC elisp
+(setq org-export-exclude-tags '("noexport"))
+#+END_SRC
+
+#+RESULTS:
+| noexport |
+
+** Presentation
+#+BEGIN_SRC elisp
+(setq org-export-exclude-tags '("noexport" "noexportpresentation"))
+#+END_SRC
+
+#+RESULTS:
+| noexport | noexportpresentation |
+
+
+* Prerequisites                                           :noexportpresentation:
+
+#+BEGIN_SRC bash :results silent :async t
+python3 -m venv ~/tmp/km3io-premiere-venv
+. ~/tmp/km3io-premiere-venv/bin/activate
+pip install km3io==0.8.2
+#+END_SRC
+
+#+BEGIN_SRC elisp
+(setq org-babel-python-command "~/tmp/km3io-premiere-venv/bin/python")
+#+END_SRC
+
+#+RESULTS:
+: ~/tmp/km3io-premiere-venv/bin/python
+
+* km3io
+- [[https://git.km3net.de/km3py/km3io][km3io]]: a tiny Python package with minimal dependencies to read KM3NeT ROOT files
+- *Goal*: provide a **standalone**, **independent** access to KM3NeT data
+- Uses the [[https://github.com/scikit-hep/uproot][uproot]] Python library to access ROOT data
+- Maximum performance due to [[https://www.numpy.org][numpy]] and [[http://numba.pydata.org][numba]]
+- 100% test coverage
+- Automated testing for Python 3.5, 3.6, 3.7 and 3.8
+
+
+** Data in ~km3io~
+- data are read lazily using the [[https://github.com/scikit-hep/awkward-array][awkwardarray]] Python library
+- only loaded when directly accessed
+- apply cut masks on huge datasets without loading them (wholemeal, database-like workflow)
+- compatible with [[https://pandas.pydata.org][pandas]]
+
+* uproot
+:PROPERTIES:
+:reveal_background: linear-gradient(to left, #910830, #521623)
+:END:
+- ROOT I/O (read/write) in pure Python and Numpy
+- Created by SciKit-HEP ([[https://scikit-hep.org][https://scikit-hep.org]])
+
+  "The Scikit-HEP project is a community-driven and community-oriented project
+  with the aim of providing Particle Physics at large with an ecosystem for
+  data analysis in Python. The project started in Autumn 2016 and is in full swing."
+- Highly recommended if you live in the Python world
+
+#+REVEAL: split
+
+
+- Unlike ~PyROOT~ and ~root_numpy~, ~uproot~ does not depend on C++ ROOT
+- Very helpful developers (*Jim Pivarski*, one of the main authors helped a lot to
+  parse KM3NeT ROOT files and we also contributed to uproot)
+- The rate of reading data into arrays with ~uproot~ is shown to be faster than
+  C++ ROOT, ~PyROOT~ or ~root_numpy~
+- *It's fast!!!*
+
+*** uproot rate / ROOT rate
+:PROPERTIES:
+:reveal_background: linear-gradient(to left, #910830, #521623)
+:END:
+
+[[file:images/uproot_vs_root.png]]
+
+Source: https://github.com/scikit-hep/uproot/blob/master/README.rst
+
+*** uproot rate / ~root_numpy~ rate
+:PROPERTIES:
+:reveal_background: linear-gradient(to left, #910830, #521623)
+:END:
+
+[[file:images/uproot_vs_root_numpy.png]]
+
+Source: https://github.com/scikit-hep/uproot/blob/master/README.rst
+
+** awkward arrays?
+:PROPERTIES:
+:reveal_background: linear-gradient(to left, #910830, #521623)
+:END:
+- "Manipulate arrays of complex data structures as easily as Numpy."
+- Variable-length lists (jagged/ragged), deeply nested (record structure),
+  different data types in the same list, etc.
+- https://github.com/scikit-hep/awkward-array
+- A recommended talk (by Jim himself) on this topic in the HEP context:
+  https://www.youtube.com/watch?v=2NxWpU7NArk
+- ~awkward v1.0~ being rewritten in C++
+
+* Installation of ~km3io~
+- Dependencies:
+  - Python 3.5+
+  - uproot (a small Python package, installed automatically via ~pip~)
+  - no binaries!
+- *No ROOT, Jpp or aanet* required to read ROOT files
+- Releases are published on the official Python package repository
+
+** ~pip install km3io~
+:PROPERTIES:
+:reveal_background: linear-gradient(to left, #ff12a8, #27aae3)
+:END:
+** Why is it so cool?
+- Runs on Linux, macOS, Windows, as long as Python 3.5+ is installed
+- Every data is a ~numpy~ array or ~awkward~ array (~numpy~ compatible array of complex data structures)
+* Online (DAQ) Data
+:PROPERTIES:
+:reveal_background: linear-gradient(to bottom, #27aae3, #000000)
+:END:
+** km3io supports the following DAQ datatypes
+- ~JDAQEvent~ (the event dataformat)
+  - header information
+  - snapshot hits
+  - triggered hits
+- ~JDAQSummaryslices~
+  - header information
+  - rates
+  - accessor methods for bit flags (HRV, FIFO, UDP status)
+
+#+REVEAL: split
+
+- ~JDAQTimeslices~
+  - header information
+  - frame hits
+  - currently only L1, L2 and SN streams
+  - L0 stream is work in progress
+
+** Examples
+*** Opening a run file
+#+BEGIN_SRC python :results output replace :session km3io :exports both
+import km3io
+# A run from iRODS
+f = km3io.DAQReader("KM3NeT_00000044_00006880.root")
+print(f.events)
+print(f.summaryslices)
+print(f.timeslices)
+#+END_SRC
+
+#+RESULTS:
+: Number of events: 115038
+: Number of summaryslices: 182668
+: Available timeslice streams: SN, L1
+
+*** Investigating timeslice frames
+
+#+BEGIN_SRC python :results output replace :session km3io :exports both
+a_timeslice = f.timeslices.stream("L1", 23)
+print(a_timeslice.frames.keys())
+#+END_SRC
+
+#+RESULTS:
+: dict_keys([806451572, 806455814, 806465101, 806483369, 806487219, 806487226, 806487231, 808432835, 808435278, 808447180, 808447186, 808451904, 808451907, 808469129, 808472260, 808472265, 808488895, 808488990, 808489014, 808489117, 808493910, 808946818, 808949744, 808951460, 808956908, 808959411, 808961448, 808961480, 808961504, 808961655, 808964815, 808964852, 808964883, 808964908, 808969848, 808969857, 808972593, 808972598, 808972698, 808974758, 808974773, 808974811, 808974972, 808976377, 808979567, 808979721, 808979729, 808981510, 808981523, 808981672, 808981812, 808981864, 808982005, 808982018, 808982041, 808982066, 808982077, 808982547, 808984711, 808996773, 808997793, 809006037, 809007627, 809503416, 809521500, 809524432, 809526097, 809544058, 809544061])
+
+*** Reading the first 42 ToTs and channel IDs of a frame sent by the DOM 806451572
+
+#+BEGIN_SRC python :results output replace :session km3io :exports both
+print(a_timeslice.frames[806451572].tot[:42])
+print(a_timeslice.frames[806451572].pmt[:42])
+#+END_SRC
+
+#+RESULTS:
+: [33 16 22 24  7 27  4 31 31 15  5 26 30 24  7 26 26 26 27 15  7  3 63 28
+:  26 30 25 24 20  7 23  6 22 22 26 15 29 25 24 22 23 21]
+: [ 0  9  4 12 13  2 10 10  8  9 27 27 28 18 27  2  6 15  4  2  2 12 27  3
+:  15 10 23 14 19  9  9 24 24  6  7 20  7 20 27 22 24 25]
+
+*** Checking the number of UDP packets in summary slices
+
+- functions to parse binary masks and bit positions from the KM3NeT format definitions
+
+#+BEGIN_SRC python :results output replace :session km3io :exports both
+f = km3io.DAQReader("KM3NeT_00000044_00006880.root")
+sumslice = f.summaryslices.slices[23]
+print(sumslice.dom_id)
+print(km3io.daq.get_number_udp_packets(sumslice.dq_status))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+[806451572 806483369 806487231 808435278 808447180 808451907 808472265
+ 808488895 808489014 808489117 808493910 808946818 808949744 808951460
+ 808956908 808959411 808961448 808961504 808961655 808964815 808964883
+ 808964908 808969848 808969857 808972593 808972598 808972698 808974972
+ 808976377 808979721 808979729 808981510 808981523 808981672 808981812
+ 808981864 808982005 808982018 808982041 808982066 808982547 808984711
+ 808996773 808997793 809006037 809007627 809521500 809524432 809544058]
+[17 17 16 16 25 16 27 17 18 17 21 16 16 16 34 18 18 18 17 18 16 18 15 17
+ 20 18 15 17 17 19 16 18 16 17 17 16 18 18 17 27 18 20 16 17 15 18 17 17
+ 17]
+#+end_example
+
+* Offline (MC/reco) Data
+:PROPERTIES:
+:reveal_background: linear-gradient(to bottom, #e3b1e3, #000000)
+:END:
+** Reading offline files (aka aanet-ROOT files)
+- Events
+  - header information
+  - hits
+- MC information
+  - MC tracks
+  - MC hits
+- Reco information
+  - tracks
+  - reconstruction info and parameters
+
+** Opening a reconstructed MUPAGE file
+#+BEGIN_SRC python :results output replace :session km3io :exports both
+f = km3io.OfflineReader("mc.root")
+print(f)
+#+END_SRC
+
+#+RESULTS:
+: <km3io.offline.OfflineReader object at 0x10b267f50>
+
+** Investigating events and tracks
+#+BEGIN_SRC python :results output replace :session km3io :exports both
+print(f.events)
+#+END_SRC
+
+#+RESULTS:
+: Number of events: 10
+
+#+BEGIN_SRC python :results output replace :session km3io :exports both
+print(f.tracks.lik)
+print(f.tracks.dir_z)
+#+END_SRC
+
+#+RESULTS:
+: [[294.6407542676734 294.6407542676734 294.6407542676734 ... 67.81221253265059 67.7756405143316 67.77250505700384] [96.75133289411137 96.75133289411137 96.75133289411137 ... 39.21916536442286 39.184645826013806 38.870325146341884] [560.2775306614813 560.2775306614813 560.2775306614813 ... 118.88577278801066 118.72271313687405 117.80785995187605] ... [71.03251451148226 71.03251451148226 71.03251451148226 ... 16.714140573909347 16.444395245214945 16.34639241716669] [326.440133294878 326.440133294878 326.440133294878 ... 87.79818671079849 87.75488082571873 87.74839444768625] [159.77779654216795 159.77779654216795 159.77779654216795 ... 33.8669134999348 33.821631538334984 33.77240735670646]]
+: [[-0.872885221293917 -0.872885221293917 -0.872885221293917 ... -0.6631226836266504 -0.5680647731737454 -0.5680647731737454] [-0.8351996698137462 -0.8351996698137462 -0.8351996698137462 ... -0.7485107718446855 -0.8229838871876581 -0.239315690284641] [-0.989148723802379 -0.989148723802379 -0.989148723802379 ... -0.9350162572437829 -0.88545604390297 -0.88545604390297] ... [-0.5704611045902105 -0.5704611045902105 -0.5704611045902105 ... -0.9350162572437829 -0.4647231989130516 -0.4647231989130516] [-0.9779941383490359 -0.9779941383490359 -0.9779941383490359 ... -0.88545604390297 -0.88545604390297 -0.8229838871876581] [-0.7396916780974963 -0.7396916780974963 -0.7396916780974963 ... -0.6631226836266504 -0.7485107718446855 -0.7485107718446855]]
+
+** Some pretty print features for single objects
+*** Hits
+#+BEGIN_SRC python :results output replace :session km3io :exports both
+print(f[0].hits[1])
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+offline hit:
+	id                  :               0
+	dom_id              :       806451572
+	channel_id          :               9
+	tdc                 :               0
+	tot                 :              30
+	trig                :               1
+	pmt_id              :               0
+	t                   :      70104016.0
+	a                   :             0.0
+	pos_x               :             0.0
+	pos_y               :             0.0
+	pos_z               :             0.0
+	dir_x               :             0.0
+	dir_y               :             0.0
+	dir_z               :             0.0
+	pure_t              :             0.0
+	pure_a              :             0.0
+	type                :               0
+	origin              :               0
+	pattern_flags       :               0
+#+end_example
+
+*** Tracks                                              :noexportpresentation:
+
+#+BEGIN_SRC python :results output replace :session km3io :exports both
+print(f[0].tracks[0])
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+offline track:
+	fUniqueID                      :                           0
+	fBits                          :                    33554432
+	id                             :                           1
+	pos_x                          :            445.835395997812
+	pos_y                          :           615.1089636184813
+	pos_z                          :           125.1448339836911
+	dir_x                          :          0.0368711082700674
+	dir_y                          :        -0.48653048395923415
+	dir_z                          :          -0.872885221293917
+	t                              :           70311446.46401498
+	E                              :           99.10458562488608
+	len                            :                         0.0
+	lik                            :           294.6407542676734
+	type                           :                           0
+	rec_type                       :                        4000
+	rec_stages                     :                [1, 3, 5, 4]
+	status                         :                           0
+	mother_id                      :                          -1
+	hit_ids                        :                          []
+	error_matrix                   :                          []
+	comment                        :                           0
+	JGANDALF_BETA0_RAD             :        0.004957442219414389
+	JGANDALF_BETA1_RAD             :        0.003417848024252858
+	JGANDALF_CHI2                  :          -294.6407542676734
+	JGANDALF_NUMBER_OF_HITS        :                       142.0
+	JENERGY_ENERGY                 :           99.10458562488608
+	JENERGY_CHI2                   :     1.7976931348623157e+308
+	JGANDALF_LAMBDA                :      4.2409761837248484e-12
+	JGANDALF_NUMBER_OF_ITERATIONS  :                        10.0
+	JSTART_NPE_MIP                 :           24.88469697331908
+	JSTART_NPE_MIP_TOTAL           :           55.88169412579765
+	JSTART_LENGTH_METRES           :           98.89582506402911
+	JVETO_NPE                      :                         0.0
+	JVETO_NUMBER_OF_HITS           :                         0.0
+	JENERGY_MUON_RANGE_METRES      :           344.9767431592819
+	JENERGY_NOISE_LIKELIHOOD       :         -333.87773581129136
+	JENERGY_NDF                    :                      1471.0
+	JENERGY_NUMBER_OF_HITS         :                       101.0
+#+end_example
+
+** Extracting the energy of every first reco track in each event
+
+#+BEGIN_SRC python :results output replace :session km3io :exports both
+# from irods:mc/v5.2/mcv5.2.mupage_10T.sirene.jte.1186.root
+f = km3io.OfflineReader("mupage.root")
+print(f.events)
+# number of tracks per event
+print(f.mc_tracks.E.counts)
+mask = f.mc_tracks.E.counts > 0
+print(f.mc_tracks.E[mask, 0])
+#+END_SRC
+
+#+RESULTS:
+: Number of events: 12236
+: [11  2  3 ... 10  1  4]
+: [17.72 73.213 10884.78 1694.332 1221.061 22945.123 11019.418 ...]
+
+* ORCA DU4 RBR Analysis Example
+** A tiny function to extract track attributes from a list of files
+
+#+BEGIN_SRC python
+def extract_features(files, features):
+    """Gather features from the best reco tracks"""
+    data = defaultdict(list)
+    for f in tqdm(files):
+        tracks = km3io.OfflineReader(f).tracks
+        mask = tracks.len.counts > 0
+        for feature in features:
+            data[feature].append(getattr(tracks, feature)[mask, 0])
+    return {k: np.hstack(v) for k, v in data.items()}
+#+END_SRC
+
+** Extracting ~E~, ~lik~, ~pos[xyz]~ and ~dir[xyz]~
+- Only takes a few seconds per file
+- Results are numpy arrays
+
+#+BEGIN_SRC python
+sea_files = glob("data/reco-sea/*aanet*.root")
+mc_files = glob("data/reco-rbr-muatm/*sirene*aanet*.root")
+features = ['E', 'lik', *[e + '_' + q for q in 'xyz' for e in ['pos', 'dir']]]
+sea_data = extract_features(sea_files, features)
+mc_data = extract_features(mc_files, features)
+#+END_SRC
+
+** Plotting some data with ~matplotlib~
+#+BEGIN_SRC python
+fig, ax = plt.subplots()
+plot_options = {
+    'histtype': 'step',
+    'bins': 100,
+    'log': True,
+    'linewidth': 2
+}
+ax.hist(sea_data['E'], label="sea data", **plot_options)
+ax.hist(mc_data['E'], label="atm. muons MC (JSirene)", **plot_options)
+ax.set_xlabel("energy / GeV")
+ax.legend(); ax.grid();
+#+END_SRC
+
+** Energy Distribution Comparison (example)
+
+[[file:./images/orca-du4.png]]
+
+* Command line tool(s)
+- We are working on some counter parts to the Jpp tools
+  - ~KPrintTree -f FILENAME~ (similar to ~JPrintTree~)
+  - more to come (feel free to request or contribute)
+
+* Thanks
+- Zineb Aly (CPPM)
+- Tamas Gal (ECAP)
+- Johannes Schumann (ECAP)
+
+** Important links
+- Docs: [[https://km3py.pages.km3net.de/km3io]]
+- Source: [[https://git.km3net.de/km3py/km3io]]
+- uproot: [[https://github.com/scikit-hep/uproot]]

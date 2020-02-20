@@ -560,9 +560,9 @@ class OfflineReader:
             are not found in the file.
         """
         keys = ", ".join(self.keys.fit_keys[:-1])
-        fit_info = self.tracks.fitinf
         rec_stages = np.array(
             [match for match in self._find_rec_stages(stages)])
+        mask = rec_stages[:, 1] != None
         if np.all(rec_stages[:, 1] == None):
             raise ValueError(
                 "The stages {} are not found in your file.".format(
@@ -570,9 +570,8 @@ class OfflineReader:
         else:
             fit_data = np.array([
                 i[k]
-                for i, j, k in zip(fit_info, rec_stages[:, 0], rec_stages[:,
-                                                                          1])
-                if k is not None
+                for i, k in zip(self.tracks.fitinf[mask], rec_stages[:,
+                                                                     1][mask])
             ])
             rec_array = np.core.records.fromarrays(fit_data.transpose(),
                                                    names=keys)
@@ -709,7 +708,7 @@ class OfflineReader:
             list of reconstruction stages of interest. for example
             [1, 2, 3, 4, 5].
 
-        Yieldsma
+        Yields
         ------
         generator
             the track id and the index of the reconstruction stages of

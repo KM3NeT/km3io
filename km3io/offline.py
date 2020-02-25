@@ -379,7 +379,7 @@ class OfflineReader:
             if 'Head' in fobj:
                 self._header = {}
                 for n, x in fobj['Head']._map_3c_string_2c_string_3e_.items():
-                    self._header[n.decode("utf-8")] = x.decode("utf-8")
+                    self._header[n.decode("utf-8")] = x.decode("utf-8").strip()
             else:
                 warnings.warn("Your file header has an unsupported format")
         return self._header

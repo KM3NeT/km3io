@@ -121,15 +121,15 @@ class DAQReader:
                                  cntvers=True))
             snapshot_hits = tree["snapshotHits"].array(
                 uproot.asjagged(uproot.astable(
-                    uproot.asdtype([("dom_id", "i4"), ("channel_id", "u1"),
-                                    ("time", "u4"), ("tot", "u1")])),
+                    uproot.asdtype([("dom_id", ">i4"), ("channel_id", "u1"),
+                                    ("time", "<u4"), ("tot", "u1")])),
                                 skipbytes=10))
             triggered_hits = tree["triggeredHits"].array(
                 uproot.asjagged(uproot.astable(
-                    uproot.asdtype([("dom_id", "i4"), ("channel_id", "u1"),
-                                    ("time", "u4"), ("tot", "u1"),
+                    uproot.asdtype([("dom_id", ">i4"), ("channel_id", "u1"),
+                                    ("time", "<u4"), ("tot", "u1"),
                                     (" cnt", "u4"), (" vers", "u2"),
-                                    ("trigger_mask", "u8")])),
+                                    ("trigger_mask", ">u8")])),
                                 skipbytes=10))
             self._events = DAQEvents(headers, snapshot_hits, triggered_hits)
         return self._events

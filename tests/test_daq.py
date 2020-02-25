@@ -64,7 +64,7 @@ class TestDAQEventsSnapshotHits(unittest.TestCase):
         self.assertListEqual([806451572, 806451572, 806455814],
                              list(hits.dom_id[0][:3]))
         self.assertListEqual([10, 13, 0], list(hits.channel_id[0][:3]))
-        self.assertListEqual([1593234433, 1559680001, 3371422721],
+        self.assertListEqual([30733918, 30733916, 30733256],
                              list(hits.time[0][:3]))
 
     def test_channel_ids_have_valid_values(self):
@@ -104,7 +104,7 @@ class TestDAQEventsTriggeredHits(unittest.TestCase):
         self.assertListEqual([806451572, 806451572, 808432835],
                              list(hits.dom_id[0][:3]))
         self.assertListEqual([10, 13, 1], list(hits.channel_id[0][:3]))
-        self.assertListEqual([1593234433, 1559680001, 1978979329],
+        self.assertListEqual([30733918, 30733916, 30733429],
                              list(hits.time[0][:3]))
         self.assertListEqual([16, 16, 4], list(hits.trigger_mask[0][:3]))
 

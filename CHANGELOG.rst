@@ -3,6 +3,12 @@ Unreleased changes
 
 Version 0
 ---------
+0.8.3 / 2020-02-25
+~~~~~~~~~~~~~~~~~~
+* The times of snapshot and triggered hits were parsed as big endian (standard)
+  ROOT endianness, however, Jpp stores that as little endian with a custom
+  streamer. This is now fixed...
+
 0.8.2 / 2020-02-14
 ~~~~~~~~~~~~~~~~~~
 * minor fixes

@@ -193,11 +193,10 @@ class TestOfflineReader(unittest.TestCase):
             0.0020367251782607574, 0.003306725805622178, 0.0057877124222254885,
             0.015581698352185896
         ]
-        reco_fit = self.nu.get_reco_fit([1, 2, 3, 4, 5])['JGANDALF_BETA0_RAD']
+        reco_fit = self.nu.get_reco_tracks([1, 2, 3, 4, 5], ['fitinf'])['fitinf']['JGANDALF_BETA0_RAD']
 
         self.assertListEqual(JGANDALF_BETA0_RAD, reco_fit[:4].tolist())
-        with self.assertRaises(ValueError):
-            self.nu.get_reco_fit([1000, 4512, 5625], mc=True)
+
 
     def test_get_reco_hits(self):
 

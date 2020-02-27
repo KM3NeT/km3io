@@ -582,16 +582,13 @@ class OfflineReader:
                 "The stages {} are not found in your file.".format(
                     str(stages)))
         else:
-            fit_data = np.array([
-                i[k]
-                for i, k in zip(fitinf[mask], rec_stages[:,1][mask])
-            ])
+            fit_data = np.array(
+                [i[k] for i, k in zip(fitinf[mask], rec_stages[:, 1][mask])])
             rec_array = np.core.records.fromarrays(fit_data.transpose(),
                                                    names=keys)
             return rec_array
 
     def get_reco_hits(self, stages, keys, mc=False):
-
         """construct a dictionary of hits class data based on the reconstruction
         stages of interest. For example, if the reconstruction stages of interest
         are [1, 2, 3, 4, 5], then get_reco_hits method will select the hits data 

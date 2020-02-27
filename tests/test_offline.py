@@ -221,7 +221,6 @@ class TestOfflineReader(unittest.TestCase):
         pos = self.nu.get_reco_tracks([1, 2, 3, 4, 5], ["pos_x"])["pos_x"]
         mc_pos = self.nu.get_reco_tracks([], ["pos_x"], mc=True)["pos_x"]
 
-
         self.assertEqual(pos.size, 9)
         self.assertEqual(mc_pos.size, 10)
 

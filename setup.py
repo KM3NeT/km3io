@@ -26,10 +26,7 @@ setup(
     include_package_data=True,
     platforms='any',
     setup_requires=['setuptools_scm'],
-    use_scm_version={
-        'write_to': 'km3io/version.txt',
-        'tag_regex': r'^(?P<prefix>v)?(?P<version>[^\+]+)(?P<suffix>.*)?$',
-    },
+    use_scm_version=True,
     install_requires=requirements,
     python_requires='>=3.5',
     entry_points={

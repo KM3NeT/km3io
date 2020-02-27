@@ -203,7 +203,8 @@ class TestOfflineReader(unittest.TestCase):
 
         doms = self.nu.get_reco_hits([1, 2, 3, 4, 5], ["dom_id"])["dom_id"]
 
-        mc_doms = self.nu.get_reco_hits([1, 2, 3, 4, 5], ["dom_id"], mc=True)["dom_id"]
+        mc_doms = self.nu.get_reco_hits([1, 2, 3, 4, 5], ["dom_id"],
+                                        mc=True)["dom_id"]
 
         self.assertEqual(doms.size, 9)
         self.assertEqual(mc_doms.size, 9)
@@ -219,7 +220,8 @@ class TestOfflineReader(unittest.TestCase):
     def test_get_reco_tracks(self):
 
         pos = self.nu.get_reco_tracks([1, 2, 3, 4, 5], ["pos_x"])["pos_x"]
-        mc_pos = self.nu.get_reco_tracks([1, 2, 3, 4, 5], ["pos_x"], mc=True)["pos_x"]
+        mc_pos = self.nu.get_reco_tracks([1, 2, 3, 4, 5], ["pos_x"],
+                                         mc=True)["pos_x"]
 
         self.assertEqual(pos.size, 9)
         self.assertEqual(mc_pos.size, 9)
@@ -233,7 +235,8 @@ class TestOfflineReader(unittest.TestCase):
     def test_get_reco_events(self):
 
         hits = self.nu.get_reco_events([1, 2, 3, 4, 5], ["hits"])["hits"]
-        mc_hits = self.nu.get_reco_events([1, 2, 3, 4, 5], ["mc_hits"], mc=True)["mc_hits"]
+        mc_hits = self.nu.get_reco_events([1, 2, 3, 4, 5], ["mc_hits"],
+                                          mc=True)["mc_hits"]
 
         self.assertEqual(hits.size, 9)
         self.assertEqual(mc_hits.size, 9)

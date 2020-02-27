@@ -565,7 +565,7 @@ class OfflineReader:
         """
         keys = ", ".join(self.keys.fit_keys[:-1])
         rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=False)])
+            [match for match in self._find_rec_stages(stages, mc=False)])
 
         if mc is False:
             fitinf = self.tracks.fitinf
@@ -618,7 +618,7 @@ class OfflineReader:
         """
         lazy_d = {}
         rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=False)])
+            [match for match in self._find_rec_stages(stages, mc=False)])
 
         if mc is False:
             hits_data = self.hits
@@ -669,7 +669,7 @@ class OfflineReader:
         lazy_d = {}
 
         rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=False)])
+            [match for match in self._find_rec_stages(stages, mc=False)])
 
         mask = rec_stages[:, 1] != None
 
@@ -714,7 +714,7 @@ class OfflineReader:
         """
         lazy_d = {}
         rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=False)])
+            [match for match in self._find_rec_stages(stages, mc=False)])
 
         if mc is False:
             tracks_data = self.tracks

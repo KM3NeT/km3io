@@ -536,7 +536,7 @@ class OfflineReader:
              if j is not None])
         return max_reco_stages
 
-    def get_reco_fit(self, stages):
+    def get_reco_fit(self, stages, mc=False):
         """construct a numpy recarray of the fit information (reconstruction
         data) of the tracks reconstructed following the reconstruction stages
         of interest.
@@ -560,9 +560,19 @@ class OfflineReader:
             are not found in the file.
         """
         keys = ", ".join(self.keys.fit_keys[:-1])
-        rec_stages = np.array(
-            [match for match in self._find_rec_stages(stages)])
+
+        if mc is False:
+            rec_stages = np.array(
+                [match for match in self._find_rec_stages(stages, mc=False)])
+            fitinf = self.tracks.fitinf
+
+        if mc is True:
+            rec_stages = np.array(
+                [match for match in self._find_rec_stages(stages, mc=True)])
+            fitinf = self.mc_tracks.fitinf
+
         mask = rec_stages[:, 1] != None
+
         if np.all(rec_stages[:, 1] == None):
             raise ValueError(
                 "The stages {} are not found in your file.".format(
@@ -570,14 +580,13 @@ class OfflineReader:
         else:
             fit_data = np.array([
                 i[k]
-                for i, k in zip(self.tracks.fitinf[mask], rec_stages[:,
-                                                                     1][mask])
+                for i, k in zip(fitinf[mask], rec_stages[:,1][mask])
             ])
             rec_array = np.core.records.fromarrays(fit_data.transpose(),
                                                    names=keys)
             return rec_array
 
-    def get_reco_hits(self, stages, keys):
+    def get_reco_hits(self, stages, keys, mc=False):
         """construct a dictionary of hits class data based on the reconstruction
         stages of interest. For example, if the reconstruction stages of interest
         are [1, 2, 3, 4, 5], then get_reco_hits method will select the hits data 
@@ -604,19 +613,29 @@ class OfflineReader:
             are not found in the file.
         """
         lazy_d = {}
-        rec_stages = np.array(
-            [match for match in self._find_rec_stages(stages)])
+
+        if mc is False:
+            rec_stages = np.array(
+                [match for match in self._find_rec_stages(stages, mc=False)])
+            hits_data = self.hits
+
+        if mc is True:
+            rec_stages = np.array(
+                [match for match in self._find_rec_stages(stages, mc=True)])
+            hits_data = self.mc_hits
+
         mask = rec_stages[:, 1] != None
+
         if np.all(rec_stages[:, 1] == None):
             raise ValueError(
                 "The stages {} are not found in your file.".format(
                     str(stages)))
         else:
             for key in keys:
-                lazy_d[key] = getattr(self.hits, key)[mask]
+                lazy_d[key] = getattr(hits_data, key)[mask]
         return lazy_d
 
-    def get_reco_events(self, stages, keys):
+    def get_reco_events(self, stages, keys, mc=False):
         """construct a dictionary of events class data based on the reconstruction
         stages of interest. For example, if the reconstruction stages of interest
         are [1, 2, 3, 4, 5], then get_reco_events method will select the events data 
@@ -642,9 +661,17 @@ class OfflineReader:
             are not found in the file.
         """
         lazy_d = {}
-        rec_stages = np.array(
-            [match for match in self._find_rec_stages(stages)])
+
+        if mc is False:
+            rec_stages = np.array(
+                [match for match in self._find_rec_stages(stages, mc=False)])
+
+        if mc is True:
+            rec_stages = np.array(
+                [match for match in self._find_rec_stages(stages, mc=True)])
+
         mask = rec_stages[:, 1] != None
+
         if np.all(rec_stages[:, 1] == None):
             raise ValueError(
                 "The stages {} are not found in your file.".format(
@@ -654,7 +681,7 @@ class OfflineReader:
                 lazy_d[key] = getattr(self.events, key)[mask]
         return lazy_d
 
-    def get_reco_tracks(self, stages, keys):
+    def get_reco_tracks(self, stages, keys, mc=False):
         """construct a dictionary of tracks class data based on the reconstruction
         stages of interest. For example, if the reconstruction stages of interest
         are [1, 2, 3, 4, 5], then get_reco_tracks method will select tracks data 
@@ -681,9 +708,19 @@ class OfflineReader:
             are not found in the file.
         """
         lazy_d = {}
-        rec_stages = np.array(
-            [match for match in self._find_rec_stages(stages)])
+
+        if mc is False:
+            rec_stages = np.array(
+                [match for match in self._find_rec_stages(stages, mc=False)])
+            tracks_data = self.tracks
+
+        if mc is True:
+            rec_stages = np.array(
+                [match for match in self._find_rec_stages(stages, mc=True)])
+            tracks_data = self.mc_tracks
+
         mask = rec_stages[:, 1] != None
+
         if np.all(rec_stages[:, 1] == None):
             raise ValueError(
                 "The stages {} are not found in your file.".format(
@@ -692,13 +729,13 @@ class OfflineReader:
             for key in keys:
                 lazy_d[key] = np.array([
                     i[k] for i, k in zip(
-                        getattr(self.tracks, key)[mask], rec_stages[:,
+                        getattr(tracks_data, key)[mask], rec_stages[:,
                                                                     1][mask])
                 ])
 
         return lazy_d
 
-    def _find_rec_stages(self, stages):
+    def _find_rec_stages(self, stages, mc=False):
         """find the index of reconstruction stages of interest in a
         list of multiple reconstruction stages.
 
@@ -715,7 +752,13 @@ class OfflineReader:
             interest if found. If the reconstruction stages of interest
             are not found, None is returned as the stages index.
         """
-        for trk_index, rec_stages in enumerate(self.tracks.rec_stages):
+        if mc is False:
+            stages_data = self.tracks.rec_stages
+
+        if mc is True:
+            stages_data = self.mc_tracks.rec_stages
+
+        for trk_index, rec_stages in enumerate(stages_data):
             try:
                 stages_index = rec_stages.index(stages)
             except ValueError:

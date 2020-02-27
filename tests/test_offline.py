@@ -197,34 +197,53 @@ class TestOfflineReader(unittest.TestCase):
 
         self.assertListEqual(JGANDALF_BETA0_RAD, reco_fit[:4].tolist())
         with self.assertRaises(ValueError):
-            self.nu.get_reco_fit([1000, 4512, 5625])
+            self.nu.get_reco_fit([1000, 4512, 5625], mc=True)
 
     def test_get_reco_hits(self):
 
         doms = self.nu.get_reco_hits([1, 2, 3, 4, 5], ["dom_id"])["dom_id"]
 
+        mc_doms = self.nu.get_reco_hits([], ["dom_id"], mc=True)["dom_id"]
+
         self.assertEqual(doms.size, 9)
+        self.assertEqual(mc_doms.size, 10)
+
         self.assertListEqual(doms[0][0:4].tolist(),
                              self.nu.hits[0].dom_id[0:4].tolist())
+        self.assertListEqual(mc_doms[0][0:4].tolist(),
+                             self.nu.mc_hits[0].dom_id[0:4].tolist())
+
         with self.assertRaises(ValueError):
             self.nu.get_reco_hits([1000, 4512, 5625], ["dom_id"])
 
     def test_get_reco_tracks(self):
 
         pos = self.nu.get_reco_tracks([1, 2, 3, 4, 5], ["pos_x"])["pos_x"]
+        mc_pos = self.nu.get_reco_tracks([], ["pos_x"], mc=True)["pos_x"]
+
 
         self.assertEqual(pos.size, 9)
+        self.assertEqual(mc_pos.size, 10)
+
         self.assertEqual(pos[0], self.nu.tracks[0].pos_x[0])
+        self.assertEqual(mc_pos[0], self.nu.mc_tracks[0].pos_x[0])
+
         with self.assertRaises(ValueError):
             self.nu.get_reco_tracks([1000, 4512, 5625], ["pos_x"])
 
     def test_get_reco_events(self):
 
         hits = self.nu.get_reco_events([1, 2, 3, 4, 5], ["hits"])["hits"]
+        mc_hits = self.nu.get_reco_events([], ["mc_hits"], mc=True)["mc_hits"]
 
         self.assertEqual(hits.size, 9)
+        self.assertEqual(mc_hits.size, 10)
+
         self.assertListEqual(hits[0:4].tolist(),
                              self.nu.events.hits[0:4].tolist())
+        self.assertListEqual(mc_hits[0:4].tolist(),
+                             self.nu.events.mc_hits[0:4].tolist())
+
         with self.assertRaises(ValueError):
             self.nu.get_reco_events([1000, 4512, 5625], ["hits"])
 

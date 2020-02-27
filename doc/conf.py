@@ -22,7 +22,8 @@ from pkg_resources import get_distribution
 # -- Project information -----------------------------------------------------
 
 version = get_distribution('km3io').version
-project = 'km3io {}'.format(version)
+short_version = '.'.join(version.split('.')[:2])
+project = 'km3io {}'.format(short_version)
 copyright = '{0}, Zineb Aly and Tamas Gal'.format(date.today().year)
 author = 'Zineb Aly, Tamas Gal, Johannes Schumann'
 

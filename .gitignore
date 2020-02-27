@@ -6,8 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
-# Version info for PyPI
-km3io/version.txt
+# Version info
+km3io/version.py
 
 # Distribution / packaging
 .Python
@@ -26,6 +26,7 @@ var/
 .installed.cfg
 *.egg
 .eggs
+pip-wheel-metadata
 
 # Installer logs
 pip-log.txt

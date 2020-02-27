@@ -18,13 +18,11 @@ import os
 from datetime import date
 import sphinx_rtd_theme
 from pkg_resources import get_distribution
-import km3io
 
 # -- Project information -----------------------------------------------------
 
-release = get_distribution('km3io').version
-version = '.'.join(release.split('.')[:2])
-project = 'km3io {}'.format(km3io.__version__)
+version = get_distribution('km3io').version
+project = 'km3io {}'.format(version)
 copyright = '{0}, Zineb Aly and Tamas Gal'.format(date.today().year)
 author = 'Zineb Aly, Tamas Gal, Johannes Schumann'
 
@@ -74,4 +72,4 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
-html_title = "km3io {}".format(km3io.__version__)
+html_title = "km3io {}".format(version)

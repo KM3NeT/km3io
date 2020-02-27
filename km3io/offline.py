@@ -564,15 +564,13 @@ class OfflineReader:
             are not found in the file.
         """
         keys = ", ".join(self.keys.fit_keys[:-1])
+        rec_stages = np.array(
+                [match for match in self._find_rec_stages(stages, mc=False)])
 
         if mc is False:
-            rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=False)])
             fitinf = self.tracks.fitinf
 
         if mc is True:
-            rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=True)])
             fitinf = self.mc_tracks.fitinf
 
         mask = rec_stages[:, 1] != None
@@ -619,15 +617,13 @@ class OfflineReader:
             are not found in the file.
         """
         lazy_d = {}
+        rec_stages = np.array(
+                [match for match in self._find_rec_stages(stages, mc=False)])
 
         if mc is False:
-            rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=False)])
             hits_data = self.hits
 
         if mc is True:
-            rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=True)])
             hits_data = self.mc_hits
 
         mask = rec_stages[:, 1] != None
@@ -672,13 +668,8 @@ class OfflineReader:
         """
         lazy_d = {}
 
-        if mc is False:
-            rec_stages = np.array(
+        rec_stages = np.array(
                 [match for match in self._find_rec_stages(stages, mc=False)])
-
-        if mc is True:
-            rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=True)])
 
         mask = rec_stages[:, 1] != None
 
@@ -722,15 +713,13 @@ class OfflineReader:
             are not found in the file.
         """
         lazy_d = {}
+        rec_stages = np.array(
+                [match for match in self._find_rec_stages(stages, mc=False)])
 
         if mc is False:
-            rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=False)])
             tracks_data = self.tracks
 
         if mc is True:
-            rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=True)])
             tracks_data = self.mc_tracks
 
         mask = rec_stages[:, 1] != None

@@ -970,12 +970,8 @@ class OfflineTracks:
             setattr(self, k, v)
 
     def __getitem__(self, item):
-        if isinstance(item, int):
-            return OfflineTrack(self._keys, [v[item] for v in self._values],
-                                fitparameters=self._fitparameters)
-        else:
-            return OfflineTracks(self._keys, [v[item] for v in self._values],
-                                 fitparameters=self._fitparameters)
+        return OfflineTrack(self._keys, [v[item] for v in self._values],
+                            fitparameters=self._fitparameters)
 
     def __len__(self):
         try:

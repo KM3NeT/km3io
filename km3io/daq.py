@@ -1,6 +1,22 @@
+import os
 import uproot
 import numpy as np
-import numba as nb
+
+if os.getenv("DISABLE_NUMBA"):
+    print("Numba is disabled, DAQ helper functions will not work!")
+    # A hack to to get the @vectorize, @guvectorize and nb.types silently pass.
+    def dummy_decorator(*args, **kwargs):
+        def decorator(f):
+            def wrapper(*args, **kwargs):
+                return dummy_decorator(*args, **kwargs)
+            return wrapper
+        return decorator
+
+    vectorize = dummy_decorator
+    guvectorize = dummy_decorator
+    int8 = int16 = int32 = int64 = dummy_decorator
+else:
+    from numba import vectorize, guvectorize, int8, int16, int32, int64
 
 TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
@@ -16,12 +32,7 @@ RATE_FACTOR = np.log(MAXIMAL_RATE_HZ / MINIMAL_RATE_HZ) / 255
 CHANNEL_BITS_TEMPLATE = np.zeros(31, dtype=bool)
 
 
-@nb.vectorize([
-    nb.int32(nb.int8),
-    nb.int32(nb.int16),
-    nb.int32(nb.int32),
-    nb.int32(nb.int64)
-])
+@vectorize([int32(int8), int32(int16), int32(int32), int32(int64)])
 def get_rate(value):  #pragma: no cover
     """Return the rate in Hz from the short int value"""
     if value == 0:
@@ -30,10 +41,10 @@ def get_rate(value):  #pragma: no cover
         return MINIMAL_RATE_HZ * np.exp(value * RATE_FACTOR)
 
 
-@nb.guvectorize("void(i8, b1[:], b1[:])",
-                "(), (n) -> (n)",
-                target="parallel",
-                nopython=True)
+@guvectorize("void(i8, b1[:], b1[:])",
+             "(), (n) -> (n)",
+             target="parallel",
+             nopython=True)
 def unpack_bits(value, bits_template, out):  #pragma: no cover
     """Return a boolean array for a value's bit representation.
 

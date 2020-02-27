@@ -62,6 +62,14 @@ test-py3.8:
         - make test
     <<: *junit_definition
 
+test-py3.8-no-numba:
+    image: docker.km3net.de/base/python:3.8
+    stage: test
+    script:
+        - *virtualenv_definition
+        - DISABLE_NUMBA=1 make test
+    <<: *junit_definition
+
 code-style:
     image: docker.km3net.de/base/python:3.7
     stage: test

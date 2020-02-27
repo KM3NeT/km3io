@@ -536,7 +536,7 @@ class OfflineReader:
              if j is not None])
         return max_reco_stages
 
-    def get_reco_fit(self, stages, mc=False):
+    def _get_reco_fit(self, stages, rec_stages, mask, tracks_data, mc=False):
         """construct a numpy recarray of the fit information (reconstruction
         data) of the tracks reconstructed following the reconstruction stages
         of interest.
@@ -565,25 +565,9 @@ class OfflineReader:
         """
         keys = ", ".join(self.keys.fit_keys[:-1])
 
-        if mc is False:
-            rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=False)])
-            fitinf = self.tracks.fitinf
-
-        if mc is True:
-            rec_stages = np.array(
-                [match for match in self._find_rec_stages(stages, mc=True)])
-            fitinf = self.mc_tracks.fitinf
-
-        mask = rec_stages[:, 1] != None
-
-        if np.all(rec_stages[:, 1] == None):
-            raise ValueError(
-                "The stages {} are not found in your file.".format(
-                    str(stages)))
         else:
             fit_data = np.array(
-                [i[k] for i, k in zip(fitinf[mask], rec_stages[:, 1][mask])])
+                [i[k] for i, k in zip(tracks_data.fitinf[mask], rec_stages[:, 1][mask])])
             rec_array = np.core.records.fromarrays(fit_data.transpose(),
                                                    names=keys)
             return rec_array
@@ -741,11 +725,14 @@ class OfflineReader:
                     str(stages)))
         else:
             for key in keys:
-                lazy_d[key] = np.array([
-                    i[k] for i, k in zip(
-                        getattr(tracks_data, key)[mask], rec_stages[:,
-                                                                    1][mask])
-                ])
+                if key == 'fitinf'
+                    lazy_d[key] = self._get_reco_fit(stages, rec_stages, mask, tracks_data)
+                else:
+                    lazy_d[key] = np.array([
+                        i[k] for i, k in zip(
+                            getattr(tracks_data, key)[mask], rec_stages[:,
+                                                                        1][mask])
+                    ])
 
         return lazy_d
 

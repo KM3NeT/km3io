@@ -546,6 +546,13 @@ class OfflineReader:
         stages : list
             list of reconstruction stages of interest. for example
             [1, 2, 3, 4, 5].
+        rec_stages : awkward array
+            jagged array of reconstruction stages from offline files.
+        mask : array of boolean
+            a numpy mask. Here it is used to mask all non reconstructed tracks
+            (tracks with empty reconstruction stages).
+        tracks_data : class
+            class of tracks data.
         mc : bool, optional
             default is False to look for fit data in the tracks tree in offline files
             (not the mc tracks tree). mc=True to look for fit data from the mc tracks
@@ -556,12 +563,6 @@ class OfflineReader:
         numpy recarray
             a recarray of the fit information (reconstruction data) of
             the tracks of interest.
-
-        Raises
-        ------
-        ValueError
-            ValueError raised when the reconstruction stages of interest
-            are not found in the file.
         """
         keys = ", ".join(self.keys.fit_keys[:-1])
 
@@ -646,6 +647,7 @@ class OfflineReader:
         -------
         dict
             dictionary of lazyarrays containing data for each events attribute requested.
+            Note that if `fitinf` is all stored in a numpy record array.
 
         Raises
         ------

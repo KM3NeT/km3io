@@ -546,6 +546,10 @@ class OfflineReader:
         stages : list
             list of reconstruction stages of interest. for example
             [1, 2, 3, 4, 5].
+        mc : bool, optional
+            default is False to look for fit data in the tracks tree in offline files
+            (not the mc tracks tree). mc=True to look for fit data from the mc tracks
+            tree in offline files.
 
         Returns
         -------
@@ -587,6 +591,7 @@ class OfflineReader:
             return rec_array
 
     def get_reco_hits(self, stages, keys, mc=False):
+
         """construct a dictionary of hits class data based on the reconstruction
         stages of interest. For example, if the reconstruction stages of interest
         are [1, 2, 3, 4, 5], then get_reco_hits method will select the hits data 
@@ -600,6 +605,10 @@ class OfflineReader:
             [1, 2, 3, 4, 5].
         keys : list of str
             list of the hits class attributes.
+        mc : bool, optional
+            default is False to look for hits data in the hits tree in offline files
+            (not the mc_hits tree). mc=True to look for mc hits data in the mc hits
+            tree in offline files.
 
         Returns
         -------
@@ -648,6 +657,10 @@ class OfflineReader:
             [1, 2, 3, 4, 5].
         keys : list of str
             list of the events class attributes.
+        mc : bool, optional
+            default is False to look for the reconstruction stages in the tracks tree
+            in offline files (not the mc tracks tree). mc=True to look for the reconstruction
+            data in the mc tracks tree in offline files.
 
         Returns
         -------
@@ -695,6 +708,10 @@ class OfflineReader:
             [1, 2, 3, 4, 5].
         keys : list of str
             list of the tracks class attributes.
+        mc : bool, optional
+            default is False to look for tracks data in the tracks tree in offline files
+            (not the mc tracks tree). mc=True to look for tracks data in the mc tracks
+            tree in offline files.
 
         Returns
         -------
@@ -744,7 +761,10 @@ class OfflineReader:
         stages : list
             list of reconstruction stages of interest. for example
             [1, 2, 3, 4, 5].
-
+        mc : bool, optional
+            default is False to look for reconstruction stages in the tracks tree in
+            offline files (not the mc tracks tree). mc=True to look for reconstruction
+            stages in the mc tracks tree in offline files.
         Yields
         ------
         generator

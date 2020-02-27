@@ -566,8 +566,10 @@ class OfflineReader:
         """
         keys = ", ".join(self.keys.fit_keys[:-1])
 
-        fit_data = np.array(
-            [i[k] for i, k in zip(tracks_data.fitinf[mask], rec_stages[:, 1][mask])])
+        fit_data = np.array([
+            i[k]
+            for i, k in zip(tracks_data.fitinf[mask], rec_stages[:, 1][mask])
+        ])
         rec_array = np.core.records.fromarrays(fit_data.transpose(),
                                                names=keys)
         return rec_array
@@ -727,10 +729,13 @@ class OfflineReader:
         else:
             for key in keys:
                 if key == 'fitinf':
-                    lazy_d[key] = self._get_reco_fit(stages, rec_stages, mask, tracks_data)
+                    lazy_d[key] = self._get_reco_fit(stages, rec_stages, mask,
+                                                     tracks_data)
                 else:
-                    lazy_d[key] = np.array([i[k] for i, k in zip(
-                            getattr(tracks_data, key)[mask], rec_stages[:,1][mask])
+                    lazy_d[key] = np.array([
+                        i[k] for i, k in zip(
+                            getattr(tracks_data, key)[mask], rec_stages[:, 1]
+                            [mask])
                     ])
 
         return lazy_d

@@ -4,12 +4,15 @@ import numpy as np
 
 if os.getenv("DISABLE_NUMBA"):
     print("Numba is disabled, DAQ helper functions will not work!")
+
     # A hack to to get the @vectorize, @guvectorize and nb.types silently pass.
     def dummy_decorator(*args, **kwargs):
         def decorator(f):
             def wrapper(*args, **kwargs):
                 return dummy_decorator(*args, **kwargs)
+
             return wrapper
+
         return decorator
 
     vectorize = dummy_decorator

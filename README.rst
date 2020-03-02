@@ -31,7 +31,14 @@ To get the latest (stable) development release::
 
     pip install git+https://git.km3net.de/km3py/km3io.git
 
-**Reminder:** km3io is **not** dependent on aanet, ROOT or Jpp! 
+**Reminder:** km3io is **not** dependent on aanet, ROOT or Jpp!
+
+Using km3io in Julia
+====================
+
+A clash of LLVM versions is very likely (``km3io`` uses ``numba`` for DAQ
+utilities). To disable ``numba``, set the environmental variable
+``DISABLE_NUMBA=1``.
 
 Questions
 =========

@@ -175,7 +175,6 @@ class TestSummaryslices(unittest.TestCase):
     def test_rates(self):
         assert 3 == len(self.ss.rates)
 
-    @unittest.skipIf(os.getenv("DISABLE_NUMBA"), reason="no numba")
     def test_fifo(self):
         s = self.ss.slices[0]
         dct_fifo_stat = {
@@ -188,7 +187,6 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert any(get_channel_flags(frame.fifo[0])) == fifo_status
 
-    @unittest.skipIf(os.getenv("DISABLE_NUMBA"), reason="no numba")
     def test_has_udp_trailer(self):
         s = self.ss.slices[0]
         dct_udp_trailer = {
@@ -208,7 +206,6 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert has_udp_trailer(frame.fifo[0]) == udp_trailer
 
-    @unittest.skipIf(os.getenv("DISABLE_NUMBA"), reason="no numba")
     def test_high_rate_veto(self):
         s = self.ss.slices[0]
         dct_high_rate_veto = {
@@ -249,7 +246,6 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert any(get_channel_flags(frame.hrv[0])) == high_rate_veto
 
-    @unittest.skipIf(os.getenv("DISABLE_NUMBA"), reason="no numba")
     def test_max_sequence_number(self):
         s = self.ss.slices[0]
         dct_seq_numbers = {
@@ -287,7 +283,6 @@ class TestSummaryslices(unittest.TestCase):
             assert get_udp_max_sequence_number(
                 frame.dq_status[0]) == max_sequence_number
 
-    @unittest.skipIf(os.getenv("DISABLE_NUMBA"), reason="no numba")
     def test_number_udp_packets(self):
         s = self.ss.slices[0]
         dct_n_packets = {
@@ -317,7 +312,6 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert get_number_udp_packets(frame.dq_status[0]) == n_udp_packets
 
-    @unittest.skipIf(os.getenv("DISABLE_NUMBA"), reason="no numba")
     def test_hrv_flags(self):
         s = self.ss.slices[0]
         dct_hrv_flags = {
@@ -353,7 +347,6 @@ class TestSummaryslices(unittest.TestCase):
                 for a, b in zip(get_channel_flags(frame.hrv[0]), hrv_flags)
             ])
 
-    @unittest.skipIf(os.getenv("DISABLE_NUMBA"), reason="no numba")
     def test_fifo_flags(self):
         s = self.ss.slices[0]
         dct_fifo_flags = {
@@ -406,17 +399,14 @@ class TestSummaryslices(unittest.TestCase):
 
 
 class TestGetRate(unittest.TestCase):
-    @unittest.skipIf(os.getenv("DISABLE_NUMBA"), reason="no numba")
     def test_zero(self):
         assert 0 == get_rate(0)
 
-    @unittest.skipIf(os.getenv("DISABLE_NUMBA"), reason="no numba")
     def test_some_values(self):
         assert 2054 == get_rate(1)
         assert 55987 == get_rate(123)
         assert 1999999 == get_rate(255)
 
-    @unittest.skipIf(os.getenv("DISABLE_NUMBA"), reason="no numba")
     def test_vectorized_input(self):
         self.assertListEqual([2054], list(get_rate([1])))
         self.assertListEqual([2054, 2111, 2169], list(get_rate([1, 2, 3])))

@@ -33,13 +33,6 @@ To get the latest (stable) development release::
 
 **Reminder:** km3io is **not** dependent on aanet, ROOT or Jpp!
 
-Using km3io in Julia
-====================
-
-A clash of LLVM versions is very likely (``km3io`` uses ``numba`` for DAQ
-utilities). To disable ``numba``, set the environmental variable
-``DISABLE_NUMBA=1``.
-
 Questions
 =========
 

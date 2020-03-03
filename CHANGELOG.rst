@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.9.0 / 2020-03-03
+~~~~~~~~~~~~~~~~~~
+* Added support for the ``usr`` field of events
+
 0.8.3 / 2020-02-25
 ~~~~~~~~~~~~~~~~~~
 * The times of snapshot and triggered hits were parsed as big endian (standard)

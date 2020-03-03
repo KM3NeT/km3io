@@ -365,6 +365,7 @@ class OfflineReader:
         self._keys = None
         self._best_reco = None
         self._header = None
+        self._usr = None
 
     def __getitem__(self, item):
         return OfflineReader(file_path=self._file_path, data=self._data[item])
@@ -473,6 +474,12 @@ class OfflineReader:
                 [self._data[key] for key in self.keys.mc_tracks_keys],
                 fitparameters=self.keys.fitparameters)
         return self._mc_tracks
+
+    @property
+    def usr(self):
+        if self._usr is None:
+            self._usr = Usr(self._file_path)
+        return self._usr
 
     @property
     def best_reco(self):
@@ -814,6 +821,44 @@ class OfflineReader:
                 yield i, j
                 continue
             yield i, j
+
+
+class Usr:
+    """Helper class to access AAObject usr stuff"""
+    def __init__(self, filepath):
+        self._f = uproot.open(filepath)
+        # Here, we assume that every event has the same names in the same order
+        # to massively increase the performance. This needs triple check if it's
+        # always the case; the usr-format is simply a very bad design.
+        try:
+            self._usr_names = [
+                n.decode("utf-8")
+                for n in self._f['E']['Evt']['usr_names'].array()[0]
+            ]
+        except (KeyError, IndexError):  # e.g. old aanet files
+            self._usr_names = []
+        else:
+            self._usr_idx_lookup = {
+                name: index
+                for index, name in enumerate(self._usr_names)
+            }
+            self._usr_data = self._f['E']['Evt']['usr'].lazyarray(
+                basketcache=uproot.cache.ThreadSafeArrayCache(
+                    BASKET_CACHE_SIZE))
+            for name in self._usr_names:
+                setattr(self, name, self[name])
+
+    def __getitem__(self, item):
+        return self._usr_data[:, self._usr_idx_lookup[item]]
+
+    def keys(self):
+        return self._usr_names
+
+    def __str__(self):
+        entries = []
+        for name in self.keys():
+            entries.append("{}: {}".format(name, self[name]))
+        return '\n'.join(entries)
 
 
 class OfflineEvents:

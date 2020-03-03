@@ -1,3 +1,4 @@
+import functools
 import uproot
 import numpy as np
 import warnings
@@ -8,6 +9,16 @@ import km3io.definitions.reconstruction
 MAIN_TREE_NAME = "E"
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
+
+
+class cached_property:
+     def __init__(self, func):
+         self.func = func
+
+     def __get__(self, obj, cls):
+         if obj is None: return self
+         value = obj.__dict__[self.func.__name__] = self.func(obj)
+         return value
 
 
 class OfflineKeys:
@@ -22,10 +33,6 @@ class OfflineKeys:
             The main ROOT tree.
         """
         self._tree = tree
-        self._events_keys = None
-        self._hits_keys = None
-        self._tracks_keys = None
-        self._mc_hits_keys = None
         self._mc_tracks_keys = None
         self._valid_keys = None
         self._fit_keys = None
@@ -48,7 +55,7 @@ class OfflineKeys:
     def __repr__(self):
         return "<{}>".format(self.__class__.__name__)
 
-    @property
+    @cached_property
     def events_keys(self):
         """reads events keys from an offline file.
 
@@ -58,17 +65,15 @@ class OfflineKeys:
             list of all events keys found in an offline file,
             except those found in fake branches.
         """
-        if self._events_keys is None:
-            fake_branches = ['Evt', 'AAObject', 'TObject', 't']
-            t_baskets = ['t.fSec', 't.fNanoSec']
-            tree = self._tree['Evt']
-            self._events_keys = [
-                key.decode('utf-8') for key in tree.keys()
-                if key.decode('utf-8') not in fake_branches
-            ] + t_baskets
-        return self._events_keys
+        fake_branches = ['Evt', 'AAObject', 'TObject', 't']
+        t_baskets = ['t.fSec', 't.fNanoSec']
+        tree = self._tree['Evt']
+        return [
+            key.decode('utf-8') for key in tree.keys()
+            if key.decode('utf-8') not in fake_branches
+        ] + t_baskets
 
-    @property
+    @cached_property
     def hits_keys(self):
         """reads hits keys from an offline file.
 
@@ -78,18 +83,16 @@ class OfflineKeys:
             list of all hits keys found in an offline file,
             except those found in fake branches.
         """
-        if self._hits_keys is None:
-            fake_branches = [
-                'hits.usr', 'hits.usr_names'
-            ]  # to be treated like trks.usr and trks.usr_names
-            tree = self._tree['hits']
-            self._hits_keys = [
-                key.decode('utf8') for key in tree.keys()
-                if key.decode('utf8') not in fake_branches
-            ]
-        return self._hits_keys
+        fake_branches = [
+            'hits.usr', 'hits.usr_names'
+        ]  # to be treated like trks.usr and trks.usr_names
+        tree = self._tree['hits']
+        return [
+            key.decode('utf8') for key in tree.keys()
+            if key.decode('utf8') not in fake_branches
+        ]
 
-    @property
+    @cached_property
     def tracks_keys(self):
         """reads tracks keys from an offline file.
 
@@ -99,20 +102,18 @@ class OfflineKeys:
             list of all tracks keys found in an offline file,
             except those found in fake branches.
         """
-        if self._tracks_keys is None:
-            # a solution can be tree['trks.usr_data'].array(
-            # uproot.asdtype(">i4"))
-            fake_branches = [
-                'trks.usr_data', 'trks.usr', 'trks.usr_names'
-            ]  # can be accessed using tree['trks.usr_names'].array()
-            tree = self._tree['Evt']['trks']
-            self._tracks_keys = [
-                key.decode('utf8') for key in tree.keys()
-                if key.decode('utf8') not in fake_branches
-            ]
-        return self._tracks_keys
+        # a solution can be tree['trks.usr_data'].array(
+        # uproot.asdtype(">i4"))
+        fake_branches = [
+            'trks.usr_data', 'trks.usr', 'trks.usr_names'
+        ]  # can be accessed using tree['trks.usr_names'].array()
+        tree = self._tree['Evt']['trks']
+        return [
+            key.decode('utf8') for key in tree.keys()
+            if key.decode('utf8') not in fake_branches
+        ]
 
-    @property
+    @cached_property
     def mc_hits_keys(self):
         """reads mc hits keys from an offline file.
 
@@ -122,16 +123,14 @@ class OfflineKeys:
             list of all mc hits keys found in an offline file,
             except those found in fake branches.
         """
-        if self._mc_hits_keys is None:
-            fake_branches = ['mc_hits.usr', 'mc_hits.usr_names']
-            tree = self._tree['Evt']['mc_hits']
-            self._mc_hits_keys = [
-                key.decode('utf8') for key in tree.keys()
-                if key.decode('utf8') not in fake_branches
-            ]
-        return self._mc_hits_keys
+        fake_branches = ['mc_hits.usr', 'mc_hits.usr_names']
+        tree = self._tree['Evt']['mc_hits']
+        return [
+            key.decode('utf8') for key in tree.keys()
+            if key.decode('utf8') not in fake_branches
+        ]
 
-    @property
+    @cached_property
     def mc_tracks_keys(self):
         """reads mc tracks keys from an offline file.
 
@@ -141,32 +140,28 @@ class OfflineKeys:
             list of all mc tracks keys found in an offline file,
             except those found in fake branches.
         """
-        if self._mc_tracks_keys is None:
-            fake_branches = [
-                'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.usr_names'
-            ]  # same solution as above can be used
-            tree = self._tree['Evt']['mc_trks']
-            self._mc_tracks_keys = [
-                key.decode('utf8') for key in tree.keys()
-                if key.decode('utf8') not in fake_branches
-            ]
-        return self._mc_tracks_keys
+        fake_branches = [
+            'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.usr_names'
+        ]  # same solution as above can be used
+        tree = self._tree['Evt']['mc_trks']
+        return [
+            key.decode('utf8') for key in tree.keys()
+            if key.decode('utf8') not in fake_branches
+        ]
 
-    @property
+    @cached_property
     def valid_keys(self):
         """constructs a list of all valid keys to be read from an offline event file.
         Returns
         -------
         list of str
             list of all valid keys.
-    """
-        if self._valid_keys is None:
-            self._valid_keys = (self.events_keys + self.hits_keys +
-                                self.tracks_keys + self.mc_tracks_keys +
-                                self.mc_hits_keys)
-        return self._valid_keys
+        """
+        return (self.events_keys + self.hits_keys +
+                            self.tracks_keys + self.mc_tracks_keys +
+                            self.mc_hits_keys)
 
-    @property
+    @cached_property
     def fit_keys(self):
         """constructs a list of fit parameters, not yet outsourced in an offline file.
 
@@ -175,14 +170,11 @@ class OfflineKeys:
         list of str
             list of all "trks.fitinf" keys.
         """
-        if self._fit_keys is None:
-            self._fit_keys = sorted(self.fitparameters,
+        return sorted(self.fitparameters,
                                     key=self.fitparameters.get,
                                     reverse=False)
-            # self._fit_keys = [*fit.keys()]
-        return self._fit_keys
 
-    @property
+    @cached_property
     def cut_hits_keys(self):
         """adapts hits keys for instance variables format in a Python class.
 
@@ -191,13 +183,11 @@ class OfflineKeys:
         list of str
             list of adapted hits keys.
         """
-        if self._cut_hits_keys is None:
-            self._cut_hits_keys = [
-                k.split('hits.')[1].replace('.', '_') for k in self.hits_keys
-            ]
-        return self._cut_hits_keys
+        return [
+            k.split('hits.')[1].replace('.', '_') for k in self.hits_keys
+        ]
 
-    @property
+    @cached_property
     def cut_tracks_keys(self):
         """adapts tracks keys for instance variables format in a Python class.
 
@@ -206,13 +196,11 @@ class OfflineKeys:
         list of str
             list of adapted tracks keys.
         """
-        if self._cut_tracks_keys is None:
-            self._cut_tracks_keys = [
-                k.split('trks.')[1].replace('.', '_') for k in self.tracks_keys
-            ]
-        return self._cut_tracks_keys
+        return [
+            k.split('trks.')[1].replace('.', '_') for k in self.tracks_keys
+        ]
 
-    @property
+    @cached_property
     def cut_events_keys(self):
         """adapts events keys for instance variables format in a Python class.
 
@@ -221,13 +209,11 @@ class OfflineKeys:
         list of str
             list of adapted events keys.
         """
-        if self._cut_events_keys is None:
-            self._cut_events_keys = [
-                k.replace('.', '_') for k in self.events_keys
-            ]
-        return self._cut_events_keys
+        return [
+            k.replace('.', '_') for k in self.events_keys
+        ]
 
-    @property
+    @cached_property
     def trigger(self):
         """trigger parameters and their index from km3net-Dataformat.
 
@@ -237,11 +223,9 @@ class OfflineKeys:
             dictionary of trigger parameters and their index in an Offline
             file.
         """
-        if self._trigger is None:
-            self._trigger = km3io.definitions.trigger.data
-        return self._trigger
+        return km3io.definitions.trigger.data
 
-    @property
+    @cached_property
     def reconstruction(self):
         """reconstruction parameters and their index from km3net-Dataformat.
 
@@ -251,11 +235,9 @@ class OfflineKeys:
             dictionary of reconstruction parameters and their index in an
             Offline file.
         """
-        if self._reconstruction is None:
-            self._reconstruction = km3io.definitions.reconstruction.data
-        return self._reconstruction
+        return km3io.definitions.reconstruction.data
 
-    @property
+    @cached_property
     def fitparameters(self):
         """fit parameters parameters and their index from km3net-Dataformat.
 
@@ -265,9 +247,7 @@ class OfflineKeys:
             dictionary of fit parameters and their index in an Offline
             file.
         """
-        if self._fitparameters is None:
-            self._fitparameters = km3io.definitions.fitparameters.data
-        return self._fitparameters
+        return km3io.definitions.fitparameters.data
 
 
 class Reader:

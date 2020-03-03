@@ -834,7 +834,7 @@ class Usr:
             self._usr_names = [n.decode("utf-8")
                                for n in self._f['E']['Evt']['usr_names'].array()[0]]
         except IndexError:
-            pass
+            self._usr_names = []
         else:
             self._usr_idx_lookup = {name: index for index, name in enumerate(self._usr_names)}
             self._usr_data = self._f['E']['Evt']['usr'].lazyarray(
@@ -848,6 +848,10 @@ class Usr:
 
     def keys(self):
         return self._usr_names
+
+    def __str__(self):
+        for name in self.keys():
+            print("{} = {}".format(name, self[name]))
 
 
 class OfflineEvents:

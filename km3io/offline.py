@@ -843,7 +843,7 @@ class Usr:
             for name in self._usr_names:
                 setattr(self, name, self[name])
 
-    def __getdata__(self, item):
+    def __getitem__(self, item):
         return self._usr_data[:, self._usr_idx_lookup[item]]
 
     def keys(self):

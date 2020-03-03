@@ -493,28 +493,26 @@ class TestUsr(unittest.TestCase):
         self.assertListEqual([], f.usr.keys())
 
     def test_keys(self):
-        self.assertListEqual(['RecoQuality',
-'RecoNDF',
-'CoC',
-'ToT',
-'ChargeAbove',
-'ChargeBelow',
-'ChargeRatio',
-'DeltaPosZ',
-'FirstPartPosZ',
-'LastPartPosZ',
-'NSnapHits',
-'NTrigHits',
-'NTrigDOMs',
-'NTrigLines',
-'NSpeedVetoHits',
-'NGeometryVetoHits',
-'ClassficationScore'], self.f.usr.keys())
+        self.assertListEqual([
+            'RecoQuality', 'RecoNDF', 'CoC', 'ToT', 'ChargeAbove',
+            'ChargeBelow', 'ChargeRatio', 'DeltaPosZ', 'FirstPartPosZ',
+            'LastPartPosZ', 'NSnapHits', 'NTrigHits', 'NTrigDOMs',
+            'NTrigLines', 'NSpeedVetoHits', 'NGeometryVetoHits',
+            'ClassficationScore'
+        ], self.f.usr.keys())
 
     def test_getitem(self):
-        assert np.allclose([118.6302815337638, 44.33580521344907, 99.93916717621543], self.f.usr['CoC'])
-        assert np.allclose([37.51967774166617, -10.280346193553832, 13.67595659707355], self.f.usr['DeltaPosZ'])
+        assert np.allclose(
+            [118.6302815337638, 44.33580521344907, 99.93916717621543],
+            self.f.usr['CoC'])
+        assert np.allclose(
+            [37.51967774166617, -10.280346193553832, 13.67595659707355],
+            self.f.usr['DeltaPosZ'])
 
     def test_attributes(self):
-        assert np.allclose([118.6302815337638, 44.33580521344907, 99.93916717621543], self.f.usr.CoC)
-        assert np.allclose([37.51967774166617, -10.280346193553832, 13.67595659707355], self.f.usr.DeltaPosZ)
+        assert np.allclose(
+            [118.6302815337638, 44.33580521344907, 99.93916717621543],
+            self.f.usr.CoC)
+        assert np.allclose(
+            [37.51967774166617, -10.280346193553832, 13.67595659707355],
+            self.f.usr.DeltaPosZ)

@@ -832,10 +832,12 @@ class Usr:
         # always the case; the usr-format is simply a very bad design.
         _usr_names = self._f['E']['Evt']['usr_names'].lazyarray()[0]
         self._usr_idx_lookup = {name: index for index, name in enumerate(_usr_names)}
-        self._usr_data = self._f['E']['Evt']['usr'].lazyarray()
+        self._usr_data = self._f['E']['Evt']['usr'].lazyarray(
+                basketcache=uproot.cache.ThreadSafeArrayCache(
+                    BASKET_CACHE_SIZE))
 
     def __getitem__(self, item):
-        return self._usr_data[self._usr_idx_lookup[item]]
+        return self._usr_data[:, self._usr_idx_lookup[item]]
 
 
 class OfflineEvents:

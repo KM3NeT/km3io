@@ -833,7 +833,7 @@ class Usr:
         try:
             self._usr_names = [n.decode("utf-8")
                                for n in self._f['E']['Evt']['usr_names'].array()[0]]
-        except IndexError:
+        except (KeyError, IndexError):  # e.g. old aanet files
             self._usr_names = []
         else:
             self._usr_idx_lookup = {name: index for index, name in enumerate(self._usr_names)}

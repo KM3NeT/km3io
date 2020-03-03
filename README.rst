@@ -66,6 +66,8 @@ Tutorial
 
   * `reading events data <#reading-events-data>`__
 
+  * `reading usr data of events <#reading-usr-data-of-events>`__
+
   * `reading hits data <#reading-hits-data>`__
 
   * `reading tracks data <#reading-tracks-data>`__
@@ -73,6 +75,7 @@ Tutorial
   * `reading mc hits data <#reading-mc-hits-data>`__
 
   * `reading mc tracks data <#reading-mc-tracks-data>`__
+
 
 
 Introduction
@@ -626,6 +629,44 @@ or the number of hits:
 
     >>> r.events[0].hits
     176
+
+
+reading usr data of events
+""""""""""""""""""""""""""
+
+To access the ``usr`` data of events, use the ``.usr`` property which behaves
+like a dictionary and returns ``lazyarray``, compatible to the ``numpy.array``
+interface. The available keys can be accessed either as attributes or via a
+dictionary lookup:
+
+.. code-block:: python3
+
+    >>> import km3io
+    >>> f = km3io.OfflineReader("tests/samples/usr-sample.root")
+    >>> f.usr
+    <km3io.offline.Usr at 0x7efd53a41eb0>
+    >>> print(f.usr)
+    RecoQuality: [85.45957235835593 68.74744265572737 50.18704013646688]
+    RecoNDF: [37.0 37.0 29.0]
+    CoC: [118.6302815337638 44.33580521344907 99.93916717621543]
+    ToT: [825.0 781.0 318.0]
+    ChargeAbove: [176.0 278.0 53.0]
+    ChargeBelow: [649.0 503.0 265.0]
+    ChargeRatio: [0.21333333333333335 0.3559539052496799 0.16666666666666666]
+    DeltaPosZ: [37.51967774166617 -10.280346193553832 13.67595659707355]
+    FirstPartPosZ: [135.29499707179326 41.46665612378939 107.39596803432326]
+    LastPartPosZ: [97.77531933012709 51.747002317343224 93.72001143724971]
+    NSnapHits: [51.0 107.0 98.0]
+    NTrigHits: [30.0 32.0 14.0]
+    NTrigDOMs: [7.0 11.0 7.0]
+    NTrigLines: [6.0 5.0 4.0]
+    NSpeedVetoHits: [0.0 0.0 0.0]
+    NGeometryVetoHits: [0.0 0.0 0.0]
+    ClassficationScore: [0.16863382173469108 0.17944356593281038 0.08155750660727408]
+    >>> f.usr.DeltaPosZ
+    <ChunkedArray [37.51967774166617 -10.280346193553832 13.67595659707355] at 0x7efd54013eb0>
+    >>> f.usr['RecoQuality']
+    <ChunkedArray [85.45957235835593 68.74744265572737 50.18704013646688] at 0x7efd54034b50>
 
 
 reading hits data

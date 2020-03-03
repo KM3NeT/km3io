@@ -7,6 +7,7 @@ from km3io import OfflineReader
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
 OFFLINE_FILE = SAMPLES_DIR / 'aanet_v2.0.0.root'
+OFFLINE_USR = SAMPLES_DIR / 'usr-sample.root'
 OFFLINE_NUMUCC = SAMPLES_DIR / "numucc.root"  # with mc data
 
 
@@ -478,3 +479,40 @@ class TestOfflineTrack(unittest.TestCase):
     def test_str(self):
         self.assertEqual(repr(self.track).split('\n\t')[0], 'offline track:')
         self.assertTrue("JGANDALF_LAMBDA" in repr(self.track))
+
+
+class TestUsr(unittest.TestCase):
+    def setUp(self):
+        self.f = OfflineReader(OFFLINE_USR)
+
+    def test_str(self):
+        print(self.f.usr)
+
+    def test_nonexistent_usr(self):
+        f = OfflineReader(SAMPLES_DIR / "daq_v1.0.0.root")
+        self.assertListEqual([], f.usr.keys())
+
+    def test_keys(self):
+        self.assertListEqual([
+            'RecoQuality', 'RecoNDF', 'CoC', 'ToT', 'ChargeAbove',
+            'ChargeBelow', 'ChargeRatio', 'DeltaPosZ', 'FirstPartPosZ',
+            'LastPartPosZ', 'NSnapHits', 'NTrigHits', 'NTrigDOMs',
+            'NTrigLines', 'NSpeedVetoHits', 'NGeometryVetoHits',
+            'ClassficationScore'
+        ], self.f.usr.keys())
+
+    def test_getitem(self):
+        assert np.allclose(
+            [118.6302815337638, 44.33580521344907, 99.93916717621543],
+            self.f.usr['CoC'])
+        assert np.allclose(
+            [37.51967774166617, -10.280346193553832, 13.67595659707355],
+            self.f.usr['DeltaPosZ'])
+
+    def test_attributes(self):
+        assert np.allclose(
+            [118.6302815337638, 44.33580521344907, 99.93916717621543],
+            self.f.usr.CoC)
+        assert np.allclose(
+            [37.51967774166617, -10.280346193553832, 13.67595659707355],
+            self.f.usr.DeltaPosZ)

@@ -850,8 +850,10 @@ class Usr:
         return self._usr_names
 
     def __str__(self):
+        entries = []
         for name in self.keys():
-            print("{} = {}".format(name, self[name]))
+            entries.append("{}: {}".format(name, self[name]))
+        return '\n'.join(entries)
 
 
 class OfflineEvents:

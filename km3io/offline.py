@@ -836,11 +836,11 @@ class Usr:
         except IndexError:
             pass
         else:
-            self._usr_idx_lookup = {name: index for index, name in enumerate(_usr_names)}
+            self._usr_idx_lookup = {name: index for index, name in enumerate(self._usr_names)}
             self._usr_data = self._f['E']['Evt']['usr'].lazyarray(
                     basketcache=uproot.cache.ThreadSafeArrayCache(
                         BASKET_CACHE_SIZE))
-            for name in _usr_names:
+            for name in self._usr_names:
                 setattr(self, name, self[name])
 
     def __getdata__(self, item):

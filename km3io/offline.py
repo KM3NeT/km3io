@@ -830,15 +830,24 @@ class Usr:
         # Here, we assume that every event has the same names in the same order
         # to massively increase the performance. This needs triple check if it's
         # always the case; the usr-format is simply a very bad design.
-        _usr_names = [n.decode("utf-8")
-                      for n in self._f['E']['Evt']['usr_names'].array()[0]]
-        self._usr_idx_lookup = {name: index for index, name in enumerate(_usr_names)}
-        self._usr_data = self._f['E']['Evt']['usr'].lazyarray(
-                basketcache=uproot.cache.ThreadSafeArrayCache(
-                    BASKET_CACHE_SIZE))
+        try:
+            self._usr_names = [n.decode("utf-8")
+                               for n in self._f['E']['Evt']['usr_names'].array()[0]]
+        except IndexError:
+            pass
+        else:
+            self._usr_idx_lookup = {name: index for index, name in enumerate(_usr_names)}
+            self._usr_data = self._f['E']['Evt']['usr'].lazyarray(
+                    basketcache=uproot.cache.ThreadSafeArrayCache(
+                        BASKET_CACHE_SIZE))
+            for name in _usr_names:
+                setattr(self, name, self[name])
 
-    def __getitem__(self, item):
+    def __getdata__(self, item):
         return self._usr_data[:, self._usr_idx_lookup[item]]
+
+    def keys(self):
+        return self._usr_names
 
 
 class OfflineEvents:

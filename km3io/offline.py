@@ -5,23 +5,23 @@ import km3io.definitions.trigger
 import km3io.definitions.fitparameters
 import km3io.definitions.reconstruction
 
+MAIN_TREE_NAME = "E"
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
 
 
 class OfflineKeys:
     """wrapper for offline keys"""
-    def __init__(self, file_path):
+    def __init__(self, tree):
         """OfflineKeys is a class that reads all the available keys in an offline
         file and adapts the keys format to Python format.
 
         Parameters
         ----------
-        file_path : path-like object
-            Path to the offline file of interest. It can be a str or any python
-            path-like object that points to the file of ineterst.
+        tree : uproot.TTree
+            The main ROOT tree.
         """
-        self._file_path = file_path
+        self._tree = tree
         self._events_keys = None
         self._hits_keys = None
         self._tracks_keys = None
@@ -46,8 +46,7 @@ class OfflineKeys:
         ])
 
     def __repr__(self):
-        return str(self)
-        # return f'{self.__class__.__name__}("{self._file_path}")'
+        return "<{}>".format(self.__class__.__name__)
 
     @property
     def events_keys(self):
@@ -62,7 +61,7 @@ class OfflineKeys:
         if self._events_keys is None:
             fake_branches = ['Evt', 'AAObject', 'TObject', 't']
             t_baskets = ['t.fSec', 't.fNanoSec']
-            tree = uproot.open(self._file_path)['E']['Evt']
+            tree = self._tree['Evt']
             self._events_keys = [
                 key.decode('utf-8') for key in tree.keys()
                 if key.decode('utf-8') not in fake_branches
@@ -83,7 +82,7 @@ class OfflineKeys:
             fake_branches = [
                 'hits.usr', 'hits.usr_names'
             ]  # to be treated like trks.usr and trks.usr_names
-            tree = uproot.open(self._file_path)['E']['hits']
+            tree = self._tree['hits']
             self._hits_keys = [
                 key.decode('utf8') for key in tree.keys()
                 if key.decode('utf8') not in fake_branches
@@ -106,7 +105,7 @@ class OfflineKeys:
             fake_branches = [
                 'trks.usr_data', 'trks.usr', 'trks.usr_names'
             ]  # can be accessed using tree['trks.usr_names'].array()
-            tree = uproot.open(self._file_path)['E']['Evt']['trks']
+            tree = self._tree['Evt']['trks']
             self._tracks_keys = [
                 key.decode('utf8') for key in tree.keys()
                 if key.decode('utf8') not in fake_branches
@@ -125,7 +124,7 @@ class OfflineKeys:
         """
         if self._mc_hits_keys is None:
             fake_branches = ['mc_hits.usr', 'mc_hits.usr_names']
-            tree = uproot.open(self._file_path)['E']['Evt']['mc_hits']
+            tree = self._tree['Evt']['mc_hits']
             self._mc_hits_keys = [
                 key.decode('utf8') for key in tree.keys()
                 if key.decode('utf8') not in fake_branches
@@ -146,7 +145,7 @@ class OfflineKeys:
             fake_branches = [
                 'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.usr_names'
             ]  # same solution as above can be used
-            tree = uproot.open(self._file_path)['E']['Evt']['mc_trks']
+            tree = self._tree['Evt']['mc_trks']
             self._mc_tracks_keys = [
                 key.decode('utf8') for key in tree.keys()
                 if key.decode('utf8') not in fake_branches
@@ -279,12 +278,11 @@ class Reader:
 
         Parameters
         ----------
-        file_path : path-like object
-            Path to the file of interest. It can be a str or any python
-            path-like object that points to the file of ineterst.
+        file_path : str or file-like object
+            The file of interest.
         """
-        self._file_path = file_path
-        self._data = uproot.open(self._file_path)['E'].lazyarrays(
+        self._tree = uproot.open(file_path)[MAIN_TREE_NAME]
+        self._data = self._tree.lazyarrays(
             basketcache=uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE))
         self._keys = None
 
@@ -335,13 +333,13 @@ class Reader:
             OfflineKeys.
         """
         if self._keys is None:
-            self._keys = OfflineKeys(self._file_path)
+            self._keys = OfflineKeys(self._tree)
         return self._keys
 
 
 class OfflineReader:
     """reader for offline ROOT files"""
-    def __init__(self, file_path, data=None):
+    def __init__(self, file_path=None):
         """ OfflineReader class is an offline ROOT file wrapper
 
         Parameters
@@ -351,12 +349,6 @@ class OfflineReader:
             path-like object that points to the file of ineterst.
         """
         self._file_path = file_path
-        if data is not None:
-            self._data = data
-        else:
-            self._data = uproot.open(self._file_path)['E'].lazyarrays(
-                basketcache=uproot.cache.ThreadSafeArrayCache(
-                    BASKET_CACHE_SIZE))
         self._events = None
         self._hits = None
         self._tracks = None
@@ -367,8 +359,21 @@ class OfflineReader:
         self._header = None
         self._usr = None
 
+        if file_path is not None:
+            self._tree = uproot.open(self._file_path)[MAIN_TREE_NAME]
+            self._data = self._tree.lazyarrays(
+                basketcache=uproot.cache.ThreadSafeArrayCache(
+                    BASKET_CACHE_SIZE))
+
+    @classmethod
+    def from_tree(cls, tree, data):
+        instance = cls()
+        instance._tree = tree
+        instance._data = data
+        return instance
+
     def __getitem__(self, item):
-        return OfflineReader(file_path=self._file_path, data=self._data[item])
+        return OfflineReader.from_tree(tree=self._tree, data=self._data[item])
 
     def __len__(self):
         return len(self._data)
@@ -395,7 +400,7 @@ class OfflineReader:
             OfflineKeys.
         """
         if self._keys is None:
-            self._keys = OfflineKeys(self._file_path)
+            self._keys = OfflineKeys(self._tree)
         return self._keys
 
     @property
@@ -918,9 +923,6 @@ class OfflineEvent:
             for k, v in zip(self._keys, self._values)
         ])
 
-    def __repr__(self):
-        return str(self)
-
 
 class OfflineHits:
     """wrapper for offline hits"""
@@ -981,15 +983,6 @@ class OfflineHit:
 
     def __getitem__(self, item):
         return self._values[item]
-
-    def __repr__(self):
-        return str(self)
-
-    # def _is_empty(array):
-    #     if array.size:
-    #         return False
-    #     else:
-    #         return True
 
 
 class OfflineTracks:
@@ -1067,6 +1060,3 @@ class OfflineTrack:
 
     def __getitem__(self, item):
         return self._values[item]
-
-    def __repr__(self):
-        return str(self)

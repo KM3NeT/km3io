@@ -15,12 +15,6 @@ class TestOfflineKeys(unittest.TestCase):
     def setUp(self):
         self.keys = OfflineReader(OFFLINE_FILE).keys
 
-    def test_repr(self):
-        reader_repr = repr(self.keys)
-
-        # check that there are 106 keys + 5 extra str
-        self.assertEqual(len(reader_repr.split('\n')), 111)
-
     def test_events_keys(self):
         # there are 22 "valid" events keys
         self.assertEqual(len(self.keys.events_keys), 22)
@@ -153,15 +147,6 @@ class TestOfflineReader(unittest.TestCase):
         self.r = OfflineReader(OFFLINE_FILE)
         self.nu = OfflineReader(OFFLINE_NUMUCC)
         self.Nevents = 10
-        self.selected_data = OfflineReader(OFFLINE_FILE,
-                                           data=self.r._data[0])._data
-
-    def test_item_selection(self):
-        # test class instance with data=None option
-        self.assertEqual(len(self.selected_data), len(self.r._data[0]))
-
-        # test item selection (here we test with hits=176)
-        self.assertEqual(self.r[0].events.hits, self.selected_data['hits'])
 
     def test_number_events(self):
         Nevents = len(self.r)
@@ -311,14 +296,8 @@ class TestOfflineEvents(unittest.TestCase):
 
 
 class TestOfflineEvent(unittest.TestCase):
-    def setUp(self):
+    def test_event(self):
         self.event = OfflineReader(OFFLINE_FILE).events[0]
-
-    def test_str(self):
-        self.assertEqual(repr(self.event).split('\n\t')[0], 'offline event:')
-        self.assertEqual(
-            repr(self.event).split('\n\t')[2],
-            'det_id              :              44')
 
 
 class TestOfflineHits(unittest.TestCase):
@@ -399,12 +378,6 @@ class TestOfflineHit(unittest.TestCase):
         self.assertEqual(self.hit[0], self.hit.id)
         self.assertEqual(self.hit[1], self.hit.dom_id)
 
-    def test_str(self):
-        self.assertEqual(repr(self.hit).split('\n\t')[0], 'offline hit:')
-        self.assertEqual(
-            repr(self.hit).split('\n\t')[2],
-            'dom_id              :       806451572')
-
 
 class TestOfflineTracks(unittest.TestCase):
     def setUp(self):
@@ -477,8 +450,7 @@ class TestOfflineTrack(unittest.TestCase):
         self.assertEqual(self.track[10], self.track.E)
 
     def test_str(self):
-        self.assertEqual(repr(self.track).split('\n\t')[0], 'offline track:')
-        self.assertTrue("JGANDALF_LAMBDA" in repr(self.track))
+        self.assertEqual(str(self.track).split('\n\t')[0], 'offline track:')
 
 
 class TestUsr(unittest.TestCase):

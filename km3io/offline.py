@@ -11,13 +11,15 @@ BASKET_CACHE_SIZE = 110 * 1024**2
 
 
 class cached_property:
-    def __init__(self, func):
-        self.func = func
+    """A simple cache decorator for properties."""
+    def __init__(self, function):
+        self.function= function
 
     def __get__(self, obj, cls):
-        if obj is None: return self
-        value = obj.__dict__[self.func.__name__] = self.func(obj)
-        return value
+        if obj is None:
+            return self
+        prop = obj.__dict__[self.function.__name__] = self.function(obj)
+        return prop
 
 
 class OfflineKeys:

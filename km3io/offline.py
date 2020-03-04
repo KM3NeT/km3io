@@ -11,13 +11,13 @@ BASKET_CACHE_SIZE = 110 * 1024**2
 
 
 class cached_property:
-     def __init__(self, func):
-         self.func = func
+    def __init__(self, func):
+        self.func = func
 
-     def __get__(self, obj, cls):
-         if obj is None: return self
-         value = obj.__dict__[self.func.__name__] = self.func(obj)
-         return value
+    def __get__(self, obj, cls):
+        if obj is None: return self
+        value = obj.__dict__[self.func.__name__] = self.func(obj)
+        return value
 
 
 class OfflineKeys:
@@ -68,8 +68,8 @@ class OfflineKeys:
         t_baskets = ['t.fSec', 't.fNanoSec']
         tree = self._tree['Evt']
         return [
-            key.decode('utf-8') for key in tree.keys()
-            if key.decode('utf-8') not in fake_branches
+            key.decode('utf-8')
+            for key in tree.keys() if key.decode('utf-8') not in fake_branches
         ] + t_baskets
 
     @cached_property
@@ -82,9 +82,8 @@ class OfflineKeys:
             list of all hits keys found in an offline file,
             except those found in fake branches.
         """
-        fake_branches = [
-            'hits.usr', 'hits.usr_names'
-        ]  # to be treated like trks.usr and trks.usr_names
+        fake_branches = ['hits.usr', 'hits.usr_names'
+                         ]  # to be treated like trks.usr and trks.usr_names
         tree = self._tree['hits']
         return [
             key.decode('utf8') for key in tree.keys()
@@ -156,9 +155,8 @@ class OfflineKeys:
         list of str
             list of all valid keys.
         """
-        return (self.events_keys + self.hits_keys +
-                            self.tracks_keys + self.mc_tracks_keys +
-                            self.mc_hits_keys)
+        return (self.events_keys + self.hits_keys + self.tracks_keys +
+                self.mc_tracks_keys + self.mc_hits_keys)
 
     @cached_property
     def fit_keys(self):
@@ -170,8 +168,8 @@ class OfflineKeys:
             list of all "trks.fitinf" keys.
         """
         return sorted(self.fitparameters,
-                                    key=self.fitparameters.get,
-                                    reverse=False)
+                      key=self.fitparameters.get,
+                      reverse=False)
 
     @cached_property
     def cut_hits_keys(self):
@@ -182,9 +180,7 @@ class OfflineKeys:
         list of str
             list of adapted hits keys.
         """
-        return [
-            k.split('hits.')[1].replace('.', '_') for k in self.hits_keys
-        ]
+        return [k.split('hits.')[1].replace('.', '_') for k in self.hits_keys]
 
     @cached_property
     def cut_tracks_keys(self):
@@ -208,9 +204,7 @@ class OfflineKeys:
         list of str
             list of adapted events keys.
         """
-        return [
-            k.replace('.', '_') for k in self.events_keys
-        ]
+        return [k.replace('.', '_') for k in self.events_keys]
 
     @cached_property
     def trigger(self):
@@ -390,9 +384,8 @@ class OfflineReader:
         Class
             OfflineHits.
         """
-        return OfflineHits(
-            self.keys.cut_hits_keys,
-            [self._data[key] for key in self.keys.hits_keys])
+        return OfflineHits(self.keys.cut_hits_keys,
+                           [self._data[key] for key in self.keys.hits_keys])
 
     @cached_property
     def tracks(self):
@@ -417,9 +410,8 @@ class OfflineReader:
         Class
             OfflineHits.
         """
-        return OfflineHits(
-            self.keys.cut_hits_keys,
-            [self._data[key] for key in self.keys.mc_hits_keys])
+        return OfflineHits(self.keys.cut_hits_keys,
+                           [self._data[key] for key in self.keys.mc_hits_keys])
 
     @cached_property
     def mc_tracks(self):
@@ -468,8 +460,8 @@ class OfflineReader:
             np.hstack([i, np.zeros(rows_size - len(i)) + np.nan])
             for i in fit_data
         ])
-        return np.core.records.fromarrays(
-            equal_size_data.transpose(), names=keys)
+        return np.core.records.fromarrays(equal_size_data.transpose(),
+                                          names=keys)
 
     def _get_max_reco_stages(self, reco_stages):
         """find the longest reconstructed track based on the maximum size of 

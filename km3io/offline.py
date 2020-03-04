@@ -198,18 +198,6 @@ class OfflineKeys:
         """
         return [k.replace('.', '_') for k in self.events_keys]
 
-    @cached_property
-    def trigger(self):
-        """trigger parameters and their index from km3net-Dataformat.
-
-        Returns
-        -------
-        dict
-            dictionary of trigger parameters and their index in an Offline
-            file.
-        """
-        return km3io.definitions.trigger.data
-
 
 class OfflineReader:
     """reader for offline ROOT files"""
@@ -220,7 +208,7 @@ class OfflineReader:
         ----------
         file_path : path-like object
             Path to the file of interest. It can be a str or any python
-            path-like object that points to the file of ineterst.
+            path-like object that points to the file.
         """
         self._file_path = file_path
 
@@ -331,7 +319,7 @@ class OfflineReader:
 
     @cached_property
     def usr(self):
-        return Usr(self._file_path)
+        return Usr(self._tree)
 
     def get_best_reco(self):
         """returns the best reconstructed track fit data. The best fit is defined
@@ -674,15 +662,14 @@ class OfflineReader:
 
 class Usr:
     """Helper class to access AAObject usr stuff"""
-    def __init__(self, filepath):
-        self._f = uproot.open(filepath)
+    def __init__(self, tree):
         # Here, we assume that every event has the same names in the same order
         # to massively increase the performance. This needs triple check if it's
         # always the case; the usr-format is simply a very bad design.
         try:
             self._usr_names = [
                 n.decode("utf-8")
-                for n in self._f['E']['Evt']['usr_names'].array()[0]
+                for n in tree['Evt']['usr_names'].array()[0]
             ]
         except (KeyError, IndexError):  # e.g. old aanet files
             self._usr_names = []
@@ -691,7 +678,7 @@ class Usr:
                 name: index
                 for index, name in enumerate(self._usr_names)
             }
-            self._usr_data = self._f['E']['Evt']['usr'].lazyarray(
+            self._usr_data = tree['Evt']['usr'].lazyarray(
                 basketcache=uproot.cache.ThreadSafeArrayCache(
                     BASKET_CACHE_SIZE))
             for name in self._usr_names:

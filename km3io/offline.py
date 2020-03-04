@@ -1,4 +1,3 @@
-import functools
 import uproot
 import numpy as np
 import warnings
@@ -303,7 +302,7 @@ class Reader:
     def __repr__(self):
         return "<{}: {} entries>".format(self.__class__.__name__, len(self))
 
-    @property
+    @cached_property
     def keys(self):
         """wrapper for all keys in an offline file.
 
@@ -312,9 +311,7 @@ class Reader:
         Class
             OfflineKeys.
         """
-        if self._keys is None:
-            self._keys = OfflineKeys(self._tree)
-        return self._keys
+        return OfflineKeys(self._tree)
 
 
 class OfflineReader:
@@ -329,15 +326,6 @@ class OfflineReader:
             path-like object that points to the file of ineterst.
         """
         self._file_path = file_path
-        self._events = None
-        self._hits = None
-        self._tracks = None
-        self._mc_hits = None
-        self._mc_tracks = None
-        self._keys = None
-        self._best_reco = None
-        self._header = None
-        self._usr = None
 
         if file_path is not None:
             self._tree = uproot.open(self._file_path)[MAIN_TREE_NAME]
@@ -358,19 +346,18 @@ class OfflineReader:
     def __len__(self):
         return len(self._data)
 
-    @property
+    @cached_property
     def header(self):
-        if self._header is None:
-            fobj = uproot.open(self._file_path)
-            if 'Head' in fobj:
-                self._header = {}
-                for n, x in fobj['Head']._map_3c_string_2c_string_3e_.items():
-                    self._header[n.decode("utf-8")] = x.decode("utf-8").strip()
-            else:
-                warnings.warn("Your file header has an unsupported format")
-        return self._header
+        fobj = uproot.open(self._file_path)
+        if 'Head' in fobj:
+            header = {}
+            for n, x in fobj['Head']._map_3c_string_2c_string_3e_.items():
+                header[n.decode("utf-8")] = x.decode("utf-8").strip()
+            return header
+        else:
+            warnings.warn("Your file header has an unsupported format")
 
-    @property
+    @cached_property
     def keys(self):
         """wrapper for all keys in an offline file.
 
@@ -379,11 +366,9 @@ class OfflineReader:
         Class
             OfflineKeys.
         """
-        if self._keys is None:
-            self._keys = OfflineKeys(self._tree)
-        return self._keys
+        return OfflineKeys(self._tree)
 
-    @property
+    @cached_property
     def events(self):
         """wrapper for offline events.
 
@@ -392,13 +377,11 @@ class OfflineReader:
         Class
             OfflineEvents.
         """
-        if self._events is None:
-            self._events = OfflineEvents(
-                self.keys.cut_events_keys,
-                [self._data[key] for key in self.keys.events_keys])
-        return self._events
+        return OfflineEvents(
+            self.keys.cut_events_keys,
+            [self._data[key] for key in self.keys.events_keys])
 
-    @property
+    @cached_property
     def hits(self):
         """wrapper for offline hits.
 
@@ -407,13 +390,11 @@ class OfflineReader:
         Class
             OfflineHits.
         """
-        if self._hits is None:
-            self._hits = OfflineHits(
-                self.keys.cut_hits_keys,
-                [self._data[key] for key in self.keys.hits_keys])
-        return self._hits
+        return OfflineHits(
+            self.keys.cut_hits_keys,
+            [self._data[key] for key in self.keys.hits_keys])
 
-    @property
+    @cached_property
     def tracks(self):
         """wrapper for offline tracks.
 
@@ -422,14 +403,12 @@ class OfflineReader:
         Class
             OfflineTracks.
         """
-        if self._tracks is None:
-            self._tracks = OfflineTracks(
-                self.keys.cut_tracks_keys,
-                [self._data[key] for key in self.keys.tracks_keys],
-                fitparameters=self.keys.fitparameters)
-        return self._tracks
+        return OfflineTracks(
+            self.keys.cut_tracks_keys,
+            [self._data[key] for key in self.keys.tracks_keys],
+            fitparameters=self.keys.fitparameters)
 
-    @property
+    @cached_property
     def mc_hits(self):
         """wrapper for offline mc hits.
 
@@ -438,13 +417,11 @@ class OfflineReader:
         Class
             OfflineHits.
         """
-        if self._mc_hits is None:
-            self._mc_hits = OfflineHits(
-                self.keys.cut_hits_keys,
-                [self._data[key] for key in self.keys.mc_hits_keys])
-        return self._mc_hits
+        return OfflineHits(
+            self.keys.cut_hits_keys,
+            [self._data[key] for key in self.keys.mc_hits_keys])
 
-    @property
+    @cached_property
     def mc_tracks(self):
         """wrapper for offline mc tracks.
 
@@ -453,20 +430,16 @@ class OfflineReader:
         Class
             OfflineTracks.
         """
-        if self._mc_tracks is None:
-            self._mc_tracks = OfflineTracks(
-                self.keys.cut_tracks_keys,
-                [self._data[key] for key in self.keys.mc_tracks_keys],
-                fitparameters=self.keys.fitparameters)
-        return self._mc_tracks
+        return OfflineTracks(
+            self.keys.cut_tracks_keys,
+            [self._data[key] for key in self.keys.mc_tracks_keys],
+            fitparameters=self.keys.fitparameters)
 
-    @property
+    @cached_property
     def usr(self):
-        if self._usr is None:
-            self._usr = Usr(self._file_path)
-        return self._usr
+        return Usr(self._file_path)
 
-    @property
+    @cached_property
     def best_reco(self):
         """returns the best reconstructed track fit data. The best fit is defined
         as the track fit with the maximum reconstruction stages. When "nan" is
@@ -481,24 +454,22 @@ class OfflineReader:
         numpy recarray
             a recarray of the best track fit data (reconstruction data).
         """
-        if self._best_reco is None:
-            keys = ", ".join(self.keys.fit_keys[:-1])
-            empty_fit_info = np.array(
-                [match for match in self._find_empty(self.tracks.fitinf)])
-            fit_info = [
-                i for i, j in zip(self.tracks.fitinf, empty_fit_info[:, 1])
-                if j is not None
-            ]
-            stages = self._get_max_reco_stages(self.tracks.rec_stages)
-            fit_data = np.array([i[j] for i, j in zip(fit_info, stages[:, 2])])
-            rows_size = len(max(fit_data, key=len))
-            equal_size_data = np.vstack([
-                np.hstack([i, np.zeros(rows_size - len(i)) + np.nan])
-                for i in fit_data
-            ])
-            self._best_reco = np.core.records.fromarrays(
-                equal_size_data.transpose(), names=keys)
-        return self._best_reco
+        keys = ", ".join(self.keys.fit_keys[:-1])
+        empty_fit_info = np.array(
+            [match for match in self._find_empty(self.tracks.fitinf)])
+        fit_info = [
+            i for i, j in zip(self.tracks.fitinf, empty_fit_info[:, 1])
+            if j is not None
+        ]
+        stages = self._get_max_reco_stages(self.tracks.rec_stages)
+        fit_data = np.array([i[j] for i, j in zip(fit_info, stages[:, 2])])
+        rows_size = len(max(fit_data, key=len))
+        equal_size_data = np.vstack([
+            np.hstack([i, np.zeros(rows_size - len(i)) + np.nan])
+            for i in fit_data
+        ])
+        return np.core.records.fromarrays(
+            equal_size_data.transpose(), names=keys)
 
     def _get_max_reco_stages(self, reco_stages):
         """find the longest reconstructed track based on the maximum size of 

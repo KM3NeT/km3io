@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from pathlib import Path
 
-from km3io.offline import Reader, OfflineEvents, OfflineHits, OfflineTracks
+from km3io.offline import OfflineEvents, OfflineHits, OfflineTracks
 from km3io import OfflineReader
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
@@ -40,72 +40,6 @@ class TestOfflineKeys(unittest.TestCase):
     def test_fit_keys(self):
         # there are 18 fit keys
         self.assertEqual(len(self.keys.fit_keys), 18)
-
-
-class TestReader(unittest.TestCase):
-    def setUp(self):
-        self.r = Reader(OFFLINE_FILE)
-        self.lengths = {0: 176, 1: 125, -1: 105}
-        self.total_item_count = 1434
-
-    def test_reading_dom_id(self):
-        dom_ids = self.r["hits.dom_id"]
-
-        for event_id, length in self.lengths.items():
-            self.assertEqual(length, len(dom_ids[event_id]))
-
-        self.assertEqual(self.total_item_count, sum(dom_ids.count()))
-
-        self.assertListEqual([806451572, 806451572, 806451572],
-                             list(dom_ids[0][:3]))
-
-    def test_reading_channel_id(self):
-        channel_ids = self.r["hits.channel_id"]
-
-        for event_id, length in self.lengths.items():
-            self.assertEqual(length, len(channel_ids[event_id]))
-
-        self.assertEqual(self.total_item_count, sum(channel_ids.count()))
-
-        self.assertListEqual([8, 9, 14], list(channel_ids[0][:3]))
-
-        # channel IDs are always between [0, 30]
-        self.assertTrue(all(c >= 0 for c in channel_ids.min()))
-        self.assertTrue(all(c < 31 for c in channel_ids.max()))
-
-    def test_reading_times(self):
-        ts = self.r["hits.t"]
-
-        for event_id, length in self.lengths.items():
-            self.assertEqual(length, len(ts[event_id]))
-
-        self.assertEqual(self.total_item_count, sum(ts.count()))
-
-        self.assertListEqual([70104010.0, 70104016.0, 70104192.0],
-                             list(ts[0][:3]))
-
-    def test_reading_keys(self):
-        # there are 106 "valid" keys in an offline file
-        self.assertEqual(len(self.r.keys.valid_keys), 106)
-
-        # there are 20 hits keys
-        self.assertEqual(len(self.r.keys.hits_keys), 20)
-        self.assertEqual(len(self.r.keys.mc_hits_keys), 20)
-
-        # there are 22 tracks keys
-        self.assertEqual(len(self.r.keys.tracks_keys), 22)
-        self.assertEqual(len(self.r.keys.mc_tracks_keys), 22)
-
-    def test_raising_KeyError(self):
-        # non valid keys must raise a KeyError
-        with self.assertRaises(KeyError):
-            self.r['whatever']
-
-    def test_number_events(self):
-        Nevents = len(self.r)
-
-        # check that there are 10 events
-        self.assertEqual(Nevents, 10)
 
 
 class TestOfflineReader(unittest.TestCase):

@@ -210,18 +210,6 @@ class OfflineKeys:
         """
         return km3io.definitions.trigger.data
 
-    @cached_property
-    def reconstruction(self):
-        """reconstruction parameters and their index from km3net-Dataformat.
-
-        Returns
-        -------
-        dict
-            dictionary of reconstruction parameters and their index in an
-            Offline file.
-        """
-        return km3io.definitions.reconstruction.data
-
 
 class Reader:
     """Reader for one offline ROOT file"""

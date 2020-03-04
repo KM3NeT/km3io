@@ -2,44 +2,12 @@ import unittest
 import numpy as np
 from pathlib import Path
 
-from km3io.offline import OfflineEvents, OfflineHits, OfflineTracks
 from km3io import OfflineReader
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
 OFFLINE_FILE = SAMPLES_DIR / 'aanet_v2.0.0.root'
 OFFLINE_USR = SAMPLES_DIR / 'usr-sample.root'
 OFFLINE_NUMUCC = SAMPLES_DIR / "numucc.root"  # with mc data
-
-
-class TestOfflineKeys(unittest.TestCase):
-    def setUp(self):
-        self.keys = OfflineReader(OFFLINE_FILE).keys
-
-    def test_events_keys(self):
-        # there are 22 "valid" events keys
-        self.assertEqual(len(self.keys.events_keys), 22)
-        self.assertEqual(len(self.keys.cut_events_keys), 22)
-
-    def test_hits_keys(self):
-        # there are 20 "valid" hits keys
-        self.assertEqual(len(self.keys.hits_keys), 20)
-        self.assertEqual(len(self.keys.mc_hits_keys), 20)
-        self.assertEqual(len(self.keys.cut_hits_keys), 20)
-
-    def test_tracks_keys(self):
-        # there are 22 "valid" tracks keys
-        self.assertEqual(len(self.keys.tracks_keys), 22)
-        self.assertEqual(len(self.keys.mc_tracks_keys), 22)
-        self.assertEqual(len(self.keys.cut_tracks_keys), 22)
-
-    def test_valid_keys(self):
-        # there are 106 valid keys: 22*2 + 22 + 20*2
-        # (fit keys are excluded)
-        self.assertEqual(len(self.keys.valid_keys), 106)
-
-    def test_fit_keys(self):
-        # there are 18 fit keys
-        self.assertEqual(len(self.keys.fit_keys), 18)
 
 
 class TestOfflineReader(unittest.TestCase):
@@ -195,11 +163,6 @@ class TestOfflineEvents(unittest.TestCase):
                          '<OfflineEvents: 10 parsed events>')
 
 
-class TestOfflineEvent(unittest.TestCase):
-    def test_event(self):
-        self.event = OfflineReader(OFFLINE_FILE).events[0]
-
-
 class TestOfflineHits(unittest.TestCase):
     def setUp(self):
         self.hits = OfflineReader(OFFLINE_FILE).hits
@@ -270,15 +233,6 @@ class TestOfflineHits(unittest.TestCase):
         self.assertListEqual([677, 687, 689], list(pmt_ids[0][:3]))
 
 
-class TestOfflineHit(unittest.TestCase):
-    def setUp(self):
-        self.hit = OfflineReader(OFFLINE_FILE)[0].hits[0]
-
-    def test_item_selection(self):
-        self.assertEqual(self.hit[0], self.hit.id)
-        self.assertEqual(self.hit[1], self.hit.dom_id)
-
-
 class TestOfflineTracks(unittest.TestCase):
     def setUp(self):
         self.tracks = OfflineReader(OFFLINE_FILE).tracks
@@ -294,11 +248,10 @@ class TestOfflineTracks(unittest.TestCase):
         self.assertEqual(len(OfflineTracks(['whatever'], [])), 0)
 
     def test_repr(self):
-        self.assertEqual(repr(self.tracks),
-                         '<OfflineTracks: 10 parsed elements>')
+        assert " 10 " in repr(self.tracks)
 
     def test_str(self):
-        self.assertEqual(str(self.tracks), 'Number of tracks: 10')
+        assert str(self.tracks).endswith(" 10")
 
     def test_reading_tracks_dir_z(self):
         dir_z = self.tracks.dir_z
@@ -339,18 +292,6 @@ class TestOfflineTracks(unittest.TestCase):
         # ]:
         #     self.assertListEqual(list(tracks.E[:, 0][_slice]),
         #                          list(tracks[_slice].E[:, 0]))
-
-
-class TestOfflineTrack(unittest.TestCase):
-    def setUp(self):
-        self.track = OfflineReader(OFFLINE_FILE)[0].tracks[0]
-
-    def test_item_selection(self):
-        self.assertEqual(self.track[0], self.track.fUniqueID)
-        self.assertEqual(self.track[10], self.track.E)
-
-    def test_str(self):
-        self.assertEqual(str(self.track).split('\n\t')[0], 'offline track:')
 
 
 class TestUsr(unittest.TestCase):

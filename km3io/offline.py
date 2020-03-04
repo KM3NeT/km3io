@@ -211,10 +211,8 @@ class OfflineReader:
             path-like object that points to the file.
 
         """
-        self._file_path = file_path
-
         if file_path is not None:
-            self._fobj = uproot.open(self._file_path)
+            self._fobj = uproot.open(file_path)
             self._tree = self._fobj[MAIN_TREE_NAME]
             self._data = self._tree.lazyarrays(
                 basketcache=uproot.cache.ThreadSafeArrayCache(

@@ -13,7 +13,7 @@ BASKET_CACHE_SIZE = 110 * 1024**2
 class cached_property:
     """A simple cache decorator for properties."""
     def __init__(self, function):
-        self.function= function
+        self.function = function
 
     def __get__(self, obj, cls):
         if obj is None:
@@ -136,7 +136,9 @@ class OfflineKeys:
             list of all mc tracks keys found in an offline file,
             except those found in fake branches.
         """
-        fake_branches = ['mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.usr_names']
+        fake_branches = [
+            'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.usr_names'
+        ]
         return self._get_keys(self._tree['Evt']['mc_trks'], fake_branches)
 
     @cached_property
@@ -246,7 +248,8 @@ class OfflineReader:
     def header(self):
         if 'Head' in self._fobj:
             header = {}
-            for n, x in self._fobj['Head']._map_3c_string_2c_string_3e_.items():
+            for n, x in self._fobj['Head']._map_3c_string_2c_string_3e_.items(
+            ):
                 header[n.decode("utf-8")] = x.decode("utf-8").strip()
             return header
         else:
@@ -299,8 +302,7 @@ class OfflineReader:
         """
         return OfflineTracks(
             self.keys.cut_tracks_keys,
-            [self._data[key] for key in self.keys.tracks_keys]
-            )
+            [self._data[key] for key in self.keys.tracks_keys])
 
     @cached_property
     def mc_hits(self):
@@ -678,8 +680,7 @@ class Usr:
         # always the case; the usr-format is simply a very bad design.
         try:
             self._usr_names = [
-                n.decode("utf-8")
-                for n in tree['Evt']['usr_names'].array()[0]
+                n.decode("utf-8") for n in tree['Evt']['usr_names'].array()[0]
             ]
         except (KeyError, IndexError):  # e.g. old aanet files
             self._usr_names = []

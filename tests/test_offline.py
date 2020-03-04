@@ -66,15 +66,6 @@ class TestOfflineKeys(unittest.TestCase):
         for k, v in zip(keys, values):
             self.assertEqual(v, reco[k])
 
-    def test_fitparameters(self):
-        # there are 18 parameters in v1.1.2 of km3net-Dataformat
-        fit = self.keys.fitparameters
-        values = [i for i in range(18)]
-
-        self.assertEqual(18, len([*fit.keys()]))
-        for k, v in fit.items():
-            self.assertEqual(values[v], fit[k])
-
 
 class TestReader(unittest.TestCase):
     def setUp(self):

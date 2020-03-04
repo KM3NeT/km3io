@@ -431,8 +431,7 @@ class OfflineReader:
     def usr(self):
         return Usr(self._file_path)
 
-    @cached_property
-    def best_reco(self):
+    def get_best_reco(self):
         """returns the best reconstructed track fit data. The best fit is defined
         as the track fit with the maximum reconstruction stages. When "nan" is
         returned, it means that the reconstruction parameter of interest is not

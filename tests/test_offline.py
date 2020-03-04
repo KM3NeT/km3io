@@ -244,7 +244,7 @@ class TestOfflineReader(unittest.TestCase):
             0.0014177681261476852, 0.002094094517471032, 0.003923368624980349,
             0.009491461076780453
         ]
-        best = self.nu.best_reco
+        best = self.nu.get_best_reco()
 
         self.assertEqual(best.size, 9)
         self.assertEqual(best['JGANDALF_BETA1_RAD'][:4].tolist(),

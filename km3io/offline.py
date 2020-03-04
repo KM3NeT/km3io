@@ -226,6 +226,15 @@ class OfflineReader:
 
     @classmethod
     def from_index(cls, source, index):
+        """Create an instance with a subtree of a given index
+
+        Parameters
+        ----------
+        source: ROOTDirectory
+            The source file.
+        index: index or slice
+            The index or slice to create the subtree.
+        """
         instance = cls(fobj=source._fobj, data=source._data[index])
         return instance
 

@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from pathlib import Path
 
-from km3io.offline import Reader, OfflineEvents, OfflineHits, OfflineTracks
+from km3io.offline import OfflineEvents, OfflineHits, OfflineTracks
 from km3io import OfflineReader
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
@@ -14,12 +14,6 @@ OFFLINE_NUMUCC = SAMPLES_DIR / "numucc.root"  # with mc data
 class TestOfflineKeys(unittest.TestCase):
     def setUp(self):
         self.keys = OfflineReader(OFFLINE_FILE).keys
-
-    def test_repr(self):
-        reader_repr = repr(self.keys)
-
-        # check that there are 106 keys + 5 extra str
-        self.assertEqual(len(reader_repr.split('\n')), 111)
 
     def test_events_keys(self):
         # there are 22 "valid" events keys
@@ -47,121 +41,12 @@ class TestOfflineKeys(unittest.TestCase):
         # there are 18 fit keys
         self.assertEqual(len(self.keys.fit_keys), 18)
 
-    def test_trigger(self):
-        # there are 4 trigger keys in v1.1.2 of km3net-Dataformat
-        trigger = self.keys.trigger
-        keys = [
-            'JTRIGGER3DSHOWER', 'JTRIGGERMXSHOWER', 'JTRIGGER3DMUON',
-            'JTRIGGERNB'
-        ]
-        values = [1, 2, 4, 5]
-
-        for k, v in zip(keys, values):
-            self.assertEqual(v, trigger[k])
-
-    def test_reconstruction(self):
-        # there are 34 parameters in v1.1.2 of km3net-Dataformat
-        reco = self.keys.reconstruction
-        keys = [
-            'JPP_RECONSTRUCTION_TYPE', 'JMUONFIT', 'JMUONBEGIN', 'JMUONPREFIT',
-            'JMUONSIMPLEX', 'JMUONGANDALF', 'JMUONENERGY', 'JMUONSTART'
-        ]
-        values = [4000, 0, 0, 1, 2, 3, 4, 5]
-
-        self.assertEqual(34, len([*reco.keys()]))
-        for k, v in zip(keys, values):
-            self.assertEqual(v, reco[k])
-
-    def test_fitparameters(self):
-        # there are 18 parameters in v1.1.2 of km3net-Dataformat
-        fit = self.keys.fitparameters
-        values = [i for i in range(18)]
-
-        self.assertEqual(18, len([*fit.keys()]))
-        for k, v in fit.items():
-            self.assertEqual(values[v], fit[k])
-
-
-class TestReader(unittest.TestCase):
-    def setUp(self):
-        self.r = Reader(OFFLINE_FILE)
-        self.lengths = {0: 176, 1: 125, -1: 105}
-        self.total_item_count = 1434
-
-    def test_reading_dom_id(self):
-        dom_ids = self.r["hits.dom_id"]
-
-        for event_id, length in self.lengths.items():
-            self.assertEqual(length, len(dom_ids[event_id]))
-
-        self.assertEqual(self.total_item_count, sum(dom_ids.count()))
-
-        self.assertListEqual([806451572, 806451572, 806451572],
-                             list(dom_ids[0][:3]))
-
-    def test_reading_channel_id(self):
-        channel_ids = self.r["hits.channel_id"]
-
-        for event_id, length in self.lengths.items():
-            self.assertEqual(length, len(channel_ids[event_id]))
-
-        self.assertEqual(self.total_item_count, sum(channel_ids.count()))
-
-        self.assertListEqual([8, 9, 14], list(channel_ids[0][:3]))
-
-        # channel IDs are always between [0, 30]
-        self.assertTrue(all(c >= 0 for c in channel_ids.min()))
-        self.assertTrue(all(c < 31 for c in channel_ids.max()))
-
-    def test_reading_times(self):
-        ts = self.r["hits.t"]
-
-        for event_id, length in self.lengths.items():
-            self.assertEqual(length, len(ts[event_id]))
-
-        self.assertEqual(self.total_item_count, sum(ts.count()))
-
-        self.assertListEqual([70104010.0, 70104016.0, 70104192.0],
-                             list(ts[0][:3]))
-
-    def test_reading_keys(self):
-        # there are 106 "valid" keys in an offline file
-        self.assertEqual(len(self.r.keys.valid_keys), 106)
-
-        # there are 20 hits keys
-        self.assertEqual(len(self.r.keys.hits_keys), 20)
-        self.assertEqual(len(self.r.keys.mc_hits_keys), 20)
-
-        # there are 22 tracks keys
-        self.assertEqual(len(self.r.keys.tracks_keys), 22)
-        self.assertEqual(len(self.r.keys.mc_tracks_keys), 22)
-
-    def test_raising_KeyError(self):
-        # non valid keys must raise a KeyError
-        with self.assertRaises(KeyError):
-            self.r['whatever']
-
-    def test_number_events(self):
-        Nevents = len(self.r)
-
-        # check that there are 10 events
-        self.assertEqual(Nevents, 10)
-
 
 class TestOfflineReader(unittest.TestCase):
     def setUp(self):
         self.r = OfflineReader(OFFLINE_FILE)
         self.nu = OfflineReader(OFFLINE_NUMUCC)
         self.Nevents = 10
-        self.selected_data = OfflineReader(OFFLINE_FILE,
-                                           data=self.r._data[0])._data
-
-    def test_item_selection(self):
-        # test class instance with data=None option
-        self.assertEqual(len(self.selected_data), len(self.r._data[0]))
-
-        # test item selection (here we test with hits=176)
-        self.assertEqual(self.r[0].events.hits, self.selected_data['hits'])
 
     def test_number_events(self):
         Nevents = len(self.r)
@@ -259,7 +144,7 @@ class TestOfflineReader(unittest.TestCase):
             0.0014177681261476852, 0.002094094517471032, 0.003923368624980349,
             0.009491461076780453
         ]
-        best = self.nu.best_reco
+        best = self.nu.get_best_reco()
 
         self.assertEqual(best.size, 9)
         self.assertEqual(best['JGANDALF_BETA1_RAD'][:4].tolist(),
@@ -311,14 +196,8 @@ class TestOfflineEvents(unittest.TestCase):
 
 
 class TestOfflineEvent(unittest.TestCase):
-    def setUp(self):
+    def test_event(self):
         self.event = OfflineReader(OFFLINE_FILE).events[0]
-
-    def test_str(self):
-        self.assertEqual(repr(self.event).split('\n\t')[0], 'offline event:')
-        self.assertEqual(
-            repr(self.event).split('\n\t')[2],
-            'det_id              :              44')
 
 
 class TestOfflineHits(unittest.TestCase):
@@ -399,12 +278,6 @@ class TestOfflineHit(unittest.TestCase):
         self.assertEqual(self.hit[0], self.hit.id)
         self.assertEqual(self.hit[1], self.hit.dom_id)
 
-    def test_str(self):
-        self.assertEqual(repr(self.hit).split('\n\t')[0], 'offline hit:')
-        self.assertEqual(
-            repr(self.hit).split('\n\t')[2],
-            'dom_id              :       806451572')
-
 
 class TestOfflineTracks(unittest.TestCase):
     def setUp(self):
@@ -477,8 +350,7 @@ class TestOfflineTrack(unittest.TestCase):
         self.assertEqual(self.track[10], self.track.E)
 
     def test_str(self):
-        self.assertEqual(repr(self.track).split('\n\t')[0], 'offline track:')
-        self.assertTrue("JGANDALF_LAMBDA" in repr(self.track))
+        self.assertEqual(str(self.track).split('\n\t')[0], 'offline track:')
 
 
 class TestUsr(unittest.TestCase):

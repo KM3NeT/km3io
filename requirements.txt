@@ -1,4 +1,5 @@
 docopt
 numba
+awkward1
 uproot>=3.11.1
 setuptools_scm

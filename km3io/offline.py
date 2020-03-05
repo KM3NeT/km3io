@@ -505,11 +505,7 @@ class BranchElement:
             return self.__class__(self._tree, self.mapper, index=item)
         if isinstance(item, int):
             return {
-                key: self._branch[self._keymap[key]].lazyarray(
-
-                basketcache=uproot.cache.ThreadSafeArrayCache(
-                    BASKET_CACHE_SIZE)
-                )[self._index, item] for key in self.keys()
+                key: self._branch[self._keymap[key]].array()[self._index, item] for key in self.keys()
                 }
         return self._branch[self._keymap[item]].lazyarray(
                 basketcache=uproot.cache.ThreadSafeArrayCache(

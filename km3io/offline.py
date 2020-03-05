@@ -489,9 +489,12 @@ class BranchElement:
         self.name = mapper.name
         self._tree = tree
         self._branch = tree[mapper.key]
-        keys = [k.decode('utf-8') for k in self._branch.keys()]
+        keys = {k.decode('utf-8') for k in self._branch.keys()} - set(["trks.usr_data"])
+        print(keys)
         self._keymap = {**{mapper.attrparser(k): k for k in keys}, **mapper.extra_keys}
         self._index = index
+
+        # self._EntryType = namedtuple(mapper.name[:-1], self.keys())
 
         # for key in keys:
         #     setattr(self, key, cached_property(self[key]))
@@ -499,6 +502,14 @@ class BranchElement:
     def __getitem__(self, item):
         if isinstance(item, slice):
             return self.__class__(self._tree, self.mapper, index=item)
+        if isinstance(item, int):
+            return {
+                key: self._branch[self._keymap[key]].lazyarray(
+
+                basketcache=uproot.cache.ThreadSafeArrayCache(
+                    BASKET_CACHE_SIZE)
+                )[self._index, item] for key in self.keys()
+                }
         return self._branch[self._keymap[item]].lazyarray(
                 basketcache=uproot.cache.ThreadSafeArrayCache(
                     BASKET_CACHE_SIZE))[self._index]

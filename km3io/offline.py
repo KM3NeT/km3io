@@ -1,7 +1,7 @@
 from collections import namedtuple
 import uproot
 import numpy as np
-import awkward1 as ak
+import awkward as ak
 import warnings
 from .definitions import mc_header
 

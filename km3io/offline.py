@@ -472,6 +472,9 @@ class Usr:
         # always the case; the usr-format is simply a very bad design.
         self._name = name
         try:
+            tree['usr']  # This will raise a KeyError in old aanet files
+                         # which has a different strucuter and key (usr_data)
+                         # We do not support those...
             self._usr_names = [
                 n.decode("utf-8") for n in tree['usr_names'].array()[0]
             ]

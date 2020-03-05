@@ -1,6 +1,7 @@
 from collections import namedtuple
 import uproot
 import numpy as np
+import awkward1 as ak
 import warnings
 import km3io.definitions.trigger
 import km3io.definitions.fitparameters

@@ -3,9 +3,7 @@ import uproot
 import numpy as np
 import awkward1 as ak
 import warnings
-import km3io.definitions.trigger
-import km3io.definitions.fitparameters
-import km3io.definitions.reconstruction
+from .definitions import mc_header
 
 MAIN_TREE_NAME = "E"
 # 110 MB based on the size of the largest basket found so far in km3net
@@ -102,7 +100,7 @@ class OfflineReader:
             for n, x in self._fobj['Head']._map_3c_string_2c_string_3e_.items(
             ):
                 header[n.decode("utf-8")] = x.decode("utf-8").strip()
-            return header
+            return Header(header)
         else:
             warnings.warn("Your file header has an unsupported format")
 
@@ -485,6 +483,44 @@ class Usr:
         return '\n'.join(entries)
 
 
+def _to_num(value):
+    """Convert value to a numerical value if possible"""
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except ValueError:
+        try:
+            return float(value)
+        except ValueError:
+            pass
+    else:
+        return value
+
+
+class Header:
+    """The online header"""
+    def __init__(self, header):
+        self._data = {}
+        for attribute, fields in mc_header.items():
+            values = header.get(attribute, '').split()
+            if not values:
+                continue
+            Constructor = namedtuple(attribute, fields)
+            if len(values) < len(fields):
+                values += [None] * (len(fields) - len(values))
+            self._data[attribute] = Constructor(**{f: _to_num(v) for (f, v) in zip(fields, values)})
+
+        for attribute, value in self._data.items():
+            setattr(self, attribute, value)
+
+    def __str__(self):
+        lines = ["MC Header:"]
+        for value in self._data.values():
+            lines.append("  {}".format(value))
+        return "\n".join(lines)
+
+
 class BranchElement:
     """wrapper for offline tracks"""
     def __init__(self, tree, mapper, index=slice(None)):
@@ -508,6 +544,7 @@ class BranchElement:
         # self._EntryType = namedtuple(mapper.name[:-1], self.keys())
 
         for key in self.keys():
+            # print("setting", self._mapper.name, key)
             setattr(self, key, self[key])
 
     def keys(self):

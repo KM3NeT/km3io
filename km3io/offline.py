@@ -12,19 +12,21 @@ MAIN_TREE_NAME = "E"
 BASKET_CACHE_SIZE = 110 * 1024**2
 
 
-BranchMapper = namedtuple("BranchMapper", ['name', 'key', 'extra_keys', 'attrparser'])
+BranchMapper = namedtuple("BranchMapper", ['name', 'key', 'extra', 'exclude', 'update', 'attrparser'])
+
 
 def _nested_mapper(key):
     """Maps a key in the ROOT file to another key (e.g. trks.pos.x -> pos_x)"""
     return '_'.join(key.split('.')[1:])
 
 
+EXCLUDE_KEYS = set(["AAObject", "t", "fBits", "fUniqueID"])
 BRANCH_MAPS = [
-    BranchMapper("tracks", "trks", {}, _nested_mapper),
-    BranchMapper("mc_tracks", "mc_trks", {}, _nested_mapper),
-    BranchMapper("hits", "mc_hits", {}, _nested_mapper),
-    BranchMapper("mc_hits", "mc_hits", {}, _nested_mapper),
-    BranchMapper("events", "Evt", {'t_sec': 't.fSec', 't_ns': 't.fNanoSec'}, lambda a: a),
+    BranchMapper("tracks", "trks", {}, ['trks.usr_data', 'trks.usr'], {}, _nested_mapper),
+    BranchMapper("mc_tracks", "mc_trks", {}, ['mc_trks.usr_data', 'mc_trks.usr'], {}, _nested_mapper),
+    BranchMapper("hits", "hits", {}, ['hits.usr'], {}, _nested_mapper),
+    BranchMapper("mc_hits", "mc_hits", {}, ['mc_hits.usr'], {}, _nested_mapper),
+    BranchMapper("events", "Evt", {'t_sec': 't.fSec', 't_ns': 't.fNanoSec'}, [], {'n_hits': 'hits', 'n_mc_hits': 'mc_hits', 'n_tracks': 'trks', 'n_mc_tracks': 'mc_trks'}, lambda a: a),
 ]
 
 
@@ -42,7 +44,7 @@ class cached_property:
 
 class OfflineReader:
     """reader for offline ROOT files"""
-    def __init__(self, file_path=None, fobj=None, data=None, index=slice(-1)):
+    def __init__(self, file_path=None, fobj=None, data=None, index=slice(None)):
         """ OfflineReader class is an offline ROOT file wrapper
 
         Parameters
@@ -86,7 +88,7 @@ class OfflineReader:
 
     def __len__(self):
         tree = self._fobj[MAIN_TREE_NAME]
-        if self._index == slice(-1):
+        if self._index == slice(None):
             return len(tree)
         else:
             return len(tree.lazyarrays(
@@ -485,24 +487,36 @@ class Usr:
 
 class BranchElement:
     """wrapper for offline tracks"""
-    def __init__(self, tree, mapper, index=slice(-1)):
-        self.mapper = mapper
-        self.name = mapper.name
+    def __init__(self, tree, mapper, index=slice(None)):
         self._tree = tree
-        self._branch = tree[mapper.key]
-        keys = {k.decode('utf-8') for k in self._branch.keys()} - set(["trks.usr_data"])
-        print(keys)
-        self._keymap = {**{mapper.attrparser(k): k for k in keys}, **mapper.extra_keys}
+        self._mapper = mapper
         self._index = index
+        self._keymap = None
+
+        self._branch = tree[mapper.key]
+
+        self._initialise_keys()
+
+    def _initialise_keys(self):
+        """Create the keymap and instance attributes"""
+        keys = set(k.decode('utf-8') for k in self._branch.keys()) - set(self._mapper.exclude) - EXCLUDE_KEYS
+        self._keymap = {**{self._mapper.attrparser(k): k for k in keys}, **self._mapper.extra}
+        self._keymap.update(self._mapper.update)
+        for k in self._mapper.update.values():
+            del self._keymap[k]
 
         # self._EntryType = namedtuple(mapper.name[:-1], self.keys())
 
-        # for key in keys:
-        #     setattr(self, key, cached_property(self[key]))
+        for key in self.keys():
+            setattr(self, key, self[key])
+
+    def keys(self):
+        return self._keymap.keys()
 
     def __getitem__(self, item):
+        """Slicing magic a la numpy"""
         if isinstance(item, slice):
-            return self.__class__(self._tree, self.mapper, index=item)
+            return self.__class__(self._tree, self._mapper, index=item)
         if isinstance(item, int):
             return {
                 key: self._branch[self._keymap[key]].array()[self._index, item] for key in self.keys()
@@ -512,17 +526,14 @@ class BranchElement:
                     BASKET_CACHE_SIZE))[self._index]
 
     def __len__(self):
-        if self._index == slice(-1):
+        if self._index == slice(None):
             return len(self._branch)
         else:
             return len(self._branch[self._keymap['id']].lazyarray()[self._index])
-
-    def keys(self):
-        return self._keymap.keys()
 
     def __str__(self):
         return "Number of elements: {}".format(len(self._branch))
 
     def __repr__(self):
-        return "<{}[{}]: {} parsed elements>".format(self.__class__.__name__, self.name,
+        return "<{}[{}]: {} parsed elements>".format(self.__class__.__name__, self._mapper.name,
                                                  len(self))

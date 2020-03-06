@@ -188,9 +188,8 @@ class TestOfflineEvents(unittest.TestCase):
                                self.events.n_hits[s])
             assert np.allclose(self.events[s].n_hits, self.events.n_hits[s])
 
-    @unittest.skip
     def test_index_consistency(self):
-        for i in range(self.n_events):
+        for i in [0,2,5]:
             assert np.allclose(self.events[i].n_hits, self.events.n_hits[i])
             assert np.allclose(OFFLINE_FILE[i].events.n_hits,
                                self.events.n_hits[i])
@@ -257,7 +256,6 @@ class TestOfflineHits(unittest.TestCase):
         for idx, t in self.t.items():
             self.assertListEqual(t[s], list(self.hits.t[idx][s]))
 
-    @unittest.skip
     def test_slicing_consistency(self):
         for s in [slice(1, 3), slice(2, 7, 3)]:
             for idx in range(3):
@@ -266,12 +264,13 @@ class TestOfflineHits(unittest.TestCase):
                 assert np.allclose(OFFLINE_FILE.events[idx].hits.dom_id[s],
                                    self.hits.dom_id[idx][s])
 
-    @unittest.skip
     def test_index_consistency(self):
-        for i in range(self.n_events):
-            assert np.allclose(self.events[i].n_hits, self.events.n_hits[i])
-            assert np.allclose(OFFLINE_FILE[i].events.n_hits,
-                               self.events.n_hits[i])
+        for idx, dom_ids in self.dom_id.items():
+            assert np.allclose(self.hits[idx].dom_id[:self.n_hits], dom_ids[:self.n_hits])
+            assert np.allclose(OFFLINE_FILE.events[idx].hits.dom_id[:self.n_hits], dom_ids[:self.n_hits])
+        for idx, ts in self.t.items():
+            assert np.allclose(self.hits[idx].t[:self.n_hits], ts[:self.n_hits])
+            assert np.allclose(OFFLINE_FILE.events[idx].hits.t[:self.n_hits], ts[:self.n_hits])
 
 
 class TestOfflineTracks(unittest.TestCase):

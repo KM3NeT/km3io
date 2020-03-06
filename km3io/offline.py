@@ -21,6 +21,17 @@ def _nested_mapper(key):
 
 EXCLUDE_KEYS = set(["AAObject", "t", "fBits", "fUniqueID"])
 
+EVENTS_MAP = BranchMapper("events", "Evt", {
+        't_sec': 't.fSec',
+        't_ns': 't.fNanoSec'
+    }, [], {
+        'n_hits': 'hits',
+        'n_mc_hits': 'mc_hits',
+        'n_tracks': 'trks',
+        'n_mc_tracks': 'mc_trks'
+    }, lambda a: a, True)
+
+
 SUBBRANCH_MAPS = [
     BranchMapper("tracks", "trks", {}, ['trks.usr_data', 'trks.usr'], {},
                  _nested_mapper, False),
@@ -41,16 +52,6 @@ SUBBRANCH_MAPS = [
         'n_mc_tracks': 'mc_trks'
     }, lambda a: a, True),
 ]
-
-EVENTS_MAP = BranchMapper("events", "Evt", {
-        't_sec': 't.fSec',
-        't_ns': 't.fNanoSec'
-    }, [], {
-        'n_hits': 'hits',
-        'n_mc_hits': 'mc_hits',
-        'n_tracks': 'trks',
-        'n_mc_tracks': 'mc_trks'
-    }, lambda a: a, True)
 
 class cached_property:
     """A simple cache decorator for properties."""
@@ -90,7 +91,7 @@ class OfflineReader:
 
     @cached_property
     def events(self):
-        return Branch(self._tree, mapper=EVENTS_MAP, index=self._index, subbranches=SUBBRANCH_MAPS)
+        return Branch(self._tree, mapper=EVENTS_MAP, index=self._index, subbranchmaps=SUBBRANCH_MAPS)
 
     @classmethod
     def from_index(cls, source, index):
@@ -563,24 +564,27 @@ class Header:
 
 class Branch:
     """Branch accessor class"""
-    def __init__(self, tree, mapper, index=None, subbranches=[]):
+    def __init__(self, tree, mapper, index=None, subbranches=None, subbranchmaps=None):
         self._tree = tree
         self._mapper = mapper
         self._index = index
         self._keymap = None
         self._branch = tree[mapper.key]
-        self._subbranches = subbranches
-        self._subbranch_keys = []
+        self._subbranches = []
 
-        self._initialise_keys()
+        self._initialise_keys()  #
 
-        for mapper in subbranches:
-            setattr(self, mapper.name,
-                    Branch(self._tree, mapper=mapper, index=self._index))
-            self._subbranch_keys.append(mapper.name)
+        if subbranches is not None:
+            self._subbranches = subbranches
+        if subbranchmaps is not None:
+            for mapper in subbranchmaps:
+                subbranch = Branch(self._tree, mapper=mapper, index=self._index)
+                self._subbranches.append(subbranch)
+        for subbranch in self._subbranches:
+            setattr(self, subbranch._mapper.name, subbranch)
 
     def _initialise_keys(self):
-        """Create the keymap and instance attributes"""
+        """Create the keymap and instance attributes for branch keys"""
         keys = set(k.decode('utf-8') for k in self._branch.keys()) - set(
             self._mapper.exclude) - EXCLUDE_KEYS
         self._keymap = {
@@ -591,8 +595,6 @@ class Branch:
         self._keymap.update(self._mapper.update)
         for k in self._mapper.update.values():
             del self._keymap[k]
-
-        # self._EntryType = namedtuple(mapper.name[:-1], self.keys())
 
         for key in self._keymap.keys():
             # print("setting", self._mapper.name, key)
@@ -623,6 +625,8 @@ class Branch:
                         self._branch[self._keymap[key]].array()[self._index]
                         for key in self.keys()
                     }
+                for subbranch in self._subbranches:
+                    dct[subbranch._mapper.name] = subbranch
                 return BranchElement(self._mapper.name, dct)[item]
             else:
                 if self._index is None:
@@ -637,6 +641,8 @@ class Branch:
                                                                 item]
                         for key in self.keys()
                     }
+                for subbranch in self._subbranches:
+                    dct[subbranch._mapper.name] = subbranch
                 return BranchElement(self._mapper.name, dct)
 
         if isinstance(item, tuple):

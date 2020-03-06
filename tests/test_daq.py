@@ -7,6 +7,7 @@ from km3io.daq import DAQReader, get_rate, has_udp_trailer, get_udp_max_sequence
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 DAQ_FILE = DAQReader(os.path.join(SAMPLES_DIR, "daq_v1.0.0.root"))
 
+
 class TestDAQEvents(unittest.TestCase):
     def setUp(self):
         self.events = DAQ_FILE.events

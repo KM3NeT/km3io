@@ -606,9 +606,10 @@ class Branch:
                     })
         if isinstance(item, tuple):
             return self[item[0]][item[1]]
-        return self._branch[self._keymap[item]].lazyarray(
-            basketcache=uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE))[
-                self._index]
+        out = self._branch[self._keymap[item]].lazyarray(
+            basketcache=uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE))
+        if self._index != slice(None):
+            out[self._index]
 
     def __len__(self):
         if self._index == slice(None):

@@ -128,9 +128,9 @@ class TestOfflineReader(unittest.TestCase):
         # head is the supported format
         head = OFFLINE_NUMUCC.header
 
-        self.assertEqual(float(head['DAQ']), 394)
-        self.assertEqual(float(head['kcut']), 2)
+        self.assertAlmostEqual(head.DAQ.livetime, 394)
 
+    def test_warning_if_unsupported_header(self):
         # test the warning for unsupported fheader format
         with self.assertWarns(UserWarning):
             self.r.header
@@ -310,7 +310,7 @@ class TestUsr(unittest.TestCase):
         self.f = OFFLINE_USR
 
     def test_str(self):
-        print(self.f.usr)
+        print(self.f.events.usr)
 
     def test_nonexistent_usr(self):
         f = OfflineReader(SAMPLES_DIR / "daq_v1.0.0.root")
@@ -323,20 +323,20 @@ class TestUsr(unittest.TestCase):
             'LastPartPosZ', 'NSnapHits', 'NTrigHits', 'NTrigDOMs',
             'NTrigLines', 'NSpeedVetoHits', 'NGeometryVetoHits',
             'ClassficationScore'
-        ], self.f.usr.keys())
+        ], self.f.events.usr.keys())
 
     def test_getitem(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
-            self.f.usr['CoC'])
+            self.f.events.usr['CoC'])
         assert np.allclose(
             [37.51967774166617, -10.280346193553832, 13.67595659707355],
-            self.f.usr['DeltaPosZ'])
+            self.f.events.usr['DeltaPosZ'])
 
     def test_attributes(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
-            self.f.usr.CoC)
+            self.f.events.usr.CoC)
         assert np.allclose(
             [37.51967774166617, -10.280346193553832, 13.67595659707355],
-            self.f.usr.DeltaPosZ)
+            self.f.events.usr.DeltaPosZ)

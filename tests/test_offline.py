@@ -5,15 +5,15 @@ from pathlib import Path
 from km3io import OfflineReader
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
-OFFLINE_FILE = SAMPLES_DIR / 'aanet_v2.0.0.root'
-OFFLINE_USR = SAMPLES_DIR / 'usr-sample.root'
-OFFLINE_NUMUCC = SAMPLES_DIR / "numucc.root"  # with mc data
+OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'aanet_v2.0.0.root')
+OFFLINE_USR = OfflineReader(SAMPLES_DIR / 'usr-sample.root')
+OFFLINE_NUMUCC = OfflineReader(SAMPLES_DIR / "numucc.root")  # with mc data
 
 
 class TestOfflineReader(unittest.TestCase):
     def setUp(self):
-        self.r = OfflineReader(OFFLINE_FILE)
-        self.nu = OfflineReader(OFFLINE_NUMUCC)
+        self.r = OFFLINE_FILE
+        self.nu = OFFLINE_NUMUCC
         self.Nevents = 10
 
     def test_number_events(self):
@@ -126,7 +126,7 @@ class TestOfflineReader(unittest.TestCase):
 
     def test_reading_header(self):
         # head is the supported format
-        head = OfflineReader(OFFLINE_NUMUCC).header
+        head = OFFLINE_NUMUCC.header
 
         self.assertEqual(float(head['DAQ']), 394)
         self.assertEqual(float(head['kcut']), 2)
@@ -138,7 +138,7 @@ class TestOfflineReader(unittest.TestCase):
 
 class TestOfflineEvents(unittest.TestCase):
     def setUp(self):
-        self.events = OfflineReader(OFFLINE_FILE).events
+        self.events = OFFLINE_FILE.events
         self.n_events = 10
         self.det_id = [44] * self.n_events
         self.n_hits = [176, 125, 318, 157, 83, 60, 71, 84, 255, 105]
@@ -191,7 +191,7 @@ class TestOfflineEvents(unittest.TestCase):
 
 class TestOfflineHits(unittest.TestCase):
     def setUp(self):
-        self.hits = OfflineReader(OFFLINE_FILE).hits
+        self.hits = OFFLINE_FILE.hits
         self.n_hits = 10
         self.dom_id = {
             0: [
@@ -239,8 +239,8 @@ class TestOfflineHits(unittest.TestCase):
 class TestOfflineTracks(unittest.TestCase):
     @unittest.skip
     def setUp(self):
-        self.tracks = OfflineReader(OFFLINE_FILE).tracks
-        self.r_mc = OfflineReader(OFFLINE_NUMUCC)
+        self.tracks = OFFLINE_FILE.tracks
+        self.r_mc = OFFLINE_NUMUCC
         self.Nevents = 10
 
     @unittest.skip
@@ -307,14 +307,14 @@ class TestOfflineTracks(unittest.TestCase):
 
 class TestUsr(unittest.TestCase):
     def setUp(self):
-        self.f = OfflineReader(OFFLINE_USR)
+        self.f = OFFLINE_USR
 
     def test_str(self):
         print(self.f.usr)
 
     def test_nonexistent_usr(self):
         f = OfflineReader(SAMPLES_DIR / "daq_v1.0.0.root")
-        self.assertListEqual([], f.usr.keys())
+        assert not hasattr(self.f, "usr")
 
     def test_keys(self):
         self.assertListEqual([

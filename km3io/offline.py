@@ -594,21 +594,35 @@ class Branch:
         if isinstance(item, slice):
             return self.__class__(self._tree, self._mapper, index=item)
         if isinstance(item, int):
+            # A bit ugly, but whatever works
             if self._mapper.flat:
-                return BranchElement(
-                    self._mapper.name, {
+                if self._index is None:
+                    dct = {
+                        key: self._branch[self._keymap[key]].array()
+                        for key in self.keys()
+                    }
+                else:
+                    dct = {
                         key:
                         self._branch[self._keymap[key]].array()[self._index]
                         for key in self.keys()
-                    })[item]
+                    }
+                return BranchElement(self._mapper.name, dct)[item]
             else:
-                return BranchElement(
-                    self._mapper.name, {
+                if self._index is None:
+                    dct = {
+                        key: self._branch[self._keymap[key]].array()[item]
+                        for key in self.keys()
+                    }
+                else:
+                    dct = {
                         key:
                         self._branch[self._keymap[key]].array()[self._index,
                                                                 item]
                         for key in self.keys()
-                    })
+                    }
+                return BranchElement(self._mapper.name, dct)
+
         if isinstance(item, tuple):
             return self[item[0]][item[1]]
 
@@ -657,16 +671,25 @@ class BranchElement:
         self._name = name
         self._index = index
         self.ItemConstructor = namedtuple(self._name[:-1], dct.keys())
-        for key, values in dct.items():
-            setattr(self, key, values[index])
+        if index is None:
+            for key, values in dct.items():
+                setattr(self, key, values)
+        else:
+            for key, values in dct.items():
+                setattr(self, key, values[index])
 
     def __getitem__(self, item):
         if isinstance(item, slice):
             return self.__class__(self._name, self._dct, index=item)
         if isinstance(item, int):
-            return self.ItemConstructor(
-                **{k: v[self._index][item]
-                   for k, v in self._dct.items()})
+            if self._index is None:
+                return self.ItemConstructor(
+                    **{k: v[item]
+                    for k, v in self._dct.items()})
+            else:
+                return self.ItemConstructor(
+                    **{k: v[self._index][item]
+                    for k, v in self._dct.items()})
 
     def __repr__(self):
         return "<{}[{}]>".format(self.__class__.__name__, self._name)

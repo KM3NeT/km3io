@@ -182,6 +182,18 @@ class TestOfflineEvents(unittest.TestCase):
         self.assertListEqual(self.t_sec[s], list(s_events.t_sec))
         self.assertListEqual(self.t_ns[s], list(s_events.t_ns))
 
+    def test_slicing_consistency(self):
+        for s in [slice(1, 3), slice(2, 7, 3)]:
+            assert np.allclose(OFFLINE_FILE[s].events.n_hits,
+                               self.events.n_hits[s])
+            assert np.allclose(self.events[s].n_hits, self.events.n_hits[s])
+
+    def test_index_consistency(self):
+        for i in range(self.n_events):
+            assert np.allclose(self.events[i].n_hits, self.events.n_hits[i])
+            assert np.allclose(OFFLINE_FILE[i].events.n_hits,
+                               self.events.n_hits[i])
+
     def test_str(self):
         assert str(self.n_events) in str(self.events)
 
@@ -235,9 +247,32 @@ class TestOfflineHits(unittest.TestCase):
         for idx, t in self.t.items():
             assert np.allclose(t, self.hits.t[idx][:len(t)])
 
+    def test_slicing(self):
+        s = slice(2, 8, 2)
+        s_hits = self.hits[s]
+        assert 3 == len(s_hits)
+        for idx, dom_id in self.dom_id.items():
+            self.assertListEqual(dom_id[s], list(self.hits.dom_id[idx][s]))
+        for idx, t in self.t.items():
+            self.assertListEqual(t[s], list(self.hits.t[idx][s]))
+
+    def test_slicing_consistency(self):
+        for s in [slice(1, 3), slice(2, 7, 3)]:
+            for idx in range(3):
+                assert np.allclose(self.hits.dom_id[idx][s],
+                                   self.hits[idx].dom_id[s])
+                assert np.allclose(OFFLINE_FILE[idx].hits.dom_id[s],
+                                   self.hits.dom_id[idx][s])
+
+    @unittest.skip
+    def test_index_consistency(self):
+        for i in range(self.n_events):
+            assert np.allclose(self.events[i].n_hits, self.events.n_hits[i])
+            assert np.allclose(OFFLINE_FILE[i].events.n_hits,
+                               self.events.n_hits[i])
+
 
 class TestOfflineTracks(unittest.TestCase):
-    @unittest.skip
     def setUp(self):
         self.tracks = OFFLINE_FILE.tracks
         self.r_mc = OFFLINE_NUMUCC

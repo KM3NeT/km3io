@@ -22,15 +22,14 @@ def _nested_mapper(key):
 EXCLUDE_KEYS = set(["AAObject", "t", "fBits", "fUniqueID"])
 
 EVENTS_MAP = BranchMapper("events", "Evt", {
-        't_sec': 't.fSec',
-        't_ns': 't.fNanoSec'
-    }, [], {
-        'n_hits': 'hits',
-        'n_mc_hits': 'mc_hits',
-        'n_tracks': 'trks',
-        'n_mc_tracks': 'mc_trks'
-    }, lambda a: a, True)
-
+    't_sec': 't.fSec',
+    't_ns': 't.fNanoSec'
+}, [], {
+    'n_hits': 'hits',
+    'n_mc_hits': 'mc_hits',
+    'n_tracks': 'trks',
+    'n_mc_tracks': 'mc_trks'
+}, lambda a: a, True)
 
 SUBBRANCH_MAPS = [
     BranchMapper("tracks", "trks", {}, ['trks.usr_data', 'trks.usr'], {},
@@ -52,6 +51,7 @@ SUBBRANCH_MAPS = [
         'n_mc_tracks': 'mc_trks'
     }, lambda a: a, True),
 ]
+
 
 class cached_property:
     """A simple cache decorator for properties."""
@@ -91,7 +91,10 @@ class OfflineReader:
 
     @cached_property
     def events(self):
-        return Branch(self._tree, mapper=EVENTS_MAP, index=self._index, subbranchmaps=SUBBRANCH_MAPS)
+        return Branch(self._tree,
+                      mapper=EVENTS_MAP,
+                      index=self._index,
+                      subbranchmaps=SUBBRANCH_MAPS)
 
     @classmethod
     def from_index(cls, source, index):
@@ -564,7 +567,12 @@ class Header:
 
 class Branch:
     """Branch accessor class"""
-    def __init__(self, tree, mapper, index=None, subbranches=None, subbranchmaps=None):
+    def __init__(self,
+                 tree,
+                 mapper,
+                 index=None,
+                 subbranches=None,
+                 subbranchmaps=None):
         self._tree = tree
         self._mapper = mapper
         self._index = index
@@ -578,7 +586,9 @@ class Branch:
             self._subbranches = subbranches
         if subbranchmaps is not None:
             for mapper in subbranchmaps:
-                subbranch = Branch(self._tree, mapper=mapper, index=self._index)
+                subbranch = Branch(self._tree,
+                                   mapper=mapper,
+                                   index=self._index)
                 self._subbranches.append(subbranch)
         for subbranch in self._subbranches:
             setattr(self, subbranch._mapper.name, subbranch)
@@ -609,20 +619,24 @@ class Branch:
 
     def __getitem__(self, item):
         """Slicing magic a la numpy"""
+        print("Getting item '{}'".format(item))
         if isinstance(item, slice):
-            return self.__class__(self._tree, self._mapper, index=item, subbranches=self._subbranches)
+            return self.__class__(self._tree,
+                                  self._mapper,
+                                  index=item,
+                                  subbranches=self._subbranches)
         if isinstance(item, int):
             # A bit ugly, but whatever works
             if self._mapper.flat:
                 if self._index is None:
                     dct = {
-                        key: self._branch[self._keymap[key]].array()
+                        key: self._branch[self._keymap[key]].lazyarray()
                         for key in self.keys()
                     }
                 else:
                     dct = {
-                        key:
-                        self._branch[self._keymap[key]].array()[self._index]
+                        key: self._branch[self._keymap[key]].lazyarray()[
+                            self._index]
                         for key in self.keys()
                     }
                 for subbranch in self._subbranches:
@@ -631,14 +645,13 @@ class Branch:
             else:
                 if self._index is None:
                     dct = {
-                        key: self._branch[self._keymap[key]].array()[item]
+                        key: self._branch[self._keymap[key]].lazyarray()[item]
                         for key in self.keys()
                     }
                 else:
                     dct = {
-                        key:
-                        self._branch[self._keymap[key]].array()[self._index,
-                                                                item]
+                        key: self._branch[self._keymap[key]].lazyarray()[
+                            self._index, item]
                         for key in self.keys()
                     }
                 for subbranch in self._subbranches:
@@ -658,7 +671,10 @@ class Branch:
                 out = out[self._index]
             return out
 
-        return self.__class__(self._tree, self._mapper, index=np.array(item), subbranches=self._subbranches)
+        return self.__class__(self._tree,
+                              self._mapper,
+                              index=np.array(item),
+                              subbranches=self._subbranches)
 
     def __len__(self):
         if self._index is None:
@@ -689,6 +705,7 @@ class BranchElement:
         The slice mask to be applied to the sub-arrays
     """
     def __init__(self, name, dct, index=None, subbranches=[]):
+        print("Creating branch element '{}'".format(name))
         self._dct = dct
         self._name = name
         self._index = index
@@ -707,11 +724,11 @@ class BranchElement:
             if self._index is None:
                 return self.ItemConstructor(
                     **{k: v[item]
-                    for k, v in self._dct.items()})
+                       for k, v in self._dct.items()})
             else:
                 return self.ItemConstructor(
                     **{k: v[self._index][item]
-                    for k, v in self._dct.items()})
+                       for k, v in self._dct.items()})
 
     def __repr__(self):
         return "<{}[{}]>".format(self.__class__.__name__, self._name)

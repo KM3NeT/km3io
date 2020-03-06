@@ -20,26 +20,6 @@ def _nested_mapper(key):
 
 
 EXCLUDE_KEYS = set(["AAObject", "t", "fBits", "fUniqueID"])
-BRANCH_MAPS = [
-    BranchMapper("tracks", "trks", {}, ['trks.usr_data', 'trks.usr'], {},
-                 _nested_mapper, False),
-    BranchMapper("mc_tracks", "mc_trks", {},
-                 ['mc_trks.usr_data', 'mc_trks.usr'], {}, _nested_mapper,
-                 False),
-    BranchMapper("hits", "hits", {}, ['hits.usr'], {}, _nested_mapper, False),
-    BranchMapper("mc_hits", "mc_hits", {},
-                 ['mc_hits.usr', 'mc_hits.dom_id', 'mc_hits.channel_id'], {},
-                 _nested_mapper, False),
-    BranchMapper("events", "Evt", {
-        't_sec': 't.fSec',
-        't_ns': 't.fNanoSec'
-    }, [], {
-        'n_hits': 'hits',
-        'n_mc_hits': 'mc_hits',
-        'n_tracks': 'trks',
-        'n_mc_tracks': 'mc_trks'
-    }, lambda a: a, True),
-]
 
 SUBBRANCH_MAPS = [
     BranchMapper("tracks", "trks", {}, ['trks.usr_data', 'trks.usr'], {},
@@ -108,13 +88,8 @@ class OfflineReader:
             self._tree = self._fobj[MAIN_TREE_NAME]
             self._data = data
 
-        for mapper in BRANCH_MAPS:
-            # print("setting mapper {}".format(mapper.name))
-            setattr(self, mapper.name,
-                    Branch(self._tree, mapper=mapper, index=self._index))
-
     @cached_property
-    def _events(self):
+    def events(self):
         return Branch(self._tree, mapper=EVENTS_MAP, index=self._index, subbranches=SUBBRANCH_MAPS)
 
     @classmethod
@@ -449,10 +424,10 @@ class OfflineReader:
             are not found, None is returned as the stages index.
         """
         if mc is False:
-            stages_data = self.tracks.rec_stages
+            stages_data = self.events.tracks.rec_stages
 
         if mc is True:
-            stages_data = self.mc_tracks.rec_stages
+            stages_data = self.events.mc_tracks.rec_stages
 
         for trk_index, rec_stages in enumerate(stages_data):
             try:
@@ -595,12 +570,14 @@ class Branch:
         self._keymap = None
         self._branch = tree[mapper.key]
         self._subbranches = subbranches
+        self._subbranch_keys = []
 
         self._initialise_keys()
 
         for mapper in subbranches:
             setattr(self, mapper.name,
                     Branch(self._tree, mapper=mapper, index=self._index))
+            self._subbranch_keys.append(mapper.name)
 
     def _initialise_keys(self):
         """Create the keymap and instance attributes"""
@@ -617,7 +594,7 @@ class Branch:
 
         # self._EntryType = namedtuple(mapper.name[:-1], self.keys())
 
-        for key in self.keys():
+        for key in self._keymap.keys():
             # print("setting", self._mapper.name, key)
             setattr(self, key, self[key])
 

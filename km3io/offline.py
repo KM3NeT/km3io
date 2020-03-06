@@ -41,6 +41,36 @@ BRANCH_MAPS = [
     }, lambda a: a, True),
 ]
 
+SUBBRANCH_MAPS = [
+    BranchMapper("tracks", "trks", {}, ['trks.usr_data', 'trks.usr'], {},
+                 _nested_mapper, False),
+    BranchMapper("mc_tracks", "mc_trks", {},
+                 ['mc_trks.usr_data', 'mc_trks.usr'], {}, _nested_mapper,
+                 False),
+    BranchMapper("hits", "hits", {}, ['hits.usr'], {}, _nested_mapper, False),
+    BranchMapper("mc_hits", "mc_hits", {},
+                 ['mc_hits.usr', 'mc_hits.dom_id', 'mc_hits.channel_id'], {},
+                 _nested_mapper, False),
+    BranchMapper("events", "Evt", {
+        't_sec': 't.fSec',
+        't_ns': 't.fNanoSec'
+    }, [], {
+        'n_hits': 'hits',
+        'n_mc_hits': 'mc_hits',
+        'n_tracks': 'trks',
+        'n_mc_tracks': 'mc_trks'
+    }, lambda a: a, True),
+]
+
+EVENTS_MAP = BranchMapper("events", "Evt", {
+        't_sec': 't.fSec',
+        't_ns': 't.fNanoSec'
+    }, [], {
+        'n_hits': 'hits',
+        'n_mc_hits': 'mc_hits',
+        'n_tracks': 'trks',
+        'n_mc_tracks': 'mc_trks'
+    }, lambda a: a, True)
 
 class cached_property:
     """A simple cache decorator for properties."""
@@ -82,6 +112,10 @@ class OfflineReader:
             # print("setting mapper {}".format(mapper.name))
             setattr(self, mapper.name,
                     Branch(self._tree, mapper=mapper, index=self._index))
+
+    @cached_property
+    def _events(self):
+        return Branch(self._tree, mapper=EVENTS_MAP, index=self._index, subbranches=SUBBRANCH_MAPS)
 
     @classmethod
     def from_index(cls, source, index):
@@ -554,14 +588,19 @@ class Header:
 
 class Branch:
     """Branch accessor class"""
-    def __init__(self, tree, mapper, index=None):
+    def __init__(self, tree, mapper, index=None, subbranches=[]):
         self._tree = tree
         self._mapper = mapper
         self._index = index
         self._keymap = None
         self._branch = tree[mapper.key]
+        self._subbranches = subbranches
 
         self._initialise_keys()
+
+        for mapper in subbranches:
+            setattr(self, mapper.name,
+                    Branch(self._tree, mapper=mapper, index=self._index))
 
     def _initialise_keys(self):
         """Create the keymap and instance attributes"""
@@ -592,7 +631,7 @@ class Branch:
     def __getitem__(self, item):
         """Slicing magic a la numpy"""
         if isinstance(item, slice):
-            return self.__class__(self._tree, self._mapper, index=item)
+            return self.__class__(self._tree, self._mapper, index=item, subbranches=self._subbranches)
         if isinstance(item, int):
             # A bit ugly, but whatever works
             if self._mapper.flat:
@@ -636,7 +675,7 @@ class Branch:
                 out = out[self._index]
             return out
 
-        return self.__class__(self._tree, self._mapper, index=np.array(item))
+        return self.__class__(self._tree, self._mapper, index=np.array(item), subbranches=self._subbranches)
 
     def __len__(self):
         if self._index is None:
@@ -666,7 +705,7 @@ class BranchElement:
     index: slice
         The slice mask to be applied to the sub-arrays
     """
-    def __init__(self, name, dct, index=None):
+    def __init__(self, name, dct, index=None, subbranches=[]):
         self._dct = dct
         self._name = name
         self._index = index

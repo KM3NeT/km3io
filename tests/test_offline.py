@@ -184,15 +184,11 @@ class TestOfflineEvents(unittest.TestCase):
 
     def test_slicing_consistency(self):
         for s in [slice(1, 3), slice(2, 7, 3)]:
-            assert np.allclose(OFFLINE_FILE[s].events.n_hits,
-                               self.events.n_hits[s])
             assert np.allclose(self.events[s].n_hits, self.events.n_hits[s])
 
     def test_index_consistency(self):
         for i in [0,2,5]:
             assert np.allclose(self.events[i].n_hits, self.events.n_hits[i])
-            assert np.allclose(OFFLINE_FILE[i].events.n_hits,
-                               self.events.n_hits[i])
 
     def test_str(self):
         assert str(self.n_events) in str(self.events)

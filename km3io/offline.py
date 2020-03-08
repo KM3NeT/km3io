@@ -503,7 +503,8 @@ class Usr:
             # which has a different strucuter and key (usr_data)
             # We do not support those...
             self._usr_names = [
-                n.decode("utf-8") for n in tree['usr_names'].lazyarray()[0]
+                n.decode("utf-8") for n in tree['usr_names'].lazyarray(
+                    basketcache=BASKET_CACHE)[0]
             ]
         except (KeyError, IndexError):  # e.g. old aanet files
             self._usr_names = []
@@ -665,8 +666,8 @@ class Branch:
         elif isinstance(self._index, int):
             return 1
         else:
-            return len(
-                self._branch[self._keymap['id']].lazyarray()[self._index])
+            return len(self._branch[self._keymap['id']].lazyarray(
+                basketcache=BASKET_CACHE)[self._index])
 
     def __str__(self):
         return "Number of elements: {}".format(len(self._branch))

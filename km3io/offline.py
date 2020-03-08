@@ -20,29 +20,35 @@ def _nested_mapper(key):
     return '_'.join(key.split('.')[1:])
 
 
-EVENTS_MAP = BranchMapper("events", "Evt", {
-    't_sec': 't.fSec',
-    't_ns': 't.fNanoSec'
-}, [], {
-    'n_hits': 'hits',
-    'n_mc_hits': 'mc_hits',
-    'n_tracks': 'trks',
-    'n_mc_tracks': 'mc_trks'
-}, lambda a: a)
+EVENTS_MAP = BranchMapper(name="events",
+                          key="Evt",
+                          extra={
+                              't_sec': 't.fSec',
+                              't_ns': 't.fNanoSec'
+                          },
+                          exclude=[],
+                          update={
+                              'n_hits': 'hits',
+                              'n_mc_hits': 'mc_hits',
+                              'n_tracks': 'trks',
+                              'n_mc_tracks': 'mc_trks'
+                          },
+                          attrparser=lambda a: a)
 
 SUBBRANCH_MAPS = [
-    BranchMapper(name="tracks",
-                 key="trks",
-                 extra={},
-                 exclude=['trks.usr_data', 'trks.usr'],
-                 update={},
-                 attrparser=_nested_mapper),
+    BranchMapper(
+        name="tracks",
+        key="trks",
+        extra={},
+        exclude=['trks.usr_data', 'trks.usr', 'trks.fUniqueID', 'trks.fBits'],
+        update={},
+        attrparser=_nested_mapper),
     BranchMapper(name="mc_tracks",
                  key="mc_trks",
                  extra={},
                  exclude=[
                      'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.rec_stages',
-                     'mc_trks.fitinf'
+                     'mc_trks.fitinf', 'mc_trks.fUniqueID', 'mc_trks.fBits'
                  ],
                  update={},
                  attrparser=_nested_mapper),
@@ -51,7 +57,7 @@ SUBBRANCH_MAPS = [
                  extra={},
                  exclude=[
                      'hits.usr', 'hits.pmt_id', 'hits.origin', 'hits.a',
-                     'hits.pure_a'
+                     'hits.pure_a', 'hits.fUniqueID', 'hits.fBits'
                  ],
                  update={},
                  attrparser=_nested_mapper),
@@ -60,7 +66,8 @@ SUBBRANCH_MAPS = [
                  extra={},
                  exclude=[
                      'mc_hits.usr', 'mc_hits.dom_id', 'mc_hits.channel_id',
-                     'mc_hits.tdc', 'mc_hits.tot', 'mc_hits.trig'
+                     'mc_hits.tdc', 'mc_hits.tot', 'mc_hits.trig',
+                     'mc_hits.fUniqueID', 'mc_hits.fBits'
                  ],
                  update={},
                  attrparser=_nested_mapper),

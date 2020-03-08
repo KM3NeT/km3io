@@ -42,15 +42,6 @@ SUBBRANCH_MAPS = [
     BranchMapper("mc_hits", "mc_hits", {},
                  ['mc_hits.usr', 'mc_hits.dom_id', 'mc_hits.channel_id'], {},
                  _nested_mapper, False),
-    BranchMapper("events", "Evt", {
-        't_sec': 't.fSec',
-        't_ns': 't.fNanoSec'
-    }, [], {
-        'n_hits': 'hits',
-        'n_mc_hits': 'mc_hits',
-        'n_tracks': 'trks',
-        'n_mc_tracks': 'mc_trks'
-    }, lambda a: a, True),
 ]
 
 
@@ -119,8 +110,7 @@ class OfflineReader:
         if self._index is None:
             return len(tree)
         else:
-            return len(
-                tree.lazyarrays(basketcache=BASKET_CACHE)[self.index])
+            return len(tree.lazyarrays(basketcache=BASKET_CACHE)[self.index])
 
     @cached_property
     def header(self):
@@ -558,7 +548,6 @@ class Header:
 
 class Branch:
     """Branch accessor class"""
-    # @profile
     def __init__(self,
                  tree,
                  mapper,
@@ -589,9 +578,9 @@ class Branch:
         for subbranch in self._subbranches:
             setattr(self, subbranch._mapper.name, subbranch)
 
-    # @profile
     def _initialise_keys(self):
         """Create the keymap and instance attributes for branch keys"""
+        # TODO: this could be a cached property
         keys = set(k.decode('utf-8') for k in self._branch.keys()) - set(
             self._mapper.exclude) - EXCLUDE_KEYS
         self._keymap = {
@@ -616,77 +605,39 @@ class Branch:
     def __getattribute__(self, attr):
         if attr.startswith("_"):  # let all private and magic methods pass
             return object.__getattribute__(self, attr)
-        if attr in self._keymap.keys():  # intercept branch key lookups
-            item = self._keymap[attr]
 
-            out = self._branch[item].lazyarray(
+        if attr in self._keymap.keys():  # intercept branch key lookups
+            out = self._branch[self._keymap[attr]].lazyarray(
                 basketcache=BASKET_CACHE)
             if self._index is not None:
                 out = out[self._index]
             return out
+
         return object.__getattribute__(self, attr)
 
-    # @profile
     def __getitem__(self, item):
-        """Slicing magic a la numpy"""
-        if isinstance(item, slice):
+        """Slicing magic"""
+        if isinstance(item, (int, slice)):
             return self.__class__(self._tree,
                                   self._mapper,
                                   index=item,
-                                  subbranches=self._subbranches)
-        if isinstance(item, int):
-            # TODO refactor this
-            if self._mapper.flat:
-                if self._index is None:
-                    dct = {
-                        key: self._branch[self._keymap[key]].lazyarray()
-                        for key in self.keys()
-                    }
-                else:
-                    dct = {
-                        key: self._branch[self._keymap[key]].lazyarray()[
-                            self._index]
-                        for key in self.keys()
-                    }
-                for subbranch in self._subbranches:
-                    dct[subbranch._mapper.name] = subbranch
-                return BranchElement(self._mapper.name, dct)[item]
-            else:
-                if self._index is None:
-                    dct = {
-                        key: self._branch[self._keymap[key]].lazyarray()[item]
-                        for key in self.keys()
-                    }
-                else:
-                    dct = {
-                        key: self._branch[self._keymap[key]].lazyarray()[
-                            self._index, item]
-                        for key in self.keys()
-                    }
-                for subbranch in self._subbranches:
-                    dct[subbranch._mapper.name] = subbranch
-                return BranchElement(self._mapper.name, dct)
+                                  keymap=self._keymap,
+                                  subbranchmaps=SUBBRANCH_MAPS)
 
         if isinstance(item, tuple):
             return self[item[0]][item[1]]
 
-        if isinstance(item, str):
-            item = self._keymap[item]
-
-            out = self._branch[item].lazyarray(
-                basketcache=BASKET_CACHE)
-            if self._index is not None:
-                out = out[self._index]
-            return out
-
         return self.__class__(self._tree,
                               self._mapper,
                               index=np.array(item),
-                              subbranches=self._subbranches)
+                              keymap=self._keymap,
+                              subbranchmaps=SUBBRANCH_MAPS)
 
     def __len__(self):
         if self._index is None:
             return len(self._branch)
+        elif isinstance(self._index, int):
+            return 1
         else:
             return len(
                 self._branch[self._keymap['id']].lazyarray()[self._index])
@@ -695,47 +646,7 @@ class Branch:
         return "Number of elements: {}".format(len(self._branch))
 
     def __repr__(self):
-        return "<{}[{}]: {} parsed elements>".format(self.__class__.__name__,
-                                                     self._mapper.name,
-                                                     len(self))
-
-
-class BranchElement:
-    """Represents a single branch element
-
-    Parameters
-    ----------
-    name: str
-        The name of the branch
-    dct: dict (keys=attributes, values=arrays of values)
-        The data
-    index: slice
-        The slice mask to be applied to the sub-arrays
-    """
-    def __init__(self, name, dct, index=None, subbranches=[]):
-        self._dct = dct
-        self._name = name
-        self._index = index
-        self.ItemConstructor = namedtuple(self._name[:-1], dct.keys())
-        if index is None:
-            for key, values in dct.items():
-                setattr(self, key, values)
-        else:
-            for key, values in dct.items():
-                setattr(self, key, values[index])
-
-    def __getitem__(self, item):
-        if isinstance(item, slice):
-            return self.__class__(self._name, self._dct, index=item)
-        if isinstance(item, int):
-            if self._index is None:
-                return self.ItemConstructor(
-                    **{k: v[item]
-                       for k, v in self._dct.items()})
-            else:
-                return self.ItemConstructor(
-                    **{k: v[self._index][item]
-                       for k, v in self._dct.items()})
-
-    def __repr__(self):
-        return "<{}[{}]>".format(self.__class__.__name__, self._name)
+        length = len(self)
+        return "<{}[{}]: {} element{}>".format(self.__class__.__name__,
+                                               self._mapper.name, length,
+                                               's' if length > 1 else '')

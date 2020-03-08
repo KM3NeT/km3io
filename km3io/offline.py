@@ -1,7 +1,6 @@
 from collections import namedtuple
 import uproot
 import numpy as np
-import awkward as ak
 import warnings
 from .definitions import mc_header
 
@@ -9,18 +8,17 @@ MAIN_TREE_NAME = "E"
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
 BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
+EXCLUDE_KEYS = set(["AAObject", "t", "fBits", "fUniqueID"])
 
 BranchMapper = namedtuple(
     "BranchMapper",
-    ['name', 'key', 'extra', 'exclude', 'update', 'attrparser', 'flat'])
+    ['name', 'key', 'extra', 'exclude', 'update', 'attrparser'])
 
 
 def _nested_mapper(key):
     """Maps a key in the ROOT file to another key (e.g. trks.pos.x -> pos_x)"""
     return '_'.join(key.split('.')[1:])
 
-
-EXCLUDE_KEYS = set(["AAObject", "t", "fBits", "fUniqueID"])
 
 EVENTS_MAP = BranchMapper("events", "Evt", {
     't_sec': 't.fSec',
@@ -30,18 +28,42 @@ EVENTS_MAP = BranchMapper("events", "Evt", {
     'n_mc_hits': 'mc_hits',
     'n_tracks': 'trks',
     'n_mc_tracks': 'mc_trks'
-}, lambda a: a, True)
+}, lambda a: a)
 
 SUBBRANCH_MAPS = [
-    BranchMapper("tracks", "trks", {}, ['trks.usr_data', 'trks.usr'], {},
-                 _nested_mapper, False),
-    BranchMapper("mc_tracks", "mc_trks", {},
-                 ['mc_trks.usr_data', 'mc_trks.usr'], {}, _nested_mapper,
-                 False),
-    BranchMapper("hits", "hits", {}, ['hits.usr'], {}, _nested_mapper, False),
-    BranchMapper("mc_hits", "mc_hits", {},
-                 ['mc_hits.usr', 'mc_hits.dom_id', 'mc_hits.channel_id'], {},
-                 _nested_mapper, False),
+    BranchMapper(name="tracks",
+                 key="trks",
+                 extra={},
+                 exclude=['trks.usr_data', 'trks.usr'],
+                 update={},
+                 attrparser=_nested_mapper),
+    BranchMapper(name="mc_tracks",
+                 key="mc_trks",
+                 extra={},
+                 exclude=[
+                     'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.rec_stages',
+                     'mc_trks.fitinf'
+                 ],
+                 update={},
+                 attrparser=_nested_mapper),
+    BranchMapper(name="hits",
+                 key="hits",
+                 extra={},
+                 exclude=[
+                     'hits.usr', 'hits.pmt_id', 'hits.origin', 'hits.a',
+                     'hits.pure_a'
+                 ],
+                 update={},
+                 attrparser=_nested_mapper),
+    BranchMapper(name="mc_hits",
+                 key="mc_hits",
+                 extra={},
+                 exclude=[
+                     'mc_hits.usr', 'mc_hits.dom_id', 'mc_hits.channel_id',
+                     'mc_hits.tdc', 'mc_hits.tot', 'mc_hits.trig'
+                 ],
+                 update={},
+                 attrparser=_nested_mapper),
 ]
 
 
@@ -463,7 +485,7 @@ class OfflineReader:
 
 
 class Usr:
-    """Helper class to access AAObject usr stuff"""
+    """Helper class to access AAObject `usr`` stuff"""
     def __init__(self, name, tree, index=None):
         # Here, we assume that every event has the same names in the same order
         # to massively increase the performance. This needs triple check if it's
@@ -522,7 +544,7 @@ def _to_num(value):
 
 
 class Header:
-    """The online header"""
+    """The header"""
     def __init__(self, header):
         self._data = {}
         for attribute, fields in mc_header.items():
@@ -552,7 +574,6 @@ class Branch:
                  tree,
                  mapper,
                  index=None,
-                 subbranches=None,
                  subbranchmaps=None,
                  keymap=None):
         self._tree = tree
@@ -567,8 +588,6 @@ class Branch:
         else:
             self._keymap = keymap
 
-        if subbranches is not None:
-            self._subbranches = subbranches
         if subbranchmaps is not None:
             for mapper in subbranchmaps:
                 subbranch = Branch(self._tree,

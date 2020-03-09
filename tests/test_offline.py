@@ -173,53 +173,20 @@ class TestOfflineHits(unittest.TestCase):
 class TestOfflineTracks(unittest.TestCase):
     def setUp(self):
         self.tracks = OFFLINE_FILE.events.tracks
-        self.r_mc = OFFLINE_NUMUCC
-        self.Nevents = 10
+        self.tracks_numucc = OFFLINE_NUMUCC
+        self.n_events = 10
 
-    @unittest.skip
+    def test_attributes_available(self):
+        for key in self.tracks._keymap.keys():
+            getattr(self.tracks, key)
+
     def test_item_selection(self):
         self.assertListEqual(list(self.tracks[0].dir_z[:2]),
                              [-0.872885221293917, -0.872885221293917])
 
-    @unittest.skip
-    def test_IndexError(self):
-        # test handling IndexError with empty lists/arrays
-        self.assertEqual(len(OfflineTracks(['whatever'], [])), 0)
-
-    @unittest.skip
     def test_repr(self):
         assert " 10 " in repr(self.tracks)
 
-    @unittest.skip
-    def test_str(self):
-        assert str(self.tracks).endswith(" 10")
-
-    @unittest.skip
-    def test_reading_tracks_dir_z(self):
-        dir_z = self.tracks.dir_z
-        tracks_dir_z = {0: 56, 1: 55, 8: 54}
-
-        for track_id, n_dir in tracks_dir_z.items():
-            self.assertEqual(n_dir, len(dir_z[track_id]))
-
-        # check that there are 10 arrays of tracks.dir_z info
-        self.assertEqual(len(dir_z), self.Nevents)
-
-    @unittest.skip
-    def test_reading_mc_tracks_dir_z(self):
-        dir_z = self.r_mc.mc_tracks.dir_z
-        tracks_dir_z = {0: 11, 1: 25, 8: 13}
-
-        for track_id, n_dir in tracks_dir_z.items():
-            self.assertEqual(n_dir, len(dir_z[track_id]))
-
-        # check that there are 10 arrays of tracks.dir_z info
-        self.assertEqual(len(dir_z), self.Nevents)
-
-        self.assertListEqual([0.230189, 0.230189, 0.218663],
-                             list(dir_z[0][:3]))
-
-    @unittest.skip
     def test_slicing(self):
         tracks = self.tracks
         assert 10 == len(tracks)

@@ -137,6 +137,8 @@ class Usr:
                     basketcache=BASKET_CACHE)[0]
             ]
         except (KeyError, IndexError):  # e.g. old aanet files
+            print("The `usr` fields could not be parsed for the '{}' branch."
+                  .format(name))
             self._usr_names = []
         else:
             self._usr_idx_lookup = {

@@ -19,108 +19,6 @@ class TestOfflineReader(unittest.TestCase):
     def test_number_events(self):
         assert self.n_events == len(self.r.events)
 
-    def test_find_empty(self):
-        fitinf = self.nu.events.tracks.fitinf
-        rec_stages = self.nu.events.tracks.rec_stages
-
-        empty_fitinf = np.array(
-            [match for match in self.nu._find_empty(fitinf)])
-        empty_stages = np.array(
-            [match for match in self.nu._find_empty(rec_stages)])
-
-        self.assertListEqual(empty_fitinf[:5, 1].tolist(),
-                             [23, 14, 14, 4, None])
-        self.assertListEqual(empty_stages[:5, 1].tolist(),
-                             [False, False, False, False, None])
-
-    def test_find_rec_stages(self):
-        stages = np.array(
-            [match for match in self.nu._find_rec_stages([1, 2, 3, 4, 5])])
-
-        self.assertListEqual(stages[:5, 1].tolist(), [0, 0, 0, 0, None])
-
-    @unittest.skip
-    def test_get_reco_fit(self):
-        JGANDALF_BETA0_RAD = [
-            0.0020367251782607574, 0.003306725805622178, 0.0057877124222254885,
-            0.015581698352185896
-        ]
-        reco_fit = self.nu.get_reco_fit([1, 2, 3, 4, 5])['JGANDALF_BETA0_RAD']
-
-        self.assertListEqual(JGANDALF_BETA0_RAD, reco_fit[:4].tolist())
-        with self.assertRaises(ValueError):
-            self.nu.get_reco_fit([1000, 4512, 5625], mc=True)
-
-    @unittest.skip
-    def test_get_reco_hits(self):
-
-        doms = self.nu.get_reco_hits([1, 2, 3, 4, 5], ["dom_id"])["dom_id"]
-
-        mc_doms = self.nu.get_reco_hits([], ["dom_id"], mc=True)["dom_id"]
-
-        self.assertEqual(doms.size, 9)
-        self.assertEqual(mc_doms.size, 10)
-
-        self.assertListEqual(doms[0][0:4].tolist(),
-                             self.nu.hits[0].dom_id[0:4].tolist())
-        self.assertListEqual(mc_doms[0][0:4].tolist(),
-                             self.nu.mc_hits[0].dom_id[0:4].tolist())
-
-        with self.assertRaises(ValueError):
-            self.nu.get_reco_hits([1000, 4512, 5625], ["dom_id"])
-
-    @unittest.skip
-    def test_get_reco_tracks(self):
-
-        pos = self.nu.get_reco_tracks([1, 2, 3, 4, 5], ["pos_x"])["pos_x"]
-        mc_pos = self.nu.get_reco_tracks([], ["pos_x"], mc=True)["pos_x"]
-
-        self.assertEqual(pos.size, 9)
-        self.assertEqual(mc_pos.size, 10)
-
-        self.assertEqual(pos[0], self.nu.tracks[0].pos_x[0])
-        self.assertEqual(mc_pos[0], self.nu.mc_tracks[0].pos_x[0])
-
-        with self.assertRaises(ValueError):
-            self.nu.get_reco_tracks([1000, 4512, 5625], ["pos_x"])
-
-    @unittest.skip
-    def test_get_reco_events(self):
-
-        hits = self.nu.get_reco_events([1, 2, 3, 4, 5], ["hits"])["hits"]
-        mc_hits = self.nu.get_reco_events([], ["mc_hits"], mc=True)["mc_hits"]
-
-        self.assertEqual(hits.size, 9)
-        self.assertEqual(mc_hits.size, 10)
-
-        self.assertListEqual(hits[0:4].tolist(),
-                             self.nu.events.hits[0:4].tolist())
-        self.assertListEqual(mc_hits[0:4].tolist(),
-                             self.nu.events.mc_hits[0:4].tolist())
-
-        with self.assertRaises(ValueError):
-            self.nu.get_reco_events([1000, 4512, 5625], ["hits"])
-
-    @unittest.skip
-    def test_get_max_reco_stages(self):
-        rec_stages = self.nu.tracks.rec_stages
-        max_reco = self.nu._get_max_reco_stages(rec_stages)
-
-        self.assertEqual(len(max_reco.tolist()), 9)
-        self.assertListEqual(max_reco[0].tolist(), [[1, 2, 3, 4, 5], 5, 0])
-
-    @unittest.skip
-    def test_best_reco(self):
-        JGANDALF_BETA1_RAD = [
-            0.0014177681261476852, 0.002094094517471032, 0.003923368624980349,
-            0.009491461076780453
-        ]
-        best = self.nu.get_best_reco()
-
-        self.assertEqual(best.size, 9)
-        self.assertEqual(best['JGANDALF_BETA1_RAD'][:4].tolist(),
-                         JGANDALF_BETA1_RAD)
-
     def test_reading_header(self):
         # head is the supported format
         head = OFFLINE_NUMUCC.header
@@ -346,10 +244,6 @@ class TestUsr(unittest.TestCase):
 
     def test_str(self):
         print(self.f.events.usr)
-
-    def test_nonexistent_usr(self):
-        f = OfflineReader(SAMPLES_DIR / "daq_v1.0.0.root")
-        assert not hasattr(self.f, "usr")
 
     def test_keys(self):
         self.assertListEqual([

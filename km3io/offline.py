@@ -88,7 +88,7 @@ class cached_property:
 
 class OfflineReader:
     """reader for offline ROOT files"""
-    def __init__(self, file_path=None, fobj=None, data=None, index=None):
+    def __init__(self, file_path=None):
         """ OfflineReader class is an offline ROOT file wrapper
 
         Parameters
@@ -98,48 +98,14 @@ class OfflineReader:
             path-like object that points to the file.
 
         """
-        self._index = index
-        if file_path is not None:
-            self._fobj = uproot.open(file_path)
-            self._tree = self._fobj[MAIN_TREE_NAME]
-            self._data = self._tree.lazyarrays(basketcache=BASKET_CACHE)
-        else:
-            self._fobj = fobj
-            self._tree = self._fobj[MAIN_TREE_NAME]
-            self._data = data
+        self._fobj = uproot.open(file_path)
+        self._tree = self._fobj[MAIN_TREE_NAME]
 
     @cached_property
     def events(self):
         return Branch(self._tree,
                       mapper=EVENTS_MAP,
-                      index=self._index,
                       subbranchmaps=SUBBRANCH_MAPS)
-
-    @classmethod
-    def from_index(cls, source, index):
-        """Create an instance with a subtree of a given index
-
-        Parameters
-        ----------
-        source: ROOTDirectory
-            The source file object.
-        index: index or slice
-            The index or slice to create the subtree.
-        """
-        instance = cls(fobj=source._fobj,
-                       data=source._data[index],
-                       index=index)
-        return instance
-
-    def __getitem__(self, index):
-        return OfflineReader.from_index(source=self, index=index)
-
-    def __len__(self):
-        tree = self._fobj[MAIN_TREE_NAME]
-        if self._index is None:
-            return len(tree)
-        else:
-            return len(tree.lazyarrays(basketcache=BASKET_CACHE)[self.index])
 
     @cached_property
     def header(self):

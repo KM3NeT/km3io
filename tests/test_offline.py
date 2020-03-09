@@ -14,13 +14,10 @@ class TestOfflineReader(unittest.TestCase):
     def setUp(self):
         self.r = OFFLINE_FILE
         self.nu = OFFLINE_NUMUCC
-        self.Nevents = 10
+        self.n_events = 10
 
     def test_number_events(self):
-        Nevents = len(self.r)
-
-        # check that there are 10 events
-        self.assertEqual(Nevents, self.Nevents)
+        assert self.n_events == len(self.r.events)
 
     def test_find_empty(self):
         fitinf = self.nu.events.tracks.fitinf

@@ -294,8 +294,8 @@ class DAQTimeslice:
         """Populate a dictionary of frames with the module ID as key"""
         hits_buffer = self._hits_buffer[self._idx]
         n_hits = self._superframe[
-            b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].lazyarray(basketcache=BASKET_CACHE)[
-                self._idx]
+            b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].lazyarray(
+                basketcache=BASKET_CACHE)[self._idx]
         try:
             module_ids = self._superframe[
                 b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].lazyarray(
@@ -303,7 +303,9 @@ class DAQTimeslice:
         except KeyError:
             module_ids = self._superframe[
                 b'vector<KM3NETDAQ::JDAQSuperFrame>.KM3NETDAQ::JDAQModuleIdentifier'].lazyarray(
-                    basketcache=BASKET_CACHE)[self._idx]
+                    uproot.asjagged(
+                        uproot.astable(uproot.asdtype([("dom_id", ">i4")]))),
+                    basketcache=BASKET_CACHE)[self._idx].dom_id
 
         idx = 0
         for module_id, n_hits in zip(module_ids, n_hits):

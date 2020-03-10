@@ -180,6 +180,13 @@ class TestOfflineTracks(unittest.TestCase):
         for key in self.tracks._keymap.keys():
             getattr(self.tracks, key)
 
+    def test_attributes(self):
+        for idx, dom_id in self.dom_id.items():
+            self.assertListEqual(dom_id,
+                                 list(self.hits.dom_id[idx][:len(dom_id)]))
+        for idx, t in self.t.items():
+            assert np.allclose(t, self.hits.t[idx][:len(t)])
+
     def test_item_selection(self):
         self.assertListEqual(list(self.tracks[0].dir_z[:2]),
                              [-0.872885221293917, -0.872885221293917])

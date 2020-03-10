@@ -62,7 +62,6 @@ class TestOfflineEvents(unittest.TestCase):
         self.assertListEqual(self.t_sec, list(self.events.t_sec))
         self.assertListEqual(self.t_ns, list(self.events.t_ns))
 
-    @unittest.skip
     def test_keys(self):
         self.assertListEqual(self.n_hits, list(self.events['n_hits']))
         self.assertListEqual(self.n_tracks, list(self.events['n_tracks']))
@@ -180,6 +179,7 @@ class TestOfflineTracks(unittest.TestCase):
         for key in self.tracks._keymap.keys():
             getattr(self.tracks, key)
 
+    @unittest.skip
     def test_attributes(self):
         for idx, dom_id in self.dom_id.items():
             self.assertListEqual(dom_id,

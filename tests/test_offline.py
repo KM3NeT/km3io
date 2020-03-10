@@ -210,6 +210,16 @@ class TestOfflineTracks(unittest.TestCase):
         # ]:
         #     self.assertListEqual(list(tracks.E[:, 0][_slice]),
         #                          list(tracks[_slice].E[:, 0]))
+        #
+
+class TestBranchIndexingMagic(unittest.TestCase):
+    def setUp(self):
+        self.events = OFFLINE_FILE.events
+
+    def test_foo(self):
+        assert 318 == self.events[2:4].n_hits[0]
+        assert np.allclose(self.events[3].tracks.dir_z[10], self.events.tracks.dir_z[3, 10])
+        assert np.allclose(self.events[3:6].tracks.pos_y[:, 0], self.events.tracks.pos_y[3:6, 0])
 
 
 class TestUsr(unittest.TestCase):

@@ -63,10 +63,10 @@ class TestOfflineEvents(unittest.TestCase):
         self.assertListEqual(self.t_ns, list(self.events.t_ns))
 
     def test_keys(self):
-        self.assertListEqual(self.n_hits, list(self.events['n_hits']))
-        self.assertListEqual(self.n_tracks, list(self.events['n_tracks']))
-        self.assertListEqual(self.t_sec, list(self.events['t_sec']))
-        self.assertListEqual(self.t_ns, list(self.events['t_ns']))
+        assert np.allclose(self.n_hits, self.events['n_hits'])
+        assert np.allclose(self.n_tracks, self.events['n_tracks'])
+        assert np.allclose(self.t_sec, self.events['t_sec'])
+        assert np.allclose(self.t_ns, self.events['t_ns'])
 
     def test_slicing(self):
         s = slice(2, 8, 2)

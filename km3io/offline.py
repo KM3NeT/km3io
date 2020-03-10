@@ -266,13 +266,16 @@ class Branch:
             return object.__getattribute__(self, attr)
 
         if attr in self._keymap.keys():  # intercept branch key lookups
-            out = self._branch[self._keymap[attr]].lazyarray(
-                basketcache=BASKET_CACHE)
-            if self._index is not None:
-                out = out[self._index]
-            return out
+            return self.__getkey__(attr)
 
         return object.__getattribute__(self, attr)
+
+    def __getkey__(self, key):
+        out = self._branch[self._keymap[key]].lazyarray(
+            basketcache=BASKET_CACHE)
+        if self._index is not None:
+            out = out[self._index]
+        return out
 
     def __getitem__(self, item):
         """Slicing magic"""
@@ -285,6 +288,9 @@ class Branch:
 
         if isinstance(item, tuple):
             return self[item[0]][item[1]]
+
+        if isinstance(item, str):
+            return self.__getkey__(item)
 
         return self.__class__(self._tree,
                               self._mapper,

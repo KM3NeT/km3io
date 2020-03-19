@@ -5,12 +5,12 @@ import unittest
 from km3io.daq import DAQReader, get_rate, has_udp_trailer, get_udp_max_sequence_number, get_channel_flags, get_number_udp_packets
 
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
+DAQ_FILE = DAQReader(os.path.join(SAMPLES_DIR, "daq_v1.0.0.root"))
 
 
 class TestDAQEvents(unittest.TestCase):
     def setUp(self):
-        self.events = DAQReader(os.path.join(SAMPLES_DIR,
-                                             "daq_v1.0.0.root")).events
+        self.events = DAQ_FILE.events
 
     def test_index_lookup(self):
         assert 3 == len(self.events)
@@ -24,8 +24,7 @@ class TestDAQEvents(unittest.TestCase):
 
 class TestDAQEvent(unittest.TestCase):
     def setUp(self):
-        self.event = DAQReader(os.path.join(SAMPLES_DIR,
-                                            "daq_v1.0.0.root")).events[0]
+        self.event = DAQ_FILE.events[0]
 
     def test_str(self):
         assert re.match(".*event.*96.*snapshot.*18.*triggered",
@@ -38,8 +37,7 @@ class TestDAQEvent(unittest.TestCase):
 
 class TestDAQEventsSnapshotHits(unittest.TestCase):
     def setUp(self):
-        self.events = DAQReader(os.path.join(SAMPLES_DIR,
-                                             "daq_v1.0.0.root")).events
+        self.events = DAQ_FILE.events
         self.lengths = {0: 96, 1: 124, -1: 78}
         self.total_item_count = 298
 
@@ -77,8 +75,7 @@ class TestDAQEventsSnapshotHits(unittest.TestCase):
 
 class TestDAQEventsTriggeredHits(unittest.TestCase):
     def setUp(self):
-        self.events = DAQReader(os.path.join(SAMPLES_DIR,
-                                             "daq_v1.0.0.root")).events
+        self.events = DAQ_FILE.events
         self.lengths = {0: 18, 1: 53, -1: 9}
         self.total_item_count = 80
 
@@ -118,8 +115,7 @@ class TestDAQEventsTriggeredHits(unittest.TestCase):
 
 class TestDAQTimeslices(unittest.TestCase):
     def setUp(self):
-        self.ts = DAQReader(os.path.join(SAMPLES_DIR,
-                                         "daq_v1.0.0.root")).timeslices
+        self.ts = DAQ_FILE.timeslices
 
     def test_data_lengths(self):
         assert 3 == len(self.ts._timeslices["L1"][0])
@@ -144,8 +140,7 @@ class TestDAQTimeslices(unittest.TestCase):
 
 class TestDAQTimeslice(unittest.TestCase):
     def setUp(self):
-        self.ts = DAQReader(os.path.join(SAMPLES_DIR,
-                                         "daq_v1.0.0.root")).timeslices
+        self.ts = DAQ_FILE.timeslices
         self.n_frames = {"L1": [69, 69, 69], "SN": [64, 66, 68]}
 
     def test_str(self):
@@ -158,8 +153,7 @@ class TestDAQTimeslice(unittest.TestCase):
 
 class TestSummaryslices(unittest.TestCase):
     def setUp(self):
-        self.ss = DAQReader(os.path.join(SAMPLES_DIR,
-                                         "daq_v1.0.0.root")).summaryslices
+        self.ss = DAQ_FILE.summaryslices
 
     def test_headers(self):
         assert 3 == len(self.ss.headers)

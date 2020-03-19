@@ -123,29 +123,33 @@ class OfflineReader:
 
 class Usr:
     """Helper class to access AAObject `usr`` stuff"""
-    def __init__(self, name, tree, index=None):
+    def __init__(self, mapper, tree, index=None):
         # Here, we assume that every event has the same names in the same order
         # to massively increase the performance. This needs triple check if
         # it's always the case; the usr-format is simply a very bad design.
-        self._name = name
+        self._name = mapper.key
+        self._index = index
         try:
-            tree['usr']  # This will raise a KeyError in old aanet files
+            tree[mapper.key +
+                 '.usr']  # This will raise a KeyError in old aanet files
             # which has a different strucuter and key (usr_data)
             # We do not support those...
             self._usr_names = [
-                n.decode("utf-8") for n in tree['usr_names'].lazyarray(
+                n.decode("utf-8")
+                for n in tree[mapper.key + '.usr_names'].lazyarray(
                     basketcache=BASKET_CACHE)[0]
             ]
         except (KeyError, IndexError):  # e.g. old aanet files
-            print("The `usr` fields could not be parsed for the '{}' branch."
-                  .format(name))
+            print("The `usr` fields could not be parsed for the '{}' branch.".
+                  format(self._name))
             self._usr_names = []
         else:
             self._usr_idx_lookup = {
                 name: index
                 for index, name in enumerate(self._usr_names)
             }
-            data = tree['usr'].lazyarray(basketcache=BASKET_CACHE)
+            data = tree[mapper.key +
+                        '.usr'].lazyarray(basketcache=BASKET_CACHE)
             if index is not None:
                 data = data[index]
             self._usr_data = data
@@ -153,7 +157,10 @@ class Usr:
                 setattr(self, name, self[name])
 
     def __getitem__(self, item):
-        return self._usr_data[:, self._usr_idx_lookup[item]]
+        if self._index is not None:
+            return self._usr_data[self._index][:, self._usr_idx_lookup[item]]
+        else:
+            return self._usr_data[:, self._usr_idx_lookup[item]]
 
     def keys(self):
         return self._usr_names
@@ -259,7 +266,7 @@ class Branch:
 
     @cached_property
     def usr(self):
-        return Usr(self._mapper.name, self._branch, index=self._index)
+        return Usr(self._mapper, self._branch, index=self._index)
 
     def __getattribute__(self, attr):
         if attr.startswith("_"):  # let all private and magic methods pass

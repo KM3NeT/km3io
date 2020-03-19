@@ -6,6 +6,8 @@ import numba as nb
 
 TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
+BASKET_CACHE_SIZE = 110 * 1024**2
+BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 # Parameters for PMT rate conversions, since the rates in summary slices are
 # stored as a single byte to save space. The values from 0-255 can be decoded
@@ -259,6 +261,17 @@ class DAQTimesliceStream:
         self.superframes = superframes
         self._hits_buffer = hits_buffer
 
+    # def frames(self):
+    #     n_hits = self._superframe[
+    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].lazyarray(
+    #             basketcache=BASKET_CACHE)[self._idx]
+    #     module_ids = self._superframe[
+    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].lazyarray(basketcache=BASKET_CACHE)[self._idx]
+    #     idx = 0
+    #     for module_id, n_hits in zip(module_ids, n_hits):
+    #         self._frames[module_id] = hits_buffer[idx:idx + n_hits]
+    #         idx += n_hits
+
 
 class DAQTimeslice:
     """A wrapper for a DAQ timeslice"""
@@ -281,10 +294,19 @@ class DAQTimeslice:
         """Populate a dictionary of frames with the module ID as key"""
         hits_buffer = self._hits_buffer[self._idx]
         n_hits = self._superframe[
-            b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].lazyarray()[
-                self._idx]
-        module_ids = self._superframe[
-            b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].lazyarray()[self._idx]
+            b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].lazyarray(
+                basketcache=BASKET_CACHE)[self._idx]
+        try:
+            module_ids = self._superframe[
+                b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].lazyarray(
+                    basketcache=BASKET_CACHE)[self._idx]
+        except KeyError:
+            module_ids = self._superframe[
+                b'vector<KM3NETDAQ::JDAQSuperFrame>.KM3NETDAQ::JDAQModuleIdentifier'].lazyarray(
+                    uproot.asjagged(
+                        uproot.astable(uproot.asdtype([("dom_id", ">i4")]))),
+                    basketcache=BASKET_CACHE)[self._idx].dom_id
+
         idx = 0
         for module_id, n_hits in zip(module_ids, n_hits):
             self._frames[module_id] = hits_buffer[idx:idx + n_hits]
@@ -294,7 +316,7 @@ class DAQTimeslice:
         if self._n_frames is None:
             self._n_frames = len(
                 self._superframe[b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].
-                lazyarray()[self._idx])
+                lazyarray(basketcache=BASKET_CACHE)[self._idx])
         return self._n_frames
 
     def __str__(self):

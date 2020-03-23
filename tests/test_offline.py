@@ -3,6 +3,7 @@ import numpy as np
 from pathlib import Path
 
 from km3io import OfflineReader
+from km3io.offline import _nested_mapper, cached_property, _to_num, Header
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
 OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'aanet_v2.0.0.root')
@@ -19,16 +20,34 @@ class TestOfflineReader(unittest.TestCase):
     def test_number_events(self):
         assert self.n_events == len(self.r.events)
 
+
+class TestHeader(unittest.TestCase):
     def test_reading_header(self):
         # head is the supported format
         head = OFFLINE_NUMUCC.header
 
         self.assertAlmostEqual(head.DAQ.livetime, 394)
 
+    def test_str_header(self):
+        assert "MC Header" in str(OFFLINE_NUMUCC.header)
+
     def test_warning_if_unsupported_header(self):
         # test the warning for unsupported fheader format
         with self.assertWarns(UserWarning):
-            self.r.header
+            OFFLINE_FILE.header
+
+    def test_header_wrapper(self):
+        head = {
+            'DAQ': '394',
+            'PDF': '4',
+            'XSecFile': '',
+            'can': '0 1027 888.4'
+        }
+
+        header = Header(head)
+
+        self.assertEqual(len(header._data), len(head))
+        self.assertIsNone(header._data["PDF"].i2)
 
 
 class TestOfflineEvents(unittest.TestCase):
@@ -168,6 +187,9 @@ class TestOfflineHits(unittest.TestCase):
             assert np.allclose(OFFLINE_FILE.events[idx].hits.t[:self.n_hits],
                                ts[:self.n_hits])
 
+    def test_keys(self):
+        assert "dom_id" in self.hits.keys()
+
 
 class TestOfflineTracks(unittest.TestCase):
     def setUp(self):
@@ -196,7 +218,8 @@ class TestOfflineTracks(unittest.TestCase):
 
     def test_slicing(self):
         tracks = self.tracks
-        assert 10 == len(tracks)
+        self.assertEqual(10, len(tracks))
+        self.assertEqual(1, len(tracks[0]))
         # track_selection = tracks[2:7]
         # assert 5 == len(track_selection)
         # track_selection_2 = tracks[1:3]
@@ -212,14 +235,24 @@ class TestOfflineTracks(unittest.TestCase):
         #                          list(tracks[_slice].E[:, 0]))
         #
 
+
 class TestBranchIndexingMagic(unittest.TestCase):
     def setUp(self):
         self.events = OFFLINE_FILE.events
 
     def test_foo(self):
-        assert 318 == self.events[2:4].n_hits[0]
-        assert np.allclose(self.events[3].tracks.dir_z[10], self.events.tracks.dir_z[3, 10])
-        assert np.allclose(self.events[3:6].tracks.pos_y[:, 0], self.events.tracks.pos_y[3:6, 0])
+        self.assertEqual(318, self.events[2:4].n_hits[0])
+        assert np.allclose(self.events[3].tracks.dir_z[10],
+                           self.events.tracks.dir_z[3, 10])
+        assert np.allclose(self.events[3:6].tracks.pos_y[:, 0],
+                           self.events.tracks.pos_y[3:6, 0])
+
+        # test slicing with a tuple
+        assert np.allclose(self.events[0].hits[1].dom_id[0:10],
+                           self.events.hits[(0, 1)].dom_id[0:10])
+
+        # test selecting with a list
+        self.assertEqual(3, len(self.events[[0, 2, 3]]))
 
 
 class TestUsr(unittest.TestCase):
@@ -229,6 +262,7 @@ class TestUsr(unittest.TestCase):
     def test_str(self):
         print(self.f.events.usr)
 
+    @unittest.skip
     def test_keys(self):
         self.assertListEqual([
             'RecoQuality', 'RecoNDF', 'CoC', 'ToT', 'ChargeAbove',
@@ -238,6 +272,7 @@ class TestUsr(unittest.TestCase):
             'ClassficationScore'
         ], self.f.events.usr.keys())
 
+    @unittest.skip
     def test_getitem(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
@@ -246,6 +281,7 @@ class TestUsr(unittest.TestCase):
             [37.51967774166617, -10.280346193553832, 13.67595659707355],
             self.f.events.usr['DeltaPosZ'])
 
+    @unittest.skip
     def test_attributes(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
@@ -253,3 +289,24 @@ class TestUsr(unittest.TestCase):
         assert np.allclose(
             [37.51967774166617, -10.280346193553832, 13.67595659707355],
             self.f.events.usr.DeltaPosZ)
+
+
+class TestIndependentFunctions(unittest.TestCase):
+    def test_nested_mapper(self):
+        self.assertEqual('pos_x', _nested_mapper("trks.pos.x"))
+
+    def test_to_num(self):
+        self.assertEqual(10, _to_num("10"))
+        self.assertEqual(10.5, _to_num("10.5"))
+        self.assertEqual("test", _to_num("test"))
+        self.assertIsNone(_to_num(None))
+
+
+class TestCachedProperty(unittest.TestCase):
+    def test_cached_properties(self):
+        class Test:
+            @cached_property
+            def prop(self):
+                pass
+
+        self.assertTrue(isinstance(Test.prop, cached_property))

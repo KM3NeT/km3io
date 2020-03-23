@@ -235,7 +235,6 @@ class Header:
             Constructor = namedtuple(attribute, fields)
             if len(values) < len(fields):
                 values += [None] * (len(fields) - len(values))
-            print(attribute, fields, values)
             self._data[attribute] = Constructor(
                 **{f: _to_num(v)
                    for (f, v) in zip(fields, values)})

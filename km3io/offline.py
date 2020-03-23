@@ -226,7 +226,7 @@ class Header:
     """The header"""
     def __init__(self, header):
         self._data = {}
-        self._missing_keys = list(set(header.keys()) - set(mc_header.keys()))
+        self._missing_keys = set(header.keys()) - set(mc_header.keys())
 
         for attribute, fields in mc_header.items():
             values = header.get(attribute, '').split()

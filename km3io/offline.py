@@ -214,23 +214,20 @@ class Usr:
 
 def _to_num(value):
     """Convert a value to a numerical one if possible"""
-    if value is None:
-        return
-    try:
-        return int(value)
-    except ValueError:
+    for converter in (int, float):
         try:
-            return float(value)
-        except ValueError:
+            return converter(value)
+        except (ValueError, TypeError):
             pass
-    else:
-        return value
+    return value
 
 
 class Header:
     """The header"""
     def __init__(self, header):
         self._data = {}
+        self._missing_keys = list(set(header.keys()) - set(mc_header.keys()))
+
         for attribute, fields in mc_header.items():
             values = header.get(attribute, '').split()
             if not values:
@@ -238,17 +235,26 @@ class Header:
             Constructor = namedtuple(attribute, fields)
             if len(values) < len(fields):
                 values += [None] * (len(fields) - len(values))
+            print(attribute, fields, values)
             self._data[attribute] = Constructor(
                 **{f: _to_num(v)
                    for (f, v) in zip(fields, values)})
+
+        # quick fix while waiting for additional definitions in mc_header
+        for key in self._missing_keys:
+            self._data[key] = _to_num(header[key])
 
         for attribute, value in self._data.items():
             setattr(self, attribute, value)
 
     def __str__(self):
         lines = ["MC Header:"]
-        for value in self._data.values():
-            lines.append("  {}".format(value))
+        keys = set(mc_header.keys())
+        for key, value in self._data.items():
+            if key in keys:
+                lines.append("  {}".format(value))
+            else:
+                lines.append("  {}: {}".format(key, value))
         return "\n".join(lines)
 
 

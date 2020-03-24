@@ -233,14 +233,20 @@ class Header:
 
             n_values = len(values)
             n_fields = len(fields)
+
+            if n_values == 1 and n_fields == 0:
+                self._data[attribute] = _to_num(values[0])
+                continue
+
             n_max = max(n_values, n_fields)
             values += [None] * (n_max - n_values)
             fields += ["field_{}".format(i) for i in range(n_fields, n_max)]
 
+            Constructor = namedtuple(attribute, fields)
+
             if not values:
                 continue
 
-            Constructor = namedtuple(attribute, fields)
             self._data[attribute] = Constructor(
                 **{f: _to_num(v)
                    for (f, v) in zip(fields, values)})

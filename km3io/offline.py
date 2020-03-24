@@ -128,7 +128,6 @@ class OfflineReader:
 
 class Usr:
     """Helper class to access AAObject `usr`` stuff"""
-
     def __init__(self, mapper, branch, index=None):
         self._mapper = mapper
         self._name = mapper.name
@@ -159,8 +158,7 @@ class Usr:
         # to massively increase the performance. This needs triple check if
         # it's always the case.
         self._usr_names = [
-            n.decode("utf-8")
-            for n in self._branch['usr_names'].lazyarray(
+            n.decode("utf-8") for n in self._branch['usr_names'].lazyarray(
                 basketcache=BASKET_CACHE)[0]
         ]
         self._usr_idx_lookup = {
@@ -183,7 +181,9 @@ class Usr:
             n.decode("utf-8") for n in self.branch['usr_names'].lazyarray(
                 # TODO this will be fixed soon in uproot,
                 # see https://github.com/scikit-hep/uproot/issues/465
-                uproot.asgenobj(uproot.SimpleArray(uproot.STLVector(uproot.STLString())), self.branch['usr_names']._context, 6),
+                uproot.asgenobj(
+                    uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
+                    self.branch['usr_names']._context, 6),
                 basketcache=BASKET_CACHE)[0]
         ]
         self.__getitem__ = self.__getitem_nested__

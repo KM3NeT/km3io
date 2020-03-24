@@ -22,12 +22,6 @@ class TestOfflineReader(unittest.TestCase):
 
 
 class TestHeader(unittest.TestCase):
-    def test_reading_header(self):
-        # head is the supported format
-        head = OFFLINE_NUMUCC.header
-
-        self.assertAlmostEqual(head.DAQ.livetime, 394)
-
     def test_str_header(self):
         assert "MC Header" in str(OFFLINE_NUMUCC.header)
 
@@ -35,6 +29,36 @@ class TestHeader(unittest.TestCase):
         # test the warning for unsupported fheader format
         with self.assertWarns(UserWarning):
             OFFLINE_FILE.header
+
+    def test_missing_key_definitions(self):
+        head = {'a': '1 2 3', 'b': '4', 'c': 'd'}
+
+        header = Header(head)
+
+        assert 1 == header.a.field_0
+        assert 2 == header.a.field_1
+        assert 3 == header.a.field_2
+        assert 4 == header.b
+        assert 'd' == header.c
+
+    def test_missing_values(self):
+        head = {'can': '1'}
+
+        header = Header(head)
+
+        assert 1 == header.can.zmin
+        assert header.can.zmax is None
+        assert header.can.r is None
+
+    def test_additional_values_compared_to_definition(self):
+        head = {'can': '1 2 3 4'}
+
+        header = Header(head)
+
+        assert 1 == header.can.zmin
+        assert 2 == header.can.zmax
+        assert 3 == header.can.r
+        assert 4 == header.can.field_3
 
     def test_header(self):
         head = {
@@ -57,34 +81,21 @@ class TestHeader(unittest.TestCase):
         assert "test" == header.undefined.field_2
         assert 3.4 == header.undefined.field_3
 
-    def test_missing_key_definitions(self):
-        head = {'a': '1 2 3', 'b': '4'}
+    def test_reading_header_from_sample_file(self):
+        head = OFFLINE_NUMUCC.header
 
-        header = Header(head)
-
-        assert 1 == header.a.field_0
-        assert 2 == header.a.field_1
-        assert 3 == header.a.field_2
-        assert 4 == header.b.field_0
-
-    def test_missing_values(self):
-        head = {'can': '1'}
-
-        header = Header(head)
-
-        assert 1 == header.can.zmin
-        assert header.can.zmax is None
-        assert header.can.r is None
-
-    def test_additional_values_compared_to_definition(self):
-        head = {'can': '1 2 3 4'}
-
-        header = Header(head)
-
-        assert 1 == header.can.zmin
-        assert 2 == header.can.zmax
-        assert 3 == header.can.r
-        assert 4 == header.can.field_3
+        assert 394 == head.DAQ.livetime
+        assert 4 == head.PDF.i1
+        assert 58 == head.PDF.i2
+        assert 0 == head.coord_origin.x
+        assert 0 == head.coord_origin.y
+        assert 0 == head.coord_origin.z
+        assert 100 == head.cut_nu.Emin
+        assert 100000000.0 == head.cut_nu.Emax
+        assert -1 == head.cut_nu.cosTmin
+        assert 1 == head.cut_nu.cosTmax
+        assert "diffuse" == head.sourcemode
+        assert 100000.0 == head.ngen
 
 
 class TestOfflineEvents(unittest.TestCase):

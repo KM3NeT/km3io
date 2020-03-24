@@ -226,22 +226,24 @@ class Header:
     """The header"""
     def __init__(self, header):
         self._data = {}
-        self._missing_keys = set(header.keys()) - set(mc_header.keys())
 
-        for attribute, fields in mc_header.items():
-            values = header.get(attribute, '').split()
+        for attribute, fields in header.items():
+            values = fields.split()
+            fields = mc_header.get(attribute, [])
+
+            n_values = len(values)
+            n_fields = len(fields)
+            n_max = max(n_values, n_fields)
+            values += [None] * (n_max - n_values)
+            fields += ["field_{}".format(i) for i in range(n_fields, n_max)]
+
             if not values:
                 continue
+
             Constructor = namedtuple(attribute, fields)
-            if len(values) < len(fields):
-                values += [None] * (len(fields) - len(values))
             self._data[attribute] = Constructor(
                 **{f: _to_num(v)
                    for (f, v) in zip(fields, values)})
-
-        # quick fix while waiting for additional definitions in mc_header
-        for key in self._missing_keys:
-            self._data[key] = _to_num(header[key])
 
         for attribute, value in self._data.items():
             setattr(self, attribute, value)

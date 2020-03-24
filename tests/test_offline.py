@@ -36,18 +36,55 @@ class TestHeader(unittest.TestCase):
         with self.assertWarns(UserWarning):
             OFFLINE_FILE.header
 
-    def test_header_wrapper(self):
+    def test_header(self):
         head = {
             'DAQ': '394',
             'PDF': '4',
-            'XSecFile': '',
-            'can': '0 1027 888.4'
+            'can': '0 1027 888.4',
+            'undefined': '1 2 test 3.4'
         }
 
         header = Header(head)
 
-        self.assertEqual(len(header._data), len(head))
-        self.assertIsNone(header._data["PDF"].i2)
+        assert 394 == header.DAQ.livetime
+        assert 4 == header.PDF.i1
+        assert header.PDF.i2 is None
+        assert 0 == header.can.zmin
+        assert 1027 == header.can.zmax
+        assert 888.4 == header.can.r
+        assert 1 == header.undefined.field_0
+        assert 2 == header.undefined.field_1
+        assert "test" == header.undefined.field_2
+        assert 3.4 == header.undefined.field_3
+
+    def test_missing_key_definitions(self):
+        head = {'a': '1 2 3', 'b': '4'}
+
+        header = Header(head)
+
+        assert 1 == header.a.field_0
+        assert 2 == header.a.field_1
+        assert 3 == header.a.field_2
+        assert 4 == header.b.field_0
+
+    def test_missing_values(self):
+        head = {'can': '1'}
+
+        header = Header(head)
+
+        assert 1 == header.can.zmin
+        assert header.can.zmax is None
+        assert header.can.r is None
+
+    def test_additional_values_compared_to_definition(self):
+        head = {'can': '1 2 3 4'}
+
+        header = Header(head)
+
+        assert 1 == header.can.zmin
+        assert 2 == header.can.zmax
+        assert 3 == header.can.r
+        assert 4 == header.can.field_3
 
 
 class TestOfflineEvents(unittest.TestCase):

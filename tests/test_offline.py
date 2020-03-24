@@ -299,7 +299,7 @@ class TestUsr(unittest.TestCase):
     def test_str(self):
         print(self.f.events.usr)
 
-    @unittest.skip
+    # @unittest.skip
     def test_keys(self):
         self.assertListEqual([
             'RecoQuality', 'RecoNDF', 'CoC', 'ToT', 'ChargeAbove',
@@ -309,7 +309,7 @@ class TestUsr(unittest.TestCase):
             'ClassficationScore'
         ], self.f.events.usr.keys())
 
-    @unittest.skip
+    # @unittest.skip
     def test_getitem(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
@@ -318,7 +318,7 @@ class TestUsr(unittest.TestCase):
             [37.51967774166617, -10.280346193553832, 13.67595659707355],
             self.f.events.usr['DeltaPosZ'])
 
-    @unittest.skip
+    # @unittest.skip
     def test_attributes(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
@@ -328,10 +328,12 @@ class TestUsr(unittest.TestCase):
             self.f.events.usr.DeltaPosZ)
 
 
-class TestIndependentFunctions(unittest.TestCase):
+class TestNestedMapper(unittest.TestCase):
     def test_nested_mapper(self):
         self.assertEqual('pos_x', _nested_mapper("trks.pos.x"))
 
+
+class TestToNum(unittest.TestCase):
     def test_to_num(self):
         self.assertEqual(10, _to_num("10"))
         self.assertEqual(10.5, _to_num("10.5"))

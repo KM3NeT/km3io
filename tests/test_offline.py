@@ -307,11 +307,10 @@ class TestUsr(unittest.TestCase):
     def setUp(self):
         self.f = OFFLINE_USR
 
-    def test_str(self):
+    def test_str_flat(self):
         print(self.f.events.usr)
 
-    @unittest.skip
-    def test_keys(self):
+    def test_keys_flat(self):
         self.assertListEqual([
             'RecoQuality', 'RecoNDF', 'CoC', 'ToT', 'ChargeAbove',
             'ChargeBelow', 'ChargeRatio', 'DeltaPosZ', 'FirstPartPosZ',
@@ -320,8 +319,7 @@ class TestUsr(unittest.TestCase):
             'ClassficationScore'
         ], self.f.events.usr.keys())
 
-    @unittest.skip
-    def test_getitem(self):
+    def test_getitem_flat(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
             self.f.events.usr['CoC'])
@@ -330,7 +328,10 @@ class TestUsr(unittest.TestCase):
             self.f.events.usr['DeltaPosZ'])
 
     @unittest.skip
-    def test_attributes(self):
+    def test_keys_nested(self):
+        self.assertListEqual(["a"], self.f.events.mc_tracks.usr.keys())
+
+    def test_attributes_flat(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
             self.f.events.usr.CoC)

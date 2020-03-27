@@ -127,7 +127,7 @@ class OfflineReader:
 
 
 class Usr:
-    """Helper class to access AAObject `usr`` stuff"""
+    """Helper class to access AAObject `usr` stuff"""
     def __init__(self, mapper, branch, index=None):
         self._mapper = mapper
         self._name = mapper.name
@@ -136,29 +136,30 @@ class Usr:
         self._usr_names = []
         self._usr_idx_lookup = {}
 
+        self._usr_key = 'usr' if mapper.flat else mapper.key + '.usr'
+
+        self._initialise()
+
+    def _initialise(self):
         try:
-            branch['usr']
+            self._branch[self._usr_key]
             # This will raise a KeyError in old aanet files
             # which has a different strucuter and key (usr_data)
-            # We do not support those
+            # We do not support those (yet)
         except (KeyError, IndexError):
             print("The `usr` fields could not be parsed for the '{}' branch.".
                   format(self._name))
             return
 
-        if mapper.flat:
+        if self._mapper.flat:
             self._initialise_flat()
-        else:
-            # self._initialise_nested()
-            # branch[self._mapper.key + '.usr']
-            pass
 
     def _initialise_flat(self):
         # Here, we assume that every event has the same names in the same order
         # to massively increase the performance. This needs triple check if
         # it's always the case.
         self._usr_names = [
-            n.decode("utf-8") for n in self._branch['usr_names'].lazyarray(
+            n.decode("utf-8") for n in self._branch[self._usr_key + '_names'].lazyarray(
                 basketcache=BASKET_CACHE)[0]
         ]
         self._usr_idx_lookup = {
@@ -166,7 +167,7 @@ class Usr:
             for index, name in enumerate(self._usr_names)
         }
 
-        data = self._branch['usr'].lazyarray(basketcache=BASKET_CACHE)
+        data = self._branch[self._usr_key].lazyarray(basketcache=BASKET_CACHE)
 
         if self._index is not None:
             data = data[self._index]
@@ -176,17 +177,16 @@ class Usr:
         for name in self._usr_names:
             setattr(self, name, self[name])
 
-    def _initialise_nested(self):
-        self._usr_names = [
-            n.decode("utf-8") for n in self.branch['usr_names'].lazyarray(
-                # TODO this will be fixed soon in uproot,
-                # see https://github.com/scikit-hep/uproot/issues/465
-                uproot.asgenobj(
-                    uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
-                    self.branch['usr_names']._context, 6),
-                basketcache=BASKET_CACHE)[0]
-        ]
-        self.__getitem__ = self.__getitem_nested__
+    # def _initialise_nested(self):
+    #     self._usr_names = [
+    #         n.decode("utf-8") for n in self.branch['usr_names'].lazyarray(
+    #             # TODO this will be fixed soon in uproot,
+    #             # see https://github.com/scikit-hep/uproot/issues/465
+    #             uproot.asgenobj(
+    #                 uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
+    #                 self.branch['usr_names']._context, 6),
+    #             basketcache=BASKET_CACHE)[0]
+    #     ]
 
     def __getitem__(self, item):
         if self._mapper.flat:
@@ -198,6 +198,19 @@ class Usr:
             return self._usr_data[self._index][:, self._usr_idx_lookup[item]]
         else:
             return self._usr_data[:, self._usr_idx_lookup[item]]
+
+    def __getitem_nested__(self, item):
+        data = self._branch[self._usr_key + '_names'].lazyarray(
+                # TODO this will be fixed soon in uproot,
+                # see https://github.com/scikit-hep/uproot/issues/465
+                uproot.asgenobj(
+                    uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
+                    self._branch[self._usr_key + '_names']._context, 6),
+                basketcache=BASKET_CACHE)
+        if self._index is None:
+            return data
+        else:
+            return data[self._index]
 
     def keys(self):
         return self._usr_names

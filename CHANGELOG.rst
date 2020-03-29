@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.9.1 / 2020-03-29
+~~~~~~~~~~~~~~~~~~
+* Added support for gSeaGen files
+
 0.9.0 / 2020-03-03
 ~~~~~~~~~~~~~~~~~~
 * Added support for the ``usr`` field of events

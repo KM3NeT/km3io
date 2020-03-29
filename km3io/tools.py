@@ -6,6 +6,7 @@ import uproot
 BASKET_CACHE_SIZE = 110 * 1024**2
 BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
+
 class cached_property:
     """A simple cache decorator for properties."""
     def __init__(self, function):
@@ -56,8 +57,8 @@ class Branch:
     def _initialise_keys(self):
         """Create the keymap and instance attributes for branch keys"""
         # TODO: this could be a cached property
-        keys = set(k.decode('utf-8') for k in self._branch.keys()) - set(
-            self._mapper.exclude)
+        keys = set(k.decode('utf-8')
+                   for k in self._branch.keys()) - set(self._mapper.exclude)
         self._keymap = {
             **{self._mapper.attrparser(k): k
                for k in keys},
@@ -132,6 +133,7 @@ class Branch:
                                                self._mapper.name, length,
                                                's' if length > 1 else '')
 
+
 class Usr:
     """Helper class to access AAObject `usr` stuff"""
     def __init__(self, mapper, branch, index=None):
@@ -165,7 +167,8 @@ class Usr:
         # to massively increase the performance. This needs triple check if
         # it's always the case.
         self._usr_names = [
-            n.decode("utf-8") for n in self._branch[self._usr_key + '_names'].lazyarray(
+            n.decode("utf-8")
+            for n in self._branch[self._usr_key + '_names'].lazyarray(
                 basketcache=BASKET_CACHE)[0]
         ]
         self._usr_idx_lookup = {
@@ -207,12 +210,12 @@ class Usr:
 
     def __getitem_nested__(self, item):
         data = self._branch[self._usr_key + '_names'].lazyarray(
-                # TODO this will be fixed soon in uproot,
-                # see https://github.com/scikit-hep/uproot/issues/465
-                uproot.asgenobj(
-                    uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
-                    self._branch[self._usr_key + '_names']._context, 6),
-                basketcache=BASKET_CACHE)
+            # TODO this will be fixed soon in uproot,
+            # see https://github.com/scikit-hep/uproot/issues/465
+            uproot.asgenobj(
+                uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
+                self._branch[self._usr_key + '_names']._context, 6),
+            basketcache=BASKET_CACHE)
         if self._index is None:
             return data
         else:

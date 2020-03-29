@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+# coding=utf-8
+# Filename: gseagen.py
+# Author: Johannes Schumann <jschumann@km3net.de>
+
+import uproot
+import numpy as np
+import warnings
+from .tools import Branch, BranchMapper, cached_property
+MAIN_TREE_NAME = "Events"
+
+
+class GSGReader:
+    """reader for gSeaGen ROOT files"""
+    def __init__(self, file_path=None, fobj=None):
+        """ GSGReader class is a gSeaGen ROOT file wrapper
+
+        Parameters
+        ----------
+        file_path : path-like object
+            Path to the file of interest. It can be a str or any python
+            path-like object that points to the file.
+        """
+        if file_path is not None:
+            self._fobj = uproot.open(file_path)
+        else:
+            self._fobj = fobj
+
+    @cached_property
+    def header(self):
+        header_key = 'Header'
+        if header_key in self._fobj:
+            header = {}
+            for k, v in self._fobj[header_key].items():
+                v = v.array()[0]
+                if isinstance(v, bytes):
+                    try:
+                        v = v.decode('utf-8')
+                    except UnicodeDecodeError:
+                        pass
+                header[k.decode("utf-8")] = v
+            return header
+        else:
+            warnings.warn("Your file header has an unsupported format")
+
+    @cached_property
+    def events(self):
+        gseagen_events_mapper = BranchMapper(name="Events",
+                                             key="Events",
+                                             extra={},
+                                             exclude={},
+                                             update={},
+                                             attrparser=lambda x: x,
+                                             flat=True)
+        return Branch(self._fobj, gseagen_events_mapper)

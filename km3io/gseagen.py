@@ -17,14 +17,11 @@ class GSGReader:
 
         Parameters
         ----------
-        file_path : path-like object
-            Path to the file of interest. It can be a str or any python
-            path-like object that points to the file.
+        file_path : file path or file-like object
+            The file handler. It can be a str or any python path-like object
+            that points to the file.
         """
-        if file_path is not None:
-            self._fobj = uproot.open(file_path)
-        else:
-            self._fobj = fobj
+        self._fobj = uproot.open(file_path)
 
     @cached_property
     def header(self):

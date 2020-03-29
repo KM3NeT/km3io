@@ -30,14 +30,14 @@ EVENTS_MAP = BranchMapper(name="events",
                           flat=True)
 
 SUBBRANCH_MAPS = [
-    BranchMapper(
-        name="tracks",
-        key="trks",
-        extra={},
-        exclude=EXCLUDE_KEYS + ['trks.usr_data', 'trks.usr', 'trks.fUniqueID', 'trks.fBits'],
-        update={},
-        attrparser=_nested_mapper,
-        flat=False),
+    BranchMapper(name="tracks",
+                 key="trks",
+                 extra={},
+                 exclude=EXCLUDE_KEYS +
+                 ['trks.usr_data', 'trks.usr', 'trks.fUniqueID', 'trks.fBits'],
+                 update={},
+                 attrparser=_nested_mapper,
+                 flat=False),
     BranchMapper(name="mc_tracks",
                  key="mc_trks",
                  extra={},
@@ -107,8 +107,6 @@ class OfflineReader:
             warnings.warn("Your file header has an unsupported format")
 
 
-
-
 class Header:
     """The header"""
     def __init__(self, header):
@@ -150,5 +148,3 @@ class Header:
             else:
                 lines.append("  {}: {}".format(key, value))
         return "\n".join(lines)
-
-

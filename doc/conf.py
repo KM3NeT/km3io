@@ -34,7 +34,8 @@ author = 'Zineb Aly, Tamas Gal, Johannes Schumann'
 # ones.
 extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.viewcode',
-    'autoapi.extension', 'numpydoc', 'sphinx_gallery.gen_gallery'
+    'autoapi.extension', 'numpydoc',
+    #'sphinx_gallery.gen_gallery'
 ]
 autosummary_generate = True
 
@@ -53,13 +54,13 @@ autoapi_options = ['members', 'undoc-members']
 autoapi_include_summaries = True
 
 # Gallery
-sphinx_gallery_conf = {
-    'backreferences_dir': 'modules/generated',
-    'examples_dirs': '../examples',  # path to your example scripts
-    'gallery_dirs':
-    'auto_examples',  # path to where to save gallery generated output
-    'show_memory': True,
-}
+# sphinx_gallery_conf = {
+#     'backreferences_dir': 'modules/generated',
+#     'examples_dirs': '../examples',  # path to your example scripts
+#     'gallery_dirs':
+#     'auto_examples',  # path to where to save gallery generated output
+#     'show_memory': True,
+# }
 
 # -- Options for HTML output -------------------------------------------------
 

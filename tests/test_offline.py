@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 
 from km3io import OfflineReader
-from km3io.offline import _nested_mapper, cached_property, _to_num, Header
+from km3io.offline import _nested_mapper, Header
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
 OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'aanet_v2.0.0.root')
@@ -340,22 +340,7 @@ class TestUsr(unittest.TestCase):
             self.f.events.usr.DeltaPosZ)
 
 
-class TestIndependentFunctions(unittest.TestCase):
+
+class TestNestedMapper(unittest.TestCase):
     def test_nested_mapper(self):
         self.assertEqual('pos_x', _nested_mapper("trks.pos.x"))
-
-    def test_to_num(self):
-        self.assertEqual(10, _to_num("10"))
-        self.assertEqual(10.5, _to_num("10.5"))
-        self.assertEqual("test", _to_num("test"))
-        self.assertIsNone(_to_num(None))
-
-
-class TestCachedProperty(unittest.TestCase):
-    def test_cached_properties(self):
-        class Test:
-            @cached_property
-            def prop(self):
-                pass
-
-        self.assertTrue(isinstance(Test.prop, cached_property))

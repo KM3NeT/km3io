@@ -48,8 +48,8 @@ class Branch:
         if subbranchmaps is not None:
             for mapper in subbranchmaps:
                 subbranch = self.__class__(self._tree,
-                                           mapper=mapper,
-                                           index=self._index)
+                                   mapper=mapper,
+                                   index=self._index)
                 self._subbranches.append(subbranch)
         for subbranch in self._subbranches:
             setattr(self, subbranch._mapper.name, subbranch)

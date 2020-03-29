@@ -4,3 +4,4 @@ version = get_distribution(__name__).version
 
 from .offline import OfflineReader
 from .daq import DAQReader
+from .gseagen import GSGReader

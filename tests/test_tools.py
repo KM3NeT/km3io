@@ -3,6 +3,7 @@
 import unittest
 from km3io.tools import _to_num, cached_property
 
+
 class TestToNum(unittest.TestCase):
     def test_to_num(self):
         self.assertEqual(10, _to_num("10"))

@@ -57,8 +57,8 @@ class Branch:
     def _initialise_keys(self):
         """Create the keymap and instance attributes for branch keys"""
         # TODO: this could be a cached property
-        keys = set(k.decode('utf-8') for k in self._branch.keys()) - set(
-            self._mapper.exclude)
+        keys = set(k.decode('utf-8')
+                   for k in self._branch.keys()) - set(self._mapper.exclude)
         self._keymap = {
             **{self._mapper.attrparser(k): k
                for k in keys},

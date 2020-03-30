@@ -7,6 +7,10 @@ from .tools import Branch, BranchMapper, cached_property, _to_num
 MAIN_TREE_NAME = "E"
 EXCLUDE_KEYS = ["AAObject", "t", "fBits", "fUniqueID"]
 
+# 110 MB based on the size of the largest basket found so far in km3net
+BASKET_CACHE_SIZE = 110 * 1024**2
+BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
+
 
 def _nested_mapper(key):
     """Maps a key in the ROOT file to another key (e.g. trks.pos.x -> pos_x)"""

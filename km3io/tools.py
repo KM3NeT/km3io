@@ -36,7 +36,7 @@ def _unfold_indices(obj, indices):
 
 BranchMapper = namedtuple(
     "BranchMapper",
-    ['name', 'key', 'extra', 'exclude', 'update', 'attrparser', 'flat'])
+    ['name', 'key', 'extra', 'exclude', 'update', 'attrparser', 'flat', 'interpretations'])
 
 
 class Branch:
@@ -102,6 +102,7 @@ class Branch:
 
     def __getkey__(self, key):
         out = self._branch[self._keymap[key]].lazyarray(
+            interpretation=self._mapper.interpretations.get(key),
             basketcache=BASKET_CACHE)
         return _unfold_indices(out, self._index_chain)
 

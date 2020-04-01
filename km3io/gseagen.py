@@ -48,5 +48,6 @@ class GSGReader:
                                              exclude={},
                                              update={},
                                              attrparser=lambda x: x,
-                                             flat=True)
+                                             flat=True,
+                                             interpretations={})
         return Branch(self._fobj, gseagen_events_mapper)

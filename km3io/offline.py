@@ -31,7 +31,8 @@ EVENTS_MAP = BranchMapper(name="events",
                               'n_mc_tracks': 'mc_trks'
                           },
                           attrparser=lambda a: a,
-                          flat=True)
+                          flat=True,
+                          interpretations={})
 
 SUBBRANCH_MAPS = [
     BranchMapper(name="tracks",
@@ -41,7 +42,8 @@ SUBBRANCH_MAPS = [
                  ['trks.usr_data', 'trks.usr', 'trks.fUniqueID', 'trks.fBits'],
                  update={},
                  attrparser=_nested_mapper,
-                 flat=False),
+                 flat=False,
+                 interpretations={}),
     BranchMapper(name="mc_tracks",
                  key="mc_trks",
                  extra={},
@@ -51,7 +53,8 @@ SUBBRANCH_MAPS = [
                  ],
                  update={},
                  attrparser=_nested_mapper,
-                 flat=False),
+                 flat=False,
+                 interpretations={}),
     BranchMapper(name="hits",
                  key="hits",
                  extra={},
@@ -61,7 +64,8 @@ SUBBRANCH_MAPS = [
                  ],
                  update={},
                  attrparser=_nested_mapper,
-                 flat=False),
+                 flat=False,
+                 interpretations={}),
     BranchMapper(name="mc_hits",
                  key="mc_hits",
                  extra={},
@@ -72,7 +76,8 @@ SUBBRANCH_MAPS = [
                  ],
                  update={},
                  attrparser=_nested_mapper,
-                 flat=False),
+                 flat=False,
+                 interpretations={}),
 ]
 
 

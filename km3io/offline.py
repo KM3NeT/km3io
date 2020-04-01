@@ -2,7 +2,7 @@ from collections import namedtuple
 import uproot
 import warnings
 from .definitions import mc_header
-from .tools import Branch, BranchMapper, cached_property, _to_num
+from .tools import Branch, BranchMapper, cached_property, _to_num, _unfold_indices
 
 MAIN_TREE_NAME = "E"
 EXCLUDE_KEYS = ["AAObject", "t", "fBits", "fUniqueID"]
@@ -79,15 +79,15 @@ SUBBRANCH_MAPS = [
 class OfflineBranch(Branch):
     @cached_property
     def usr(self):
-        return Usr(self._mapper, self._branch, index=self._index)
+        return Usr(self._mapper, self._branch, index_chain=self._index_chain)
 
 
 class Usr:
     """Helper class to access AAObject `usr` stuff"""
-    def __init__(self, mapper, branch, index=None):
+    def __init__(self, mapper, branch, index_chain=None):
         self._mapper = mapper
         self._name = mapper.name
-        self._index = index
+        self._index_chain = [] if index_chain is None else index_chain
         self._branch = branch
         self._usr_names = []
         self._usr_idx_lookup = {}
@@ -125,8 +125,8 @@ class Usr:
 
         data = self._branch[self._usr_key].lazyarray()
 
-        if self._index is not None:
-            data = data[self._index]
+        if self._index_chain:
+            data = _unfold_indices(data, self._index_chain)
 
         self._usr_data = data
 
@@ -150,8 +150,8 @@ class Usr:
         return self.__getitem_nested__(item)
 
     def __getitem_flat__(self, item):
-        if self._index is not None:
-            return self._usr_data[self._index][:, self._usr_idx_lookup[item]]
+        if self._index_chain:
+            return _unfold_indices(self._usr_data, self._index_chain)[:, self._usr_idx_lookup[item]]
         else:
             return self._usr_data[:, self._usr_idx_lookup[item]]
 
@@ -163,10 +163,7 @@ class Usr:
                 uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
                 self._branch[self._usr_key + '_names']._context, 6),
             basketcache=BASKET_CACHE)
-        if self._index is None:
-            return data
-        else:
-            return data[self._index]
+        return _unfold_indices(data, self._index_chain)
 
     def keys(self):
         return self._usr_names

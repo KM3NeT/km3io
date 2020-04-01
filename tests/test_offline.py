@@ -161,6 +161,16 @@ class TestOfflineEvents(unittest.TestCase):
         assert np.allclose(self.events.hits[3:5][1][4].dom_id,
                            self.events[3:5][1][4].hits.dom_id)
 
+    def test_iteration(self):
+        i = 0
+        for event in self.events:
+            i += 1
+        assert 10 == i
+
+    def test_iteration_2(self):
+        n_hits = [e.n_hits for e in self.events]
+        assert np.allclose(n_hits, self.events.n_hits)
+
     def test_str(self):
         assert str(self.n_events) in str(self.events)
 

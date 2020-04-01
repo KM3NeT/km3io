@@ -29,10 +29,7 @@ EVENTS_MAP = BranchMapper(name="events",
                               'n_mc_hits': 'mc_hits',
                               'n_tracks': 'trks',
                               'n_mc_tracks': 'mc_trks'
-                          },
-                          attrparser=lambda a: a,
-                          flat=True,
-                          interpretations={})
+                          })
 
 SUBBRANCH_MAPS = [
     BranchMapper(name="tracks",
@@ -40,44 +37,33 @@ SUBBRANCH_MAPS = [
                  extra={},
                  exclude=EXCLUDE_KEYS +
                  ['trks.usr_data', 'trks.usr', 'trks.fUniqueID', 'trks.fBits'],
-                 update={},
                  attrparser=_nested_mapper,
-                 flat=False,
-                 interpretations={}),
+                 flat=False),
     BranchMapper(name="mc_tracks",
                  key="mc_trks",
-                 extra={},
                  exclude=EXCLUDE_KEYS + [
                      'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.rec_stages',
                      'mc_trks.fitinf', 'mc_trks.fUniqueID', 'mc_trks.fBits'
                  ],
-                 update={},
                  attrparser=_nested_mapper,
-                 flat=False,
-                 interpretations={}),
+                 flat=False),
     BranchMapper(name="hits",
                  key="hits",
-                 extra={},
                  exclude=EXCLUDE_KEYS + [
                      'hits.usr', 'hits.pmt_id', 'hits.origin', 'hits.a',
                      'hits.pure_a', 'hits.fUniqueID', 'hits.fBits'
                  ],
-                 update={},
                  attrparser=_nested_mapper,
-                 flat=False,
-                 interpretations={}),
+                 flat=False),
     BranchMapper(name="mc_hits",
                  key="mc_hits",
-                 extra={},
                  exclude=EXCLUDE_KEYS + [
                      'mc_hits.usr', 'mc_hits.dom_id', 'mc_hits.channel_id',
                      'mc_hits.tdc', 'mc_hits.tot', 'mc_hits.trig',
                      'mc_hits.fUniqueID', 'mc_hits.fBits'
                  ],
-                 update={},
                  attrparser=_nested_mapper,
-                 flat=False,
-                 interpretations={}),
+                 flat=False),
 ]
 
 

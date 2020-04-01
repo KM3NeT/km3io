@@ -42,12 +42,4 @@ class GSGReader:
 
     @cached_property
     def events(self):
-        gseagen_events_mapper = BranchMapper(name="Events",
-                                             key="Events",
-                                             extra={},
-                                             exclude={},
-                                             update={},
-                                             attrparser=lambda x: x,
-                                             flat=True,
-                                             interpretations={})
-        return Branch(self._fobj, gseagen_events_mapper)
+        return Branch(self._fobj, BranchMapper(name="Events", key="Events"))

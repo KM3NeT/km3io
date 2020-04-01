@@ -26,9 +26,10 @@ def _unfold_indices(obj, indices):
         try:
             obj = obj[idx]
         except IndexError:
-            print("IndexError while accessing an item from '{}' at depth {} ({}) "
-                  "using the index chain {}"
-                  .format(repr(original_obj), depth, idx, indices))
+            print(
+                "IndexError while accessing an item from '{}' at depth {} ({}) "
+                "using the index chain {}".format(repr(original_obj), depth,
+                                                  idx, indices))
             raise
     return obj
 
@@ -62,7 +63,7 @@ class Branch:
         if subbranchmaps is not None:
             for mapper in subbranchmaps:
                 subbranch = self.__class__(self._tree,
-                                   mapper=mapper,
+                                           mapper=mapper,
                                            index_chain=self._index_chain)
                 self._subbranches.append(subbranch)
         for subbranch in self._subbranches:
@@ -129,8 +130,10 @@ class Branch:
         elif isinstance(self._index_chain[-1], int):
             return 1
         else:
-            return len(_unfold_indices(self._branch[self._keymap['id']].lazyarray(
-                basketcache=BASKET_CACHE), self._index_chain))
+            return len(
+                _unfold_indices(
+                    self._branch[self._keymap['id']].lazyarray(
+                        basketcache=BASKET_CACHE), self._index_chain))
 
     def __str__(self):
         return "Number of elements: {}".format(len(self._branch))

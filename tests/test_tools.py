@@ -30,7 +30,8 @@ class TestUnfoldIndices(unittest.TestCase):
         assert data[indices[0]][indices[1]] == _unfold_indices(data, indices)
 
         indices = [slice(1, 9, 2), slice(1, 4), 2]
-        assert data[indices[0]][indices[1]][indices[2]] == _unfold_indices(data, indices)
+        assert data[indices[0]][indices[1]][indices[2]] == _unfold_indices(
+            data, indices)
 
     def test_unfold_indices_raises_index_error(self):
         data = range(10)

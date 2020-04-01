@@ -107,6 +107,7 @@ class Branch:
         """Slicing magic"""
         if isinstance(item, str):
             return self.__getkey__(item)
+
         return self.__class__(self._tree,
                               self._mapper,
                               index_chain=self._index_chain + [item],

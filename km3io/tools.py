@@ -21,12 +21,14 @@ class cached_property:
 
 def _unfold_indices(obj, indices):
     """Unfolds an index chain and returns the corresponding item"""
+    original_obj = obj
     for depth, idx in enumerate(indices):
         try:
             obj = obj[idx]
         except IndexError:
-            print("IndexError while accessing item '{}' at depth {} ({}) of "
-                  "the index chain {}".format(repr(obj), depth, idx, indices))
+            print("IndexError while accessing an item from '{}' at depth {} ({}) "
+                  "using the index chain {}"
+                  .format(repr(original_obj), depth, idx, indices))
             raise
     return obj
 
@@ -41,12 +43,12 @@ class Branch:
     def __init__(self,
                  tree,
                  mapper,
-                 index=None,
+                 index_chain=None,
                  subbranchmaps=None,
                  keymap=None):
         self._tree = tree
         self._mapper = mapper
-        self._index = index
+        self._index_chain = [] if index_chain is None else index_chain
         self._keymap = None
         self._branch = tree[mapper.key]
         self._subbranches = []
@@ -61,7 +63,7 @@ class Branch:
             for mapper in subbranchmaps:
                 subbranch = self.__class__(self._tree,
                                    mapper=mapper,
-                                   index=self._index)
+                                           index_chain=self._index_chain)
                 self._subbranches.append(subbranch)
         for subbranch in self._subbranches:
             setattr(self, subbranch._mapper.name, subbranch)
@@ -98,39 +100,37 @@ class Branch:
     def __getkey__(self, key):
         out = self._branch[self._keymap[key]].lazyarray(
             basketcache=BASKET_CACHE)
-        if self._index is not None:
-            out = out[self._index]
-        return out
+        return _unfold_indices(out, self._index_chain)
 
     def __getitem__(self, item):
         """Slicing magic"""
-        if isinstance(item, (int, slice)):
+        if isinstance(item, (int, slice, tuple)):
             return self.__class__(self._tree,
                                   self._mapper,
-                                  index=item,
+                                  index_chain=self._index_chain + [item],
                                   keymap=self._keymap,
                                   subbranchmaps=self._subbranchmaps)
 
-        if isinstance(item, tuple):
-            return self[item[0]][item[1]]
+        # if isinstance(item, tuple):
+        #     return self[item[0]][item[1]]
 
         if isinstance(item, str):
             return self.__getkey__(item)
 
         return self.__class__(self._tree,
                               self._mapper,
-                              index=np.array(item),
+                              index_chain=self._index_chain + [np.array(item)],
                               keymap=self._keymap,
                               subbranchmaps=self._subbranchmaps)
 
     def __len__(self):
-        if self._index is None:
+        if not self._index_chain:
             return len(self._branch)
-        elif isinstance(self._index, int):
+        elif isinstance(self._index_chain[-1], int):
             return 1
         else:
-            return len(self._branch[self._keymap['id']].lazyarray(
-                basketcache=BASKET_CACHE)[self._index])
+            return len(_unfold_indices(self._branch[self._keymap['id']].lazyarray(
+                basketcache=BASKET_CACHE), self._index_chain))
 
     def __str__(self):
         return "Number of elements: {}".format(len(self._branch))

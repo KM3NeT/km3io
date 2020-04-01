@@ -152,6 +152,10 @@ class TestOfflineEvents(unittest.TestCase):
         for i in [0, 2, 5]:
             assert np.allclose(self.events[i].n_hits, self.events.n_hits[i])
 
+    def test_index_chaining(self):
+        assert np.allclose(self.events[3:5].n_hits, self.events.n_hits[3:5])
+        assert np.allclose(self.events[3:5][0].n_hits, self.events.n_hits[3:5][0])
+
     def test_str(self):
         assert str(self.n_events) in str(self.events)
 
@@ -295,9 +299,9 @@ class TestBranchIndexingMagic(unittest.TestCase):
         assert np.allclose(self.events[3:6].tracks.pos_y[:, 0],
                            self.events.tracks.pos_y[3:6, 0])
 
-        # test slicing with a tuple
-        assert np.allclose(self.events[0].hits[1].dom_id[0:10],
-                           self.events.hits[(0, 1)].dom_id[0:10])
+        # # test slicing with a tuple
+        # assert np.allclose(self.events[0].hits[1].dom_id[0:10],
+        #                    self.events.hits[(0, 1)].dom_id[0:10])
 
         # test selecting with a list
         self.assertEqual(3, len(self.events[[0, 2, 3]]))

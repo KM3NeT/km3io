@@ -126,7 +126,6 @@ class Branch:
         for k in self._mapper.update.values():
             del self._keymap[k]
 
-        print(self._keymap)
         for key in self._keymap.keys():
             setattr(self, key, None)
 

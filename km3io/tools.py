@@ -105,22 +105,11 @@ class Branch:
 
     def __getitem__(self, item):
         """Slicing magic"""
-        if isinstance(item, (int, slice, tuple)):
-            return self.__class__(self._tree,
-                                  self._mapper,
-                                  index_chain=self._index_chain + [item],
-                                  keymap=self._keymap,
-                                  subbranchmaps=self._subbranchmaps)
-
-        # if isinstance(item, tuple):
-        #     return self[item[0]][item[1]]
-
         if isinstance(item, str):
             return self.__getkey__(item)
-
         return self.__class__(self._tree,
                               self._mapper,
-                              index_chain=self._index_chain + [np.array(item)],
+                              index_chain=self._index_chain + [item],
                               keymap=self._keymap,
                               subbranchmaps=self._subbranchmaps)
 

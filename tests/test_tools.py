@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from km3io.tools import _to_num, cached_property
+from km3io.tools import _to_num, cached_property, _unfold_indices
 
 
 class TestToNum(unittest.TestCase):
@@ -20,3 +20,20 @@ class TestCachedProperty(unittest.TestCase):
                 pass
 
         self.assertTrue(isinstance(Test.prop, cached_property))
+
+
+class TestUnfoldIndices(unittest.TestCase):
+    def test_unfold_indices(self):
+        data = range(10)
+
+        indices = [slice(2, 5), 0]
+        assert data[indices[0]][indices[1]] == _unfold_indices(data, indices)
+
+        indices = [slice(1, 9, 2), slice(1, 4), 2]
+        assert data[indices[0]][indices[1]][indices[2]] == _unfold_indices(data, indices)
+
+    def test_unfold_indices_raises_index_error(self):
+        data = range(10)
+        indices = [slice(2, 5), 99]
+        with self.assertRaises(IndexError):
+            _unfold_indices(data, indices)

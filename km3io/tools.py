@@ -19,6 +19,18 @@ class cached_property:
         return prop
 
 
+def _unfold_indices(obj, indices):
+    """Unfolds an index chain and returns the corresponding item"""
+    for depth, idx in enumerate(indices):
+        try:
+            obj = obj[idx]
+        except IndexError:
+            print("IndexError while accessing item '{}' at depth {} ({}) of "
+                  "the index chain {}".format(repr(obj), depth, idx, indices))
+            raise
+    return obj
+
+
 BranchMapper = namedtuple(
     "BranchMapper",
     ['name', 'key', 'extra', 'exclude', 'update', 'attrparser', 'flat'])

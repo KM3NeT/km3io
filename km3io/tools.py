@@ -34,9 +34,50 @@ def _unfold_indices(obj, indices):
     return obj
 
 
-BranchMapper = namedtuple(
-    "BranchMapper",
-    ['name', 'key', 'extra', 'exclude', 'update', 'attrparser', 'flat', 'interpretations'])
+class BranchMapper:
+    def __init__(
+            self,
+            name,
+            key,
+            extra=None,
+            exclude=None,
+            update=None,
+            attrparser=None,
+            flat=True,
+            interpretations=None):
+        """
+        Mapper helper for keys in a ROOT branch.
+
+        Parameters
+        ----------
+        name: str
+            The name of the mapper helper which is displayed to the user
+        key: str
+            The key of the branch in the ROOT tree.
+        exclude: ``None``, ``list(str)``
+            Keys to exclude from parsing.
+        update: ``None``, ``dict(str: str)``
+            An update map for keys which are to be presented with a different
+            key to the user e.g. ``{"n_hits": "hits"}`` will rename the ``hits``
+            key to ``n_hits``.
+        extra: ``None``, ``dict(str: str)``
+            An extra mapper for hidden object, primarily nested ones like
+            ``t.fSec``, which can be revealed and mapped to e.g. ``t_sec``
+            via ``{"t_sec", "t.fSec"}``.
+        attrparser: ``None``, ``function(str) -> str``
+            The function to be used to create attribute names. This is only
+            needed if unsupported characters are present, like ``.``, which
+            would prevent setting valid Python attribute names.
+        """
+        self.name = name
+        self.key = key
+
+        self.extra = {} if extra is None else extra
+        self.exclude = [] if exclude is None else exclude
+        self.update = {} if update is None else update
+        self.attrparser = (lambda x: x) if attrparser is None else attrparser
+        self.flat = flat
+        self.interpretations = {} if interpretations is None else interpretations
 
 
 class Branch:
@@ -85,6 +126,7 @@ class Branch:
         for k in self._mapper.update.values():
             del self._keymap[k]
 
+        print(self._keymap)
         for key in self._keymap.keys():
             setattr(self, key, None)
 

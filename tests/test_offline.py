@@ -156,6 +156,10 @@ class TestOfflineEvents(unittest.TestCase):
         assert np.allclose(self.events[3:5].n_hits, self.events.n_hits[3:5])
         assert np.allclose(self.events[3:5][0].n_hits,
                            self.events.n_hits[3:5][0])
+        assert np.allclose(self.events[3:5].hits[1].dom_id[4],
+                           self.events.hits[3:5][1][4].dom_id)
+        assert np.allclose(self.events.hits[3:5][1][4].dom_id,
+                           self.events[3:5][1][4].hits.dom_id)
 
     def test_str(self):
         assert str(self.n_events) in str(self.events)
@@ -273,20 +277,20 @@ class TestOfflineTracks(unittest.TestCase):
         tracks = self.tracks
         self.assertEqual(10, len(tracks))
         self.assertEqual(1, len(tracks[0]))
-        # track_selection = tracks[2:7]
-        # assert 5 == len(track_selection)
-        # track_selection_2 = tracks[1:3]
-        # assert 2 == len(track_selection_2)
-        # for _slice in [
-        #         slice(0, 0),
-        #         slice(0, 1),
-        #         slice(0, 2),
-        #         slice(1, 5),
-        #         slice(3, -2)
-        # ]:
-        #     self.assertListEqual(list(tracks.E[:, 0][_slice]),
-        #                          list(tracks[_slice].E[:, 0]))
-        #
+        track_selection = tracks[2:7]
+        assert 5 == len(track_selection)
+        track_selection_2 = tracks[1:3]
+        assert 2 == len(track_selection_2)
+        for _slice in [
+                slice(0, 0),
+                slice(0, 1),
+                slice(0, 2),
+                slice(1, 5),
+                slice(3, -2)
+        ]:
+            self.assertListEqual(list(tracks.E[:, 0][_slice]),
+                                 list(tracks[_slice].E[:, 0]))
+
 
 
 class TestBranchIndexingMagic(unittest.TestCase):
@@ -299,10 +303,6 @@ class TestBranchIndexingMagic(unittest.TestCase):
                            self.events.tracks.dir_z[3, 10])
         assert np.allclose(self.events[3:6].tracks.pos_y[:, 0],
                            self.events.tracks.pos_y[3:6, 0])
-
-        # # test slicing with a tuple
-        # assert np.allclose(self.events[0].hits[1].dom_id[0:10],
-        #                    self.events.hits[(0, 1)].dom_id[0:10])
 
         # test selecting with a list
         self.assertEqual(3, len(self.events[[0, 2, 3]]))

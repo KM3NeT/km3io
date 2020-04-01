@@ -154,7 +154,8 @@ class TestOfflineEvents(unittest.TestCase):
 
     def test_index_chaining(self):
         assert np.allclose(self.events[3:5].n_hits, self.events.n_hits[3:5])
-        assert np.allclose(self.events[3:5][0].n_hits, self.events.n_hits[3:5][0])
+        assert np.allclose(self.events[3:5][0].n_hits,
+                           self.events.n_hits[3:5][0])
 
     def test_str(self):
         assert str(self.n_events) in str(self.events)
@@ -342,7 +343,6 @@ class TestUsr(unittest.TestCase):
         assert np.allclose(
             [37.51967774166617, -10.280346193553832, 13.67595659707355],
             self.f.events.usr.DeltaPosZ)
-
 
 
 class TestNestedMapper(unittest.TestCase):

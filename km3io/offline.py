@@ -151,7 +151,9 @@ class Usr:
 
     def __getitem_flat__(self, item):
         if self._index_chain:
-            return _unfold_indices(self._usr_data, self._index_chain)[:, self._usr_idx_lookup[item]]
+            return _unfold_indices(
+                self._usr_data, self._index_chain)[:,
+                                                   self._usr_idx_lookup[item]]
         else:
             return self._usr_data[:, self._usr_idx_lookup[item]]
 
@@ -197,8 +199,8 @@ class OfflineReader:
     def events(self):
         """The `E` branch, containing all offline events."""
         return OfflineBranch(self._tree,
-                      mapper=EVENTS_MAP,
-                      subbranchmaps=SUBBRANCH_MAPS)
+                             mapper=EVENTS_MAP,
+                             subbranchmaps=SUBBRANCH_MAPS)
 
     @cached_property
     def header(self):

@@ -250,6 +250,7 @@ class TestOfflineHits(unittest.TestCase):
 
 class TestOfflineTracks(unittest.TestCase):
     def setUp(self):
+        self.f = OFFLINE_FILE
         self.tracks = OFFLINE_FILE.events.tracks
         self.tracks_numucc = OFFLINE_NUMUCC
         self.n_events = 10
@@ -290,6 +291,20 @@ class TestOfflineTracks(unittest.TestCase):
         ]:
             self.assertListEqual(list(tracks.E[:, 0][_slice]),
                                  list(tracks[_slice].E[:, 0]))
+
+    def test_nested_indexing(self):
+        self.assertAlmostEqual(
+            self.f.events.tracks.fitinf[3:5][1][9][2],
+            self.f.events[3:5].tracks[1].fitinf[9][2])
+        self.assertAlmostEqual(
+            self.f.events.tracks.fitinf[3:5][1][9][2],
+            self.f.events[3:5][1][9][2].tracks.fitinf)
+        self.assertAlmostEqual(
+            self.f.events.tracks.fitinf[3:5][1][9][2],
+            self.f.events[3:5][1].tracks[9][2].fitinf)
+        self.assertAlmostEqual(
+            self.f.events.tracks.fitinf[3:5][1][9][2],
+            self.f.events[3:5][1].tracks[9].fitinf[2])
 
 
 

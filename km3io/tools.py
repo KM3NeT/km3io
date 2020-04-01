@@ -55,6 +55,8 @@ class Branch:
         self._subbranches = []
         self._subbranchmaps = subbranchmaps
 
+        self._iterator_index = 0
+
         if keymap is None:
             self._initialise_keys()  #
         else:
@@ -125,8 +127,22 @@ class Branch:
                     self._branch[self._keymap['id']].lazyarray(
                         basketcache=BASKET_CACHE), self._index_chain))
 
+    def __iter__(self):
+        self._iterator_index = 0
+        return self
+
+    def __next__(self):
+        idx = self._iterator_index
+        self._iterator_index += 1
+        if idx >= len(self):
+            raise StopIteration
+        return self[idx]
+
     def __str__(self):
-        return "Number of elements: {}".format(len(self._branch))
+        length = len(self)
+        return "{} ({}) with {} element{}".format(self.__class__.__name__,
+                                               self._mapper.name, length,
+                                               's' if length > 1 else '')
 
     def __repr__(self):
         length = len(self)

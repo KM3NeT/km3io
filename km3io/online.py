@@ -107,8 +107,8 @@ def has_udp_trailer(value):
     return np.any(np.bitwise_and(value, np.left_shift(1, 31)))
 
 
-class DAQReader:
-    """Reader for DAQ ROOT files"""
+class OnlineReader:
+    """Reader for online ROOT files"""
     def __init__(self, filename):
         self._fobj = uproot.open(filename)
         self._events = None
@@ -135,13 +135,13 @@ class DAQReader:
                                     (" cnt", "u4"), (" vers", "u2"),
                                     ("trigger_mask", ">u8")])),
                                 skipbytes=10))
-            self._events = DAQEvents(headers, snapshot_hits, triggered_hits)
+            self._events = OnlineEvents(headers, snapshot_hits, triggered_hits)
         return self._events
 
     @property
     def timeslices(self):
         if self._timeslices is None:
-            self._timeslices = DAQTimeslices(self._fobj)
+            self._timeslices = Timeslices(self._fobj)
         return self._timeslices
 
     @property
@@ -202,8 +202,8 @@ class SummarySlices:
         return "Number of summaryslices: {}".format(len(self.headers))
 
 
-class DAQTimeslices:
-    """A simple wrapper for DAQ timeslices"""
+class Timeslices:
+    """A simple wrapper for timeslices"""
     def __init__(self, fobj):
         self._fobj = fobj
         self._timeslices = {}
@@ -233,11 +233,11 @@ class DAQTimeslices:
             self._timeslices[stream.decode("ascii")] = (headers, superframes,
                                                         hits_buffer)
             setattr(self, stream.decode("ascii"),
-                    DAQTimesliceStream(headers, superframes, hits_buffer))
+                    TimesliceStream(headers, superframes, hits_buffer))
 
     def stream(self, stream, idx):
         ts = self._timeslices[stream]
-        return DAQTimeslice(*ts, idx, stream)
+        return Timeslice(*ts, idx, stream)
 
     def __str__(self):
         return "Available timeslice streams: {}".format(', '.join(
@@ -247,7 +247,7 @@ class DAQTimeslices:
         return str(self)
 
 
-class DAQTimesliceStream:
+class TimesliceStream:
     def __init__(self, headers, superframes, hits_buffer):
         # self.headers = headers.lazyarray(
         #     uproot.asjagged(uproot.astable(
@@ -273,8 +273,8 @@ class DAQTimesliceStream:
     #         idx += n_hits
 
 
-class DAQTimeslice:
-    """A wrapper for a DAQ timeslice"""
+class Timeslice:
+    """A wrapper for a timeslice"""
     def __init__(self, header, superframe, hits_buffer, idx, stream):
         self.header = header
         self._frames = {}
@@ -327,15 +327,15 @@ class DAQTimeslice:
                                          len(self.header))
 
 
-class DAQEvents:
-    """A simple wrapper for DAQ events"""
+class OnlineEvents:
+    """A simple wrapper for online events"""
     def __init__(self, headers, snapshot_hits, triggered_hits):
         self.headers = headers
         self.snapshot_hits = snapshot_hits
         self.triggered_hits = triggered_hits
 
     def __getitem__(self, item):
-        return DAQEvent(self.headers[item], self.snapshot_hits[item],
+        return OnlineEvent(self.headers[item], self.snapshot_hits[item],
                         self.triggered_hits[item])
 
     def __len__(self):
@@ -348,15 +348,15 @@ class DAQEvents:
         return str(self)
 
 
-class DAQEvent:
-    """A wrapper for a DAQ event"""
+class OnlineEvent:
+    """A wrapper for a online event"""
     def __init__(self, header, snapshot_hits, triggered_hits):
         self.header = header
         self.snapshot_hits = snapshot_hits
         self.triggered_hits = triggered_hits
 
     def __str__(self):
-        return "DAQ event with {} snapshot hits and {} triggered hits".format(
+        return "Online event with {} snapshot hits and {} triggered hits".format(
             len(self.snapshot_hits), len(self.triggered_hits))
 
     def __repr__(self):

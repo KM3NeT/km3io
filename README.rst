@@ -50,11 +50,11 @@ Tutorial
 
 * `Introduction <#introduction>`__
 
-  * `Overview of daq files <#overview-of-daq-files>`__
+  * `Overview of online files <#overview-of-online-files>`__
 
   * `Overview of offline files <#overview-of-offline-files>`__
 
-* `DAQ files reader <#daq-files-reader>`__
+* `Online files reader <#online-files-reader>`__
 
   * `Reading Events <#reading-events>`__
 
@@ -82,9 +82,9 @@ Introduction
 ------------
 
 Most of km3net data is stored in root files. These root files are either created with `Jpp <https://git.km3net.de/common/jpp>`__ or `aanet <https://git.km3net.de/common/aanet>`__ software. A root file created with 
-`Jpp <https://git.km3net.de/common/jpp>`__ is often referred to as "a Jpp root file". Similarly, a root file created with `aanet <https://git.km3net.de/common/aanet>`__ is often referred to as "an aanet file". In km3io, an aanet root file will always be reffered to as an ``offline file``, while a Jpp root file will always be referred to as a ``daq file``.
+`Jpp <https://git.km3net.de/common/jpp>`__ is often referred to as "a Jpp root file". Similarly, a root file created with `aanet <https://git.km3net.de/common/aanet>`__ is often referred to as "an aanet file". In km3io, an aanet root file will always be reffered to as an ``offline file``, while a Jpp ROOT file will always be referred to as a ``online file``.
 
-km3io is a Python package that provides a set of classes (``DAQReader`` and ``OfflineReader``) to read both daq root files and offline root files without any dependency to aanet, Jpp or ROOT. 
+km3io is a Python package that provides a set of classes (``OnlineReader`` and ``OfflineReader``) to read both online ROOT files and offline ROOT files without any dependency to aanet, Jpp or ROOT.
 
 Data in km3io is often returned as a "lazyarray", a "jagged lazyarray" or a `Numpy <https://docs.scipy.org/doc/numpy>`__ array. A lazyarray is an array-like object that reads data on demand! In a lazyarray, only the first and the last chunks of data are read in memory. A lazyarray can be used with all Numpy's universal `functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`__. Here is how a lazyarray looks like:
 
@@ -101,10 +101,9 @@ A jagged array, is a 2+ dimentional array with different arrays lengths. In othe
     # <JaggedArray [[102 102 102 ... 11517 11518 11518] [] [101 101 102 ... 11518 11518 11518] ... [101 101 102 ... 11516 11516 11517] [] [101 101 101 ... 11517 11517 11518]] at 0x7f74b0ef8810>
 
 
-Overview of DAQ files
+Overview of Online files
 """""""""""""""""""""
-DAQ files, or also called online files, are written by the DataWriter and
-contain events, timeslics and summary slices.
+Online files are written by the DataWriter (part of Jpp) and contain events, timeslices and summary slices.
 
 
 Overview of offline files
@@ -208,11 +207,12 @@ Offline files contain data about events, hits and tracks. Based on aanet version
     "start_run", "run_id"
 
 
-DAQ files reader
+Online files reader
 ----------------
 
-``km3io`` is able to read events, summary slices and timeslices (except the L0
-slices, which is work in progress).
+``km3io`` is able to read events, summary slices and timeslices. Timeslices are
+currently only supported with split level of 2 or more, which means that reading
+L0 timeslices is currently not working (but in progress).
 
 Let's have a look at some ORCA data (``KM3NeT_00000044_00005404.root``)
 
@@ -224,7 +224,7 @@ To get a lazy ragged array of the events:
 .. code-block:: python3
 
   import km3io
-  f = km3io.DAQReader("KM3NeT_00000044_00005404.root")
+  f = km3io.OnlineReader("KM3NeT_00000044_00005404.root")
 
 
 That's it, we created an object which gives access to all the events, but the
@@ -249,7 +249,7 @@ IDs of the slice with the index ``23``:
 .. code-block:: python3
 
   >>> f.summaryslices
-  <km3io.daq.SummarySlices at 0x7effcc0e52b0>
+  <km3io.online.SummarySlices at 0x7effcc0e52b0>
   >>> f.summaryslices.slices[23].dom_id
   array([806451572, 806455814, 806465101, 806483369, 806487219, 806487226,
        806487231, 808432835, 808435278, 808447180, 808447186, 808451904,

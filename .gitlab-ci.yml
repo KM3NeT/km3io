@@ -84,6 +84,15 @@ coverage:
         paths:
             - reports/coverage
 
+
+build-docs:
+    image: docker.km3net.de/base/python:3.6
+    stage: doc
+    script:
+        - *virtualenv_definition
+        - cd doc && make clean && make html
+    cache: {}
+
 pages:
     image: docker.km3net.de/base/python:3.6
     stage: doc

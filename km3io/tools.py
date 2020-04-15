@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from collections import namedtuple
 import numpy as np
+import awkward1 as ak
 import uproot
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
@@ -44,7 +45,8 @@ class BranchMapper:
             update=None,
             attrparser=None,
             flat=True,
-            interpretations=None):
+            interpretations=None,
+            toawkward=None):
         """
         Mapper helper for keys in a ROOT branch.
 
@@ -68,6 +70,9 @@ class BranchMapper:
             The function to be used to create attribute names. This is only
             needed if unsupported characters are present, like ``.``, which
             would prevent setting valid Python attribute names.
+        toawkward: ``None``, ``list(str)``
+            List of keys to convert to awkward arrays (recommended for
+            doubly ragged arrays)
         """
         self.name = name
         self.key = key
@@ -78,6 +83,7 @@ class BranchMapper:
         self.attrparser = (lambda x: x) if attrparser is None else attrparser
         self.flat = flat
         self.interpretations = {} if interpretations is None else interpretations
+        self.toawkward = [] if toawkward is None else toawkward
 
 
 class Branch:
@@ -145,6 +151,8 @@ class Branch:
         out = self._branch[self._keymap[key]].lazyarray(
             interpretation=self._mapper.interpretations.get(key),
             basketcache=BASKET_CACHE)
+        if self._index_chain is not None and key in self._mapper.toawkward:
+            out = ak.from_iter(out)
         return _unfold_indices(out, self._index_chain)
 
     def __getitem__(self, item):

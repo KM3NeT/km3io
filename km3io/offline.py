@@ -38,7 +38,8 @@ SUBBRANCH_MAPS = [
                  exclude=EXCLUDE_KEYS +
                  ['trks.usr_data', 'trks.usr', 'trks.fUniqueID', 'trks.fBits'],
                  attrparser=_nested_mapper,
-                 flat=False),
+                 flat=False,
+                 toawkward=['fitinf', 'rec_stages']),
     BranchMapper(name="mc_tracks",
                  key="mc_trks",
                  exclude=EXCLUDE_KEYS + [

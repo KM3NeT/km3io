@@ -10,7 +10,7 @@ SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 class TestOnlineEvents(unittest.TestCase):
     def setUp(self):
         self.events = OnlineReader(os.path.join(SAMPLES_DIR,
-                                             "daq_v1.0.0.root")).events
+                                                "daq_v1.0.0.root")).events
 
     def test_index_lookup(self):
         assert 3 == len(self.events)
@@ -25,7 +25,7 @@ class TestOnlineEvents(unittest.TestCase):
 class TestOnlineEvent(unittest.TestCase):
     def setUp(self):
         self.event = OnlineReader(os.path.join(SAMPLES_DIR,
-                                            "daq_v1.0.0.root")).events[0]
+                                               "daq_v1.0.0.root")).events[0]
 
     def test_str(self):
         assert re.match(".*event.*96.*snapshot.*18.*triggered",
@@ -39,7 +39,7 @@ class TestOnlineEvent(unittest.TestCase):
 class TestOnlineEventsSnapshotHits(unittest.TestCase):
     def setUp(self):
         self.events = OnlineReader(os.path.join(SAMPLES_DIR,
-                                             "daq_v1.0.0.root")).events
+                                                "daq_v1.0.0.root")).events
         self.lengths = {0: 96, 1: 124, -1: 78}
         self.total_item_count = 298
 
@@ -78,7 +78,7 @@ class TestOnlineEventsSnapshotHits(unittest.TestCase):
 class TestOnlineEventsTriggeredHits(unittest.TestCase):
     def setUp(self):
         self.events = OnlineReader(os.path.join(SAMPLES_DIR,
-                                             "daq_v1.0.0.root")).events
+                                                "daq_v1.0.0.root")).events
         self.lengths = {0: 18, 1: 53, -1: 9}
         self.total_item_count = 80
 
@@ -119,7 +119,7 @@ class TestOnlineEventsTriggeredHits(unittest.TestCase):
 class TestTimeslices(unittest.TestCase):
     def setUp(self):
         self.ts = OnlineReader(os.path.join(SAMPLES_DIR,
-                                         "daq_v1.0.0.root")).timeslices
+                                            "daq_v1.0.0.root")).timeslices
 
     def test_data_lengths(self):
         assert 3 == len(self.ts._timeslices["L1"][0])
@@ -145,7 +145,7 @@ class TestTimeslices(unittest.TestCase):
 class TestTimeslice(unittest.TestCase):
     def setUp(self):
         self.ts = OnlineReader(os.path.join(SAMPLES_DIR,
-                                         "daq_v1.0.0.root")).timeslices
+                                            "daq_v1.0.0.root")).timeslices
         self.n_frames = {"L1": [69, 69, 69], "SN": [64, 66, 68]}
 
     def test_str(self):
@@ -159,7 +159,7 @@ class TestTimeslice(unittest.TestCase):
 class TestSummaryslices(unittest.TestCase):
     def setUp(self):
         self.ss = OnlineReader(os.path.join(SAMPLES_DIR,
-                                         "daq_v1.0.0.root")).summaryslices
+                                            "daq_v1.0.0.root")).summaryslices
 
     def test_headers(self):
         assert 3 == len(self.ss.headers)

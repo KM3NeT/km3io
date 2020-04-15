@@ -336,7 +336,7 @@ class OnlineEvents:
 
     def __getitem__(self, item):
         return OnlineEvent(self.headers[item], self.snapshot_hits[item],
-                        self.triggered_hits[item])
+                           self.triggered_hits[item])
 
     def __len__(self):
         return len(self.headers)

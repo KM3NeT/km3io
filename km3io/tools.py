@@ -35,16 +35,15 @@ def _unfold_indices(obj, indices):
 
 
 class BranchMapper:
-    def __init__(
-            self,
-            name,
-            key,
-            extra=None,
-            exclude=None,
-            update=None,
-            attrparser=None,
-            flat=True,
-            interpretations=None):
+    def __init__(self,
+                 name,
+                 key,
+                 extra=None,
+                 exclude=None,
+                 update=None,
+                 attrparser=None,
+                 flat=True,
+                 interpretations=None):
         """
         Mapper helper for keys in a ROOT branch.
 
@@ -183,8 +182,8 @@ class Branch:
     def __str__(self):
         length = len(self)
         return "{} ({}) with {} element{}".format(self.__class__.__name__,
-                                               self._mapper.name, length,
-                                               's' if length > 1 else '')
+                                                  self._mapper.name, length,
+                                                  's' if length > 1 else '')
 
     def __repr__(self):
         length = len(self)

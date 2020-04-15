@@ -1,7 +1,9 @@
-from collections import namedtuple
 import uproot
+import awkward
 import warnings
-from .definitions import mc_header
+
+from collections import namedtuple
+from .definitions import mc_header, fitparameters
 from .tools import Branch, BranchMapper, cached_property, _to_num, _unfold_indices
 
 MAIN_TREE_NAME = "E"
@@ -16,6 +18,14 @@ def _nested_mapper(key):
     """Maps a key in the ROOT file to another key (e.g. trks.pos.x -> pos_x)"""
     return '_'.join(key.split('.')[1:])
 
+def _convert_to_awkward(nested_array):
+    """Convert nested arrays like fitinf and rec_stages into awkward arrays"""
+    return awkward.fromiter([i for i in nested_array])
+
+def fitinf(fitparam, tracks):
+    fit = _convert_to_awkward(tracks.fitinf)
+    index = fitparameters.data[fitparam]
+    return awkward.fromiter([i[i.counts>index, index] for i in fit])
 
 EVENTS_MAP = BranchMapper(name="events",
                           key="Evt",

@@ -1,14 +1,34 @@
 import unittest
+import awkward
 import numpy as np
 from pathlib import Path
 
 from km3io import OfflineReader
-from km3io.offline import _nested_mapper, Header
+from km3io.offline import _nested_mapper, Header, _convert_to_awkward, fitinf
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
 OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'aanet_v2.0.0.root')
 OFFLINE_USR = OfflineReader(SAMPLES_DIR / 'usr-sample.root')
 OFFLINE_NUMUCC = OfflineReader(SAMPLES_DIR / "numucc.root")  # with mc data
+
+
+class TestFitinf(unittest.TestCase):
+    def setUp(self):
+        self.tracks = OFFLINE_FILE.events.tracks
+        self.fit = OFFLINE_FILE.events.tracks.fitinf
+
+    def test_conversion_to_awkward(self):
+        converted_fit = _convert_to_awkward(self.fit)
+
+        assert isinstance(converted_fit, awkward.array.jagged.JaggedArray)
+        assert self.fit[0][0][0] == converted_fit[0][0][0]
+
+    def test_fitinf(self):
+        beta = fitinf('JGANDALF_BETA0_RAD', self.tracks)
+
+        assert beta[0][0] == self.fit[0][0][0]
+        assert beta[0][1] == self.fit[0][1][0]
+        assert beta[0][2] == self.fit[0][2][0]
 
 
 class TestOfflineReader(unittest.TestCase):
@@ -303,19 +323,14 @@ class TestOfflineTracks(unittest.TestCase):
                                  list(tracks[_slice].E[:, 0]))
 
     def test_nested_indexing(self):
-        self.assertAlmostEqual(
-            self.f.events.tracks.fitinf[3:5][1][9][2],
-            self.f.events[3:5].tracks[1].fitinf[9][2])
-        self.assertAlmostEqual(
-            self.f.events.tracks.fitinf[3:5][1][9][2],
-            self.f.events[3:5][1][9][2].tracks.fitinf)
-        self.assertAlmostEqual(
-            self.f.events.tracks.fitinf[3:5][1][9][2],
-            self.f.events[3:5][1].tracks[9][2].fitinf)
-        self.assertAlmostEqual(
-            self.f.events.tracks.fitinf[3:5][1][9][2],
-            self.f.events[3:5][1].tracks[9].fitinf[2])
-
+        self.assertAlmostEqual(self.f.events.tracks.fitinf[3:5][1][9][2],
+                               self.f.events[3:5].tracks[1].fitinf[9][2])
+        self.assertAlmostEqual(self.f.events.tracks.fitinf[3:5][1][9][2],
+                               self.f.events[3:5][1][9][2].tracks.fitinf)
+        self.assertAlmostEqual(self.f.events.tracks.fitinf[3:5][1][9][2],
+                               self.f.events[3:5][1].tracks[9][2].fitinf)
+        self.assertAlmostEqual(self.f.events.tracks.fitinf[3:5][1][9][2],
+                               self.f.events[3:5][1].tracks[9].fitinf[2])
 
 
 class TestBranchIndexingMagic(unittest.TestCase):

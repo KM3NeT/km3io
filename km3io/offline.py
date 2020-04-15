@@ -18,14 +18,32 @@ def _nested_mapper(key):
     """Maps a key in the ROOT file to another key (e.g. trks.pos.x -> pos_x)"""
     return '_'.join(key.split('.')[1:])
 
+
 def _convert_to_awkward(nested_array):
     """Convert nested arrays like fitinf and rec_stages into awkward arrays"""
     return awkward.fromiter([i for i in nested_array])
 
+
 def fitinf(fitparam, tracks):
+    """Access fit parameters in tracks.fitinf.
+
+    Parameters
+    ----------
+    fitparam : str
+        the fit parameter name according to fitparameters defined in
+        km3net-dataformat.
+    tracks : class km3io.offline.OfflineBranch
+        the tracks class .
+
+    Returns
+    -------
+    awkward array
+        awkward array of the fit parameters.
+    """
     fit = _convert_to_awkward(tracks.fitinf)
-    index = fitparameters.data[fitparam]
-    return awkward.fromiter([i[i.counts>index, index] for i in fit])
+    index = fitparameters[fitparam]
+    return awkward.fromiter([i[i.counts > index, index] for i in fit])
+
 
 EVENTS_MAP = BranchMapper(name="events",
                           key="Evt",

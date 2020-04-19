@@ -1,4 +1,5 @@
 docopt
+llvmlite==0.31
 numba
 awkward1>=0.2.13
 uproot>=3.11.1

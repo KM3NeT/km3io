@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 0
 ---------
+0.11.0 / 2020-04-19
+~~~~~~~~~~~~~~~~~~~
+* DAQ was renamed to online
+* Several improviements, bugfixes etc.
+
 0.10.0 / 2020-04-01
 ~~~~~~~~~~~~~~~~~~~
 * The offline I/O has been refactored and now supports slicing à la numpy

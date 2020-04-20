@@ -5,9 +5,12 @@ The km3io setup script.
 
 """
 from setuptools import setup
+import sys
 
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
+    if sys.version_info[:2] == (3, 5):
+        requirements.append("llvmlite==0.31.0")
 
 try:
     with open("README.rst") as fh:

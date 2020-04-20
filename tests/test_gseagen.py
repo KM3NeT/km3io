@@ -47,7 +47,7 @@ class TestGSGHeader(unittest.TestCase):
         self.assertAlmostEqual(self.header["SiteLatitude"], 0.747)
         self.assertAlmostEqual(self.header["SiteLongitude"], 0.10763)
         self.assertAlmostEqual(self.header["SeaBottomRadius"], 6368000.)
-        assert round(self.header["GlobalGenWeight"]-6.26910765e+08, 0) == 0
+        assert round(self.header["GlobalGenWeight"] - 6.26910765e+08, 0) == 0
         self.assertAlmostEqual(self.header["RhoSW"], 1.03975)
         self.assertAlmostEqual(self.header["RhoSR"], 2.65)
         self.assertAlmostEqual(self.header["TGen"], 31556926.)

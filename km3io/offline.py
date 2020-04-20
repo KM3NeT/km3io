@@ -1,7 +1,8 @@
 from collections import namedtuple
 import uproot
 import warnings
-from .definitions import mc_header
+import awkward1 as ak1
+from .definitions import mc_header, fitparameters
 from .tools import Branch, BranchMapper, cached_property, _to_num, _unfold_indices
 
 MAIN_TREE_NAME = "E"
@@ -15,6 +16,33 @@ BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 def _nested_mapper(key):
     """Maps a key in the ROOT file to another key (e.g. trks.pos.x -> pos_x)"""
     return '_'.join(key.split('.')[1:])
+
+
+def fitinf(fitparam, tracks):
+    """Access fit parameters in tracks.fitinf.
+
+    Parameters
+    ----------
+    fitparam : str
+        the fit parameter name according to fitparameters defined in
+        km3net-dataformat.
+    tracks : class km3io.offline.OfflineBranch
+        the tracks class .
+
+    Returns
+    -------
+    awkward array
+        awkward array of the fit parameters.
+    """
+    fit = tracks.fitinf
+    counts = ak1.Array([ak1.num(i, axis=1) for i in fit])
+    index = fitparameters[fitparam]
+    params = fit[counts > index]
+    return ak1.Array([i[:, index] for i in params])
+
+
+def fitparams():
+    return fitparameters.keys()
 
 
 EVENTS_MAP = BranchMapper(name="events",

@@ -25,24 +25,76 @@ def fitinf(fitparam, tracks):
     ----------
     fitparam : str
         the fit parameter name according to fitparameters defined in
-        km3net-dataformat.
+        KM3NeT-Dataformat.
     tracks : class km3io.offline.OfflineBranch
-        the tracks class .
+        the tracks class. both full tracks branch or a slice of the
+        tracks branch (example tracks[:, 0]) work.
 
     Returns
     -------
     awkward array
-        awkward array of the fit parameters.
+        awkward array of the values of the fit parameter requested.
     """
     fit = tracks.fitinf
-    counts = ak1.Array([ak1.num(i, axis=1) for i in fit])
     index = fitparameters[fitparam]
-    params = fit[counts > index]
-    return ak1.Array([i[:, index] for i in params])
-
+    try:
+        params = fit[count_nested(fit, axis=2) > index]
+        return ak1.Array([i[:, index] for i in params])
+    except ValueError:
+        # This is the case for tracks[:, 0] or any other selection.
+        params = fit[count_nested(fit, axis=1) > index]
+        return params[:, index]
 
 def fitparams():
+    """name of the fit parameters as defined in the official
+    KM3NeT-Dataformat.
+
+    Returns
+    -------
+    dict_keys
+        fit parameters keys.
+    """
     return fitparameters.keys()
+
+def count_nested(Array, axis=0):
+    """count elements in a nested awkward Array.
+
+    Parameters
+    ----------
+    Array : Awkward1 Array
+        Array of data. Example tracks.fitinf or tracks.rec_stages.
+    axis : int, optional
+        axis = 0: to count elements in the outmost level of nesting.
+        axis = 1: to count elements in the first level of nesting.
+        axis = 2: to count elements in the second level of nesting.
+
+    Returns
+    -------
+    awkward1 Array or int
+        counts of elements found in a nested awkward1 Array.
+    """
+    if axis == 0:
+        return ak1.num(Array, axis=0)
+    if axis == 1:
+        return ak1.num(Array, axis=1)
+    if axis == 2:
+        return ak1.count(Array, axis=2)
+
+def best_track(tracks, strategy="first", rec_stages=None):
+    """best track selection based on different strategies
+
+    Parameters
+    ----------
+    tracks : class km3io.offline.OfflineBranch
+        the tracks branch.
+    strategy : str
+        the trategy desired to select the best tracks.
+    """
+    if strategy == "first":
+        return tracks[:, 0]
+    # if strategy == "rec_stages" and rec_stages is not None:
+    #     mask = tracks.rec_stages[]
+
 
 
 EVENTS_MAP = BranchMapper(name="events",

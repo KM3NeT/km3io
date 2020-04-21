@@ -87,6 +87,19 @@ def count_nested(Array, axis=0):
 
 @nb.jit(nopython=True)
 def _find(rec_stages, stages, builder):
+    """construct an awkward1 array with the same structure as tracks.rec_stages.
+    When stages are found, the Array is filled with value 1, otherwise it is filled
+    with value 0.
+
+    Parameters
+    ----------
+    rec_stages : awkward1 Array
+        tracks.rec_stages .
+    stages : awkward1 Array
+        reconstruction stages of interest.
+    builder : awkward1.highlevel.ArrayBuilder
+        awkward1 Array builder.
+    """
     for s in rec_stages:
         builder.begin_list()
         for i in s:
@@ -106,6 +119,21 @@ def _find(rec_stages, stages, builder):
 
 
 def mask(rec_stages, stages):
+    """create a mask on tracks.rec_stages .
+
+    Parameters
+    ----------
+    rec_stages : awkward1 Array
+        tracks.rec_stages .
+    stages : list
+        reconstruction stages of interest.
+
+    Returns
+    -------
+    awkward1 Array
+        an awkward1 Array mask where True corresponds to the positions
+        where stages were found. False otherwise.
+    """
     builder = ak1.ArrayBuilder()
     _find(rec_stages, ak1.Array(stages), builder)
     return builder.snapshot() == 1

@@ -179,6 +179,14 @@ class TestOfflineEvents(unittest.TestCase):
         assert np.allclose(self.events.hits[3:5][1][4].dom_id,
                            self.events[3:5][1][4].hits.dom_id)
 
+    def test_fancy_indexing(self):
+        mask = self.events.n_tracks > 55
+        tracks = self.events.tracks[mask]
+        first_tracks = tracks[:, 0]
+        assert 8 == len(first_tracks)
+        assert 8 == len(first_tracks.rec_stages)
+        assert 8 == len(first_tracks.lik)
+
     def test_iteration(self):
         i = 0
         for event in self.events:

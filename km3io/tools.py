@@ -159,6 +159,9 @@ class Branch:
         if isinstance(item, str):
             return self.__getkey__(item)
 
+        if item.__class__.__name__ == "ChunkedArray":
+            item = np.array(item)
+
         return self.__class__(self._tree,
                               self._mapper,
                               index_chain=self._index_chain + [item],

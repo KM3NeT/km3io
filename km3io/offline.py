@@ -45,6 +45,7 @@ def fitinf(fitparam, tracks):
         params = fit[count_nested(fit, axis=1) > index]
         return params[:, index]
 
+
 def fitparams():
     """name of the fit parameters as defined in the official
     KM3NeT-Dataformat.
@@ -55,6 +56,7 @@ def fitparams():
         fit parameters keys.
     """
     return fitparameters.keys()
+
 
 def count_nested(Array, axis=0):
     """count elements in a nested awkward Array.
@@ -80,6 +82,7 @@ def count_nested(Array, axis=0):
     if axis == 2:
         return ak1.count(Array, axis=2)
 
+
 def best_track(tracks, strategy="first", rec_stages=None):
     """best track selection based on different strategies
 
@@ -94,7 +97,6 @@ def best_track(tracks, strategy="first", rec_stages=None):
         return tracks[:, 0]
     # if strategy == "rec_stages" and rec_stages is not None:
     #     mask = tracks.rec_stages[]
-
 
 
 EVENTS_MAP = BranchMapper(name="events",

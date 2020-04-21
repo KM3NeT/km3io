@@ -36,6 +36,7 @@ class TestFitinf(unittest.TestCase):
 
         assert "JGANDALF_BETA0_RAD" in keys
 
+
 class TestCountNested(unittest.TestCase):
     def test_count_nested(self):
         fit = OFFLINE_FILE.events.tracks.fitinf

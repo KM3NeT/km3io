@@ -2,6 +2,8 @@ from collections import namedtuple
 import uproot
 import warnings
 import awkward1 as ak1
+import numba as nb
+
 from .definitions import mc_header, fitparameters
 from .tools import Branch, BranchMapper, cached_property, _to_num, _unfold_indices
 
@@ -81,6 +83,32 @@ def count_nested(Array, axis=0):
         return ak1.num(Array, axis=1)
     if axis == 2:
         return ak1.count(Array, axis=2)
+
+
+@nb.jit(nopython=True)
+def _find(rec_stages, stages, builder):
+    for s in rec_stages:
+        builder.begin_list()
+        for i in s:
+            num_stages = len(i)
+            if num_stages == len(stages):
+                found = 0
+                for j in range(num_stages):
+                    if i[j] == stages[j]:
+                        found += 1
+                if found == num_stages:
+                    builder.append(1)
+                else:
+                    builder.append(0)
+            else:
+                builder.append(0)
+        builder.end_list()
+
+
+def mask(rec_stages, stages):
+    builder = ak1.ArrayBuilder()
+    _find(rec_stages, ak1.Array(stages), builder)
+    return builder.snapshot() == 1
 
 
 def best_track(tracks, strategy="first", rec_stages=None):

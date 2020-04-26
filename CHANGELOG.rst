@@ -1,12 +1,15 @@
 Unreleased changes
 ------------------
+
+Version 0
+---------
+0.13.0 / 2020-04-26
+~~~~~~~~~~~~~~~~~~~
 * ``km3io.tools.unique`` and ``km3io.tools.uniquecount`` were added to help
   working with unique elements (e.g. DOM IDs or channel IDs)
 * Internal restructuring of ``.tools``, ROOT related stuff is moved
   to ``.rootio``
 
-Version 0
----------
 0.12.0 / 2020-04-26
 ~~~~~~~~~~~~~~~~~~~
 * Added ``.close()`` to the Offline and Online reader classes

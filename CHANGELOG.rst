@@ -1,8 +1,12 @@
 Unreleased changes
 ------------------
+* Added ``.close()`` to the Offline and Online reader classes
+* The Offline and Online reader classes now support context managers
+  (``with km3io.OfflineReader(filename) as r: ...``)
 
 Version 0
 ---------
+
 0.11.0 / 2020-04-19
 ~~~~~~~~~~~~~~~~~~~
 * DAQ was renamed to online

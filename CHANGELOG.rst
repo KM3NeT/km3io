@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``km3io.tools.unique`` and ``km3io.tools.uniquecount`` were added to help
+  working with unique elements (e.g. DOM IDs or channel IDs)
 * Internal restructuring of ``.tools``, ROOT related stuff is moved
   to ``.rootio``
 

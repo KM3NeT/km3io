@@ -77,6 +77,11 @@ class TestOfflineReader(unittest.TestCase):
         self.nu = OFFLINE_NUMUCC
         self.n_events = 10
 
+    def test_context_manager(self):
+        filename = SAMPLES_DIR / 'aanet_v2.0.0.root'
+        with OfflineReader(filename) as r:
+            assert r._filename == filename
+
     def test_number_events(self):
         assert self.n_events == len(self.r.events)
 

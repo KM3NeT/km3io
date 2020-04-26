@@ -323,7 +323,17 @@ class OfflineReader:
 
         """
         self._fobj = uproot.open(file_path)
+        self._filename = file_path
         self._tree = self._fobj[MAIN_TREE_NAME]
+
+    def close(self):
+        self._fobj.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
 
     @cached_property
     def events(self):

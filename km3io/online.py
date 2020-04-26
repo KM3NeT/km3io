@@ -111,9 +111,19 @@ class OnlineReader:
     """Reader for online ROOT files"""
     def __init__(self, filename):
         self._fobj = uproot.open(filename)
+        self._filename = filename
         self._events = None
         self._timeslices = None
         self._summaryslices = None
+
+    def close(self):
+        self._fobj.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
 
     @property
     def events(self):

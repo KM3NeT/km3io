@@ -7,6 +7,13 @@ from km3io.online import OnlineReader, get_rate, has_udp_trailer, get_udp_max_se
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 
 
+class TestOnlineReaderContextManager(unittest.TestCase):
+    def test_context_manager(self):
+        filename = os.path.join(SAMPLES_DIR, "daq_v1.0.0.root")
+        with OnlineReader(filename) as r:
+            assert r._filename == filename
+
+
 class TestOnlineEvents(unittest.TestCase):
     def setUp(self):
         self.events = OnlineReader(os.path.join(SAMPLES_DIR,

@@ -6,7 +6,8 @@
 import uproot
 import numpy as np
 import warnings
-from .tools import Branch, BranchMapper, cached_property
+from .rootio import Branch, BranchMapper
+from .tools import cached_property
 MAIN_TREE_NAME = "Events"
 
 

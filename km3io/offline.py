@@ -5,7 +5,8 @@ import awkward1 as ak1
 import numba as nb
 
 from .definitions import mc_header, fitparameters
-from .tools import Branch, BranchMapper, cached_property, _to_num, _unfold_indices
+from .tools import cached_property, to_num, unfold_indices
+from .rootio import Branch, BranchMapper
 
 MAIN_TREE_NAME = "E"
 EXCLUDE_KEYS = ["AAObject", "t", "fBits", "fUniqueID"]
@@ -256,7 +257,7 @@ class Usr:
         data = self._branch[self._usr_key].lazyarray()
 
         if self._index_chain:
-            data = _unfold_indices(data, self._index_chain)
+            data = unfold_indices(data, self._index_chain)
 
         self._usr_data = data
 
@@ -281,7 +282,7 @@ class Usr:
 
     def __getitem_flat__(self, item):
         if self._index_chain:
-            return _unfold_indices(
+            return unfold_indices(
                 self._usr_data, self._index_chain)[:,
                                                    self._usr_idx_lookup[item]]
         else:
@@ -295,7 +296,7 @@ class Usr:
                 uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
                 self._branch[self._usr_key + '_names']._context, 6),
             basketcache=BASKET_CACHE)
-        return _unfold_indices(data, self._index_chain)
+        return unfold_indices(data, self._index_chain)
 
     def keys(self):
         return self._usr_names
@@ -368,7 +369,7 @@ class Header:
             n_fields = len(fields)
 
             if n_values == 1 and n_fields == 0:
-                self._data[attribute] = _to_num(values[0])
+                self._data[attribute] = to_num(values[0])
                 continue
 
             n_max = max(n_values, n_fields)
@@ -381,7 +382,7 @@ class Header:
                 continue
 
             self._data[attribute] = Constructor(
-                **{f: _to_num(v)
+                **{f: to_num(v)
                    for (f, v) in zip(fields, values)})
 
         for attribute, value in self._data.items():

@@ -37,6 +37,7 @@ test-py3.5:
         - *virtualenv_definition
         - make test
     <<: *junit_definition
+    allow_failure: true
 
 test-py3.6:
     image: docker.km3net.de/base/python:3.6

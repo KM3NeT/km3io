@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* Internal restructuring of ``.tools``, ROOT related stuff is moved
+  to ``.rootio``
 
 Version 0
 ---------

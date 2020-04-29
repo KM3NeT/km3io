@@ -9,6 +9,7 @@ from km3io.offline import _nested_mapper, Header, fitinf, fitparams, count_neste
 SAMPLES_DIR = Path(__file__).parent / 'samples'
 OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'aanet_v2.0.0.root')
 OFFLINE_USR = OfflineReader(SAMPLES_DIR / 'usr-sample.root')
+OFFLINE_MC_TRACK_USR = OfflineReader(SAMPLES_DIR / 'mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root')
 OFFLINE_NUMUCC = OfflineReader(SAMPLES_DIR / "numucc.root")  # with mc data
 
 
@@ -425,10 +426,6 @@ class TestUsr(unittest.TestCase):
             [37.51967774166617, -10.280346193553832, 13.67595659707355],
             self.f.events.usr['DeltaPosZ'])
 
-    @unittest.skip
-    def test_keys_nested(self):
-        self.assertListEqual(["a"], self.f.events.mc_tracks.usr.keys())
-
     def test_attributes_flat(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
@@ -436,6 +433,27 @@ class TestUsr(unittest.TestCase):
         assert np.allclose(
             [37.51967774166617, -10.280346193553832, 13.67595659707355],
             self.f.events.usr.DeltaPosZ)
+
+
+class TestMcTrackUsr(unittest.TestCase):
+    def setUp(self):
+        self.f = OFFLINE_MC_TRACK_USR
+
+    def test_usr_names(self):
+        n_tracks = len(self.f.events)
+        for i in range(3):
+            self.assertListEqual([b'bx', b'by', b'ichan', b'cc'],
+                                self.f.events.mc_tracks.usr_names[i][0].tolist())
+            self.assertListEqual([b'energy_lost_in_can'],
+                                self.f.events.mc_tracks.usr_names[i][1].tolist())
+
+    def test_usr(self):
+        assert np.allclose([0.0487, 0.0588, 3, 2],
+                           self.f.events.mc_tracks.usr[0][0].tolist(),
+                           atol=0.0001)
+        assert np.allclose([0.147, 0.4, 3, 2],
+                           self.f.events.mc_tracks.usr[1][0].tolist(),
+                           atol=0.001)
 
 
 class TestNestedMapper(unittest.TestCase):

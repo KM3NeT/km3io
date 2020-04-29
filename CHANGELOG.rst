@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 0
 ---------
+0.14.0 / 2020-04-29
+~~~~~~~~~~~~~~~~~~~
+* ``events.mc_tracks.usr`` and ``events.mc_tracks.usr_names`` are now
+  correctly parsed
+
 0.13.0 / 2020-04-26
 ~~~~~~~~~~~~~~~~~~~
 * ``km3io.tools.unique`` and ``km3io.tools.uniquecount`` were added to help

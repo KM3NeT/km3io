@@ -178,14 +178,15 @@ SUBBRANCH_MAPS = [
                  ['trks.usr_data', 'trks.usr', 'trks.fUniqueID', 'trks.fBits'],
                  attrparser=_nested_mapper,
                  flat=False,
-                 toawkward=['fitinf', 'rec_stages']),
+                 toawkward=['usr', 'fitinf', 'rec_stages']),
     BranchMapper(name="mc_tracks",
                  key="mc_trks",
                  exclude=EXCLUDE_KEYS + [
-                     'mc_trks.usr_data', 'mc_trks.usr', 'mc_trks.rec_stages',
+                     'mc_trks.rec_stages',
                      'mc_trks.fitinf', 'mc_trks.fUniqueID', 'mc_trks.fBits'
                  ],
                  attrparser=_nested_mapper,
+                 toawkward=['usr', 'usr_names'],
                  flat=False),
     BranchMapper(name="hits",
                  key="hits",
@@ -214,7 +215,7 @@ class OfflineBranch(Branch):
 
 
 class Usr:
-    """Helper class to access AAObject `usr` stuff"""
+    """Helper class to access AAObject `usr` stuff (only for events.usr)"""
     def __init__(self, mapper, branch, index_chain=None):
         self._mapper = mapper
         self._name = mapper.name
@@ -238,13 +239,6 @@ class Usr:
                   format(self._name))
             return
 
-        if self._mapper.flat:
-            self._initialise_flat()
-
-    def _initialise_flat(self):
-        # Here, we assume that every event has the same names in the same order
-        # to massively increase the performance. This needs triple check if
-        # it's always the case.
         self._usr_names = [
             n.decode("utf-8")
             for n in self._branch[self._usr_key + '_names'].lazyarray()[0]
@@ -264,39 +258,13 @@ class Usr:
         for name in self._usr_names:
             setattr(self, name, self[name])
 
-    # def _initialise_nested(self):
-    #     self._usr_names = [
-    #         n.decode("utf-8") for n in self.branch['usr_names'].lazyarray(
-    #             # TODO this will be fixed soon in uproot,
-    #             # see https://github.com/scikit-hep/uproot/issues/465
-    #             uproot.asgenobj(
-    #                 uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
-    #                 self.branch['usr_names']._context, 6),
-    #             basketcache=BASKET_CACHE)[0]
-    #     ]
-
     def __getitem__(self, item):
-        if self._mapper.flat:
-            return self.__getitem_flat__(item)
-        return self.__getitem_nested__(item)
-
-    def __getitem_flat__(self, item):
         if self._index_chain:
             return unfold_indices(
                 self._usr_data, self._index_chain)[:,
                                                    self._usr_idx_lookup[item]]
         else:
             return self._usr_data[:, self._usr_idx_lookup[item]]
-
-    def __getitem_nested__(self, item):
-        data = self._branch[self._usr_key + '_names'].lazyarray(
-            # TODO this will be fixed soon in uproot,
-            # see https://github.com/scikit-hep/uproot/issues/465
-            uproot.asgenobj(
-                uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
-                self._branch[self._usr_key + '_names']._context, 6),
-            basketcache=BASKET_CACHE)
-        return unfold_indices(data, self._index_chain)
 
     def keys(self):
         return self._usr_names

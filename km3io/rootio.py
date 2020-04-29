@@ -122,8 +122,23 @@ class Branch:
         return object.__getattribute__(self, attr)
 
     def __getkey__(self, key):
+        interpretation = self._mapper.interpretations.get(key)
+
+        if key == 'usr_names':
+            # TODO this will be fixed soon in uproot,
+            # see https://github.com/scikit-hep/uproot/issues/465
+            interpretation = uproot.asgenobj(
+                uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
+                self._branch[self._keymap[key]]._context, 6)
+
+        if key == 'usr':
+            # triple jagged array is wrongly parsed in uproot
+            interpretation = uproot.asgenobj(
+                uproot.SimpleArray(uproot.STLVector(uproot.asdtype('>f8'))),
+                self._branch[self._keymap[key]]._context, 6)
+
         out = self._branch[self._keymap[key]].lazyarray(
-            interpretation=self._mapper.interpretations.get(key),
+            interpretation=interpretation,
             basketcache=BASKET_CACHE)
         if self._index_chain is not None and key in self._mapper.toawkward:
             out = ak.from_iter(out)

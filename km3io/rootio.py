@@ -138,10 +138,9 @@ class Branch:
                 self._branch[self._keymap[key]]._context, 6)
 
         out = self._branch[self._keymap[key]].lazyarray(
-            interpretation=interpretation,
-            basketcache=BASKET_CACHE)
+            interpretation=interpretation, basketcache=BASKET_CACHE)
         if self._index_chain is not None and key in self._mapper.toawkward:
-            out = ak.from_iter(out)
+            out = ak.fromiter(out)
         return unfold_indices(out, self._index_chain)
 
     def __getitem__(self, item):

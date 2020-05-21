@@ -76,6 +76,8 @@ class Branch:
         self._subbranches = []
         self._subbranchmaps = subbranchmaps
 
+        self._awkward_cache = {}  # FIXME preliminary cache to improve perf
+
         self._iterator_index = 0
 
         if keymap is None:
@@ -141,7 +143,9 @@ class Branch:
             interpretation=interpretation,
             basketcache=BASKET_CACHE)
         if self._index_chain is not None and key in self._mapper.toawkward:
-            out = ak.from_iter(out)
+            if key not in self._awkward_cache:
+                self._awkward_cache[key] = ak.from_iter(out)
+            out = self._awkward_cache[key]
         return unfold_indices(out, self._index_chain)
 
     def __getitem__(self, item):

@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.14.2 / 2020-05-21
+~~~~~~~~~~~~~~~~~~~
+* Improved caching for awkward arrays in pumps
+
 0.14.1 / 2020-05-21
 ~~~~~~~~~~~~~~~~~~~
 * Improved caching for awkward arrays

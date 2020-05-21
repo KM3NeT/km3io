@@ -67,7 +67,8 @@ class Branch:
                  mapper,
                  index_chain=None,
                  subbranchmaps=None,
-                 keymap=None):
+                 keymap=None,
+                 awkward_cache=None):
         self._tree = tree
         self._mapper = mapper
         self._index_chain = [] if index_chain is None else index_chain
@@ -75,8 +76,9 @@ class Branch:
         self._branch = tree[mapper.key]
         self._subbranches = []
         self._subbranchmaps = subbranchmaps
-
-        self._awkward_cache = {}  # FIXME preliminary cache to improve perf
+        # FIXME preliminary cache to improve performance. Hopefully uproot4
+        # will fix this automatically!
+        self._awkward_cache = {} if awkward_cache is None else awkward_cache
 
         self._iterator_index = 0
 
@@ -89,7 +91,8 @@ class Branch:
             for mapper in subbranchmaps:
                 subbranch = self.__class__(self._tree,
                                            mapper=mapper,
-                                           index_chain=self._index_chain)
+                                           index_chain=self._index_chain,
+                                           awkward_cache=self._awkward_cache)
                 self._subbranches.append(subbranch)
         for subbranch in self._subbranches:
             setattr(self, subbranch._mapper.name, subbranch)
@@ -143,10 +146,12 @@ class Branch:
             interpretation=interpretation,
             basketcache=BASKET_CACHE)
         if self._index_chain is not None and key in self._mapper.toawkward:
-            if key not in self._awkward_cache:
-                print("Creating cache for the '{}' branch...".format(key))
-                self._awkward_cache[key] = ak.from_iter(out)
-            out = self._awkward_cache[key]
+            cache_key = self._mapper.name + '/' + key
+            if cache_key not in self._awkward_cache:
+                if len(out) > 20000:  # It will take more than 10 seconds
+                    print("Creating cache for '{}'.".format(cache_key))
+                self._awkward_cache[cache_key] = ak.from_iter(out)
+            out = self._awkward_cache[cache_key]
         return unfold_indices(out, self._index_chain)
 
     def __getitem__(self, item):
@@ -161,7 +166,8 @@ class Branch:
                               self._mapper,
                               index_chain=self._index_chain + [item],
                               keymap=self._keymap,
-                              subbranchmaps=self._subbranchmaps)
+                              subbranchmaps=self._subbranchmaps,
+                              awkward_cache=self._awkward_cache)
 
     def __len__(self):
         if not self._index_chain:

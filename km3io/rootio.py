@@ -144,6 +144,7 @@ class Branch:
             basketcache=BASKET_CACHE)
         if self._index_chain is not None and key in self._mapper.toawkward:
             if key not in self._awkward_cache:
+                print("Creating cache for the '{}' branch...".format(key))
                 self._awkward_cache[key] = ak.from_iter(out)
             out = self._awkward_cache[key]
         return unfold_indices(out, self._index_chain)

@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.14.1 / 2020-05-21
+~~~~~~~~~~~~~~~~~~~
+* Improved caching for awkward arrays
+
 0.14.0 / 2020-04-29
 ~~~~~~~~~~~~~~~~~~~
 * ``events.mc_tracks.usr`` and ``events.mc_tracks.usr_names`` are now

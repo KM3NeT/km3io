@@ -41,3 +41,5 @@ data = {
     "RECTYPE_UNKNOWN": -1,
     "RECSTAGE_UNKNOWN": -1,
 }
+
+data_r = {v: k for k, v in data.items()}

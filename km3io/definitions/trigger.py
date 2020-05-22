@@ -11,3 +11,5 @@ data = {
     "JTRIGGER3DMUON": 4,
     "JTRIGGERNB": 5,
 }
+
+data_r = {v: k for k, v in data.items()}

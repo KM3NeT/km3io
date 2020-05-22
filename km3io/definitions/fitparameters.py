@@ -25,3 +25,5 @@ data = {
     "JENERGY_NUMBER_OF_HITS": 16,
     "JCOPY_Z_M": 17,
 }
+
+data_r = {v: k for k, v in data.items()}

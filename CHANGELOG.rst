@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 0
 ---------
+0.15.0 / 2020-05-22
+~~~~~~~~~~~~~~~~~~~
+* Added reverse maps for index lookup of definitions
+  ``km3io.definitions.fitparameters_idx`` etc.
+
 0.14.2 / 2020-05-21
 ~~~~~~~~~~~~~~~~~~~
 * Improved caching for awkward arrays in pumps

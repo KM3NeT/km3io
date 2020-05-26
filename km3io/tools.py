@@ -59,7 +59,7 @@ def unique(array, dtype=np.int64):
     out[entry_idx] = last
     for i in range(1, n):
         current = array[i]
-        if current == last: # shortcut for sorted arrays
+        if current == last:  # shortcut for sorted arrays
             continue
         already_present = False
         for j in range(entry_idx + 1):
@@ -70,7 +70,7 @@ def unique(array, dtype=np.int64):
             entry_idx += 1
             out[entry_idx] = current
         last = current
-    return out[:entry_idx+1]
+    return out[:entry_idx + 1]
 
 
 @nb.jit(nopython=True)

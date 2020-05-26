@@ -143,8 +143,7 @@ class Branch:
                 self._branch[self._keymap[key]]._context, 6)
 
         out = self._branch[self._keymap[key]].lazyarray(
-            interpretation=interpretation,
-            basketcache=BASKET_CACHE)
+            interpretation=interpretation, basketcache=BASKET_CACHE)
         if self._index_chain is not None and key in self._mapper.toawkward:
             cache_key = self._mapper.name + '/' + key
             if cache_key not in self._awkward_cache:
@@ -159,8 +158,8 @@ class Branch:
         if isinstance(item, str):
             return self.__getkey__(item)
 
-        if item.__class__.__name__ == "ChunkedArray":
-            item = np.array(item)
+        # if item.__class__.__name__ == "ChunkedArray":
+        #     item = np.array(item)
 
         return self.__class__(self._tree,
                               self._mapper,

@@ -12,7 +12,8 @@ class TestUnique(unittest.TestCase):
         max_range = 100
         for i in range(23):
             low = np.random.randint(0, max_range)
-            high = np.random.randint(low + 1, low + 2 + np.random.randint(max_range))
+            high = np.random.randint(low + 1,
+                                     low + 2 + np.random.randint(max_range))
             n = np.random.randint(max_range)
             arr = np.random.randint(low, high, n).astype(dtype)
             np_reference = np.sort(np.unique(arr))

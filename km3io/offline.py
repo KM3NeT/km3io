@@ -4,7 +4,7 @@ import warnings
 import numba as nb
 import awkward1 as ak1
 
-from .definitions import mc_header, fitparameters
+from .definitions import mc_header, fitparameters, reconstruction
 from .tools import cached_property, to_num, unfold_indices
 from .rootio import Branch, BranchMapper
 
@@ -19,6 +19,18 @@ BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 def _nested_mapper(key):
     """Maps a key in the ROOT file to another key (e.g. trks.pos.x -> pos_x)"""
     return '_'.join(key.split('.')[1:])
+
+
+def rec_types():
+    """name of the reconstruction type as defined in the official
+    KM3NeT-Dataformat.
+
+    Returns
+    -------
+    dict_keys
+        reconstruction types.
+    """
+    return reconstruction.keys()
 
 
 def fitinf(fitparam, tracks):
@@ -140,7 +152,7 @@ def mask(rec_stages, stages):
     return builder.snapshot() == 1
 
 
-def best_track(tracks, strategy="first", rec_stages=None):
+def best_track(tracks, strategy="first", rec_type=None, rec_stages=None):
     """best track selection based on different strategies
 
     Parameters
@@ -154,6 +166,9 @@ def best_track(tracks, strategy="first", rec_stages=None):
         return tracks[:, 0]
     if strategy == "rec_stages" and rec_stages is not None:
         return tracks[mask(tracks.rec_stages, rec_stages)]
+    if strategy == "default" and rec_type is not None:
+        return tracks[tracks.rec_type == reconstruction[rec_type]][
+            tracks.lik == ak1.max(tracks.lik, axis=1)][:, 0]
 
 
 EVENTS_MAP = BranchMapper(name="events",

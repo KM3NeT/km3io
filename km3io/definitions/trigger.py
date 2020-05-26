@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KM3NeT Data Definitions v1.1.2
+KM3NeT Data Definitions v1.2.1-7-g30d101f
 https://git.km3net.de/common/km3net-dataformat
 """
 
@@ -10,6 +10,5 @@ data = {
     "JTRIGGERMXSHOWER": 2,
     "JTRIGGER3DMUON": 4,
     "JTRIGGERNB": 5,
+    "FACTORY_LIMIT": 31,
 }
-
-data_r = {v: k for k, v in data.items()}

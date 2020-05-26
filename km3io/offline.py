@@ -1,8 +1,8 @@
 from collections import namedtuple
 import uproot
 import warnings
-import awkward1 as ak1
 import numba as nb
+import awkward1 as ak1
 
 from .definitions import mc_header, fitparameters
 from .tools import cached_property, to_num, unfold_indices
@@ -152,8 +152,8 @@ def best_track(tracks, strategy="first", rec_stages=None):
     """
     if strategy == "first":
         return tracks[:, 0]
-    # if strategy == "rec_stages" and rec_stages is not None:
-    #     mask = tracks.rec_stages[]
+    if strategy == "rec_stages" and rec_stages is not None:
+        return tracks[mask(tracks.rec_stages, rec_stages)]
 
 
 EVENTS_MAP = BranchMapper(name="events",
@@ -182,8 +182,8 @@ SUBBRANCH_MAPS = [
     BranchMapper(name="mc_tracks",
                  key="mc_trks",
                  exclude=EXCLUDE_KEYS + [
-                     'mc_trks.rec_stages',
-                     'mc_trks.fitinf', 'mc_trks.fUniqueID', 'mc_trks.fBits'
+                     'mc_trks.rec_stages', 'mc_trks.fitinf',
+                     'mc_trks.fUniqueID', 'mc_trks.fBits'
                  ],
                  attrparser=_nested_mapper,
                  toawkward=['usr', 'usr_names'],

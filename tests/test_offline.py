@@ -4,7 +4,7 @@ import awkward1 as ak1
 from pathlib import Path
 
 from km3io import OfflineReader
-from km3io.offline import _nested_mapper, Header, fitinf, fitparams, count_nested, _find, mask, best_track
+from km3io.offline import _nested_mapper, Header, fitinf, fitparams, count_nested, _find, mask, best_track, rec_types
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
 OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'aanet_v2.0.0.root')
@@ -41,6 +41,13 @@ class TestFitinf(unittest.TestCase):
         assert "JGANDALF_BETA0_RAD" in keys
 
 
+class TestRecoTypes(unittest.TestCase):
+    def test_reco_types(self):
+        keys = set(rec_types())
+
+        assert "JPP_RECONSTRUCTION_TYPE" in keys
+
+
 class TestBestTrack(unittest.TestCase):
     def setUp(self):
         self.tracks = OFFLINE_FILE.events.tracks
@@ -50,10 +57,19 @@ class TestBestTrack(unittest.TestCase):
         rec_stages_tracks = best_track(self.tracks,
                                        strategy="rec_stages",
                                        rec_stages=[1, 3, 5, 4])
+        default_best = best_track(self.tracks,
+                                  strategy="default",
+                                  rec_type="JPP_RECONSTRUCTION_TYPE")
 
         assert first_tracks.dir_z[0] == self.tracks.dir_z[0][0]
         assert first_tracks.dir_x[1] == self.tracks.dir_x[1][0]
+
         assert rec_stages_tracks.rec_stages[0] == [1, 3, 5, 4]
+        assert rec_stages_tracks.rec_stages[1] == [1, 3, 5, 4]
+
+        assert default_best.lik[0] == ak1.max(self.tracks.lik[0])
+        assert default_best.lik[1] == ak1.max(self.tracks.lik[1])
+        assert default_best.rec_type[0] == 4000
 
 
 class TestCountNested(unittest.TestCase):

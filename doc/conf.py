@@ -37,7 +37,6 @@ extensions = [
     'autoapi.extension', 'numpydoc',
     'sphinx_gallery.gen_gallery'
 ]
-autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -50,7 +49,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # AutoAPI
 autoapi_type = 'python'
 autoapi_dirs = ['../km3io']
-autoapi_options = ['members', 'undoc-members']
+autoapi_options = ['members', 'undoc-members', 'show-module-summary']
 autoapi_include_summaries = True
 
 # Gallery

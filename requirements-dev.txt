@@ -1,6 +1,6 @@
 matplotlib
 memory_profiler
-numpydoc
+numpydoc==0.9.2
 pillow
 pytest
 pytest-cov

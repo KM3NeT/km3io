@@ -5,19 +5,18 @@ import unittest
 from km3io.online import OnlineReader, get_rate, has_udp_trailer, get_udp_max_sequence_number, get_channel_flags, get_number_udp_packets
 
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
+ONLINE_FILE = os.path.join(SAMPLES_DIR, "km3net_online.root")
 
 
 class TestOnlineReaderContextManager(unittest.TestCase):
     def test_context_manager(self):
-        filename = os.path.join(SAMPLES_DIR, "daq_v1.0.0.root")
-        with OnlineReader(filename) as r:
-            assert r._filename == filename
+        with OnlineReader(ONLINE_FILE) as r:
+            assert r._filename == ONLINE_FILE
 
 
 class TestOnlineEvents(unittest.TestCase):
     def setUp(self):
-        self.events = OnlineReader(os.path.join(SAMPLES_DIR,
-                                                "daq_v1.0.0.root")).events
+        self.events = OnlineReader(ONLINE_FILE).events
 
     def test_index_lookup(self):
         assert 3 == len(self.events)
@@ -31,8 +30,7 @@ class TestOnlineEvents(unittest.TestCase):
 
 class TestOnlineEvent(unittest.TestCase):
     def setUp(self):
-        self.event = OnlineReader(os.path.join(SAMPLES_DIR,
-                                               "daq_v1.0.0.root")).events[0]
+        self.event = OnlineReader(ONLINE_FILE).events[0]
 
     def test_str(self):
         assert re.match(".*event.*96.*snapshot.*18.*triggered",
@@ -45,8 +43,7 @@ class TestOnlineEvent(unittest.TestCase):
 
 class TestOnlineEventsSnapshotHits(unittest.TestCase):
     def setUp(self):
-        self.events = OnlineReader(os.path.join(SAMPLES_DIR,
-                                                "daq_v1.0.0.root")).events
+        self.events = OnlineReader(ONLINE_FILE).events
         self.lengths = {0: 96, 1: 124, -1: 78}
         self.total_item_count = 298
 
@@ -84,8 +81,7 @@ class TestOnlineEventsSnapshotHits(unittest.TestCase):
 
 class TestOnlineEventsTriggeredHits(unittest.TestCase):
     def setUp(self):
-        self.events = OnlineReader(os.path.join(SAMPLES_DIR,
-                                                "daq_v1.0.0.root")).events
+        self.events = OnlineReader(ONLINE_FILE).events
         self.lengths = {0: 18, 1: 53, -1: 9}
         self.total_item_count = 80
 
@@ -125,8 +121,7 @@ class TestOnlineEventsTriggeredHits(unittest.TestCase):
 
 class TestTimeslices(unittest.TestCase):
     def setUp(self):
-        self.ts = OnlineReader(os.path.join(SAMPLES_DIR,
-                                            "daq_v1.0.0.root")).timeslices
+        self.ts = OnlineReader(ONLINE_FILE).timeslices
 
     def test_data_lengths(self):
         assert 3 == len(self.ts._timeslices["L1"][0])
@@ -151,8 +146,7 @@ class TestTimeslices(unittest.TestCase):
 
 class TestTimeslice(unittest.TestCase):
     def setUp(self):
-        self.ts = OnlineReader(os.path.join(SAMPLES_DIR,
-                                            "daq_v1.0.0.root")).timeslices
+        self.ts = OnlineReader(ONLINE_FILE).timeslices
         self.n_frames = {"L1": [69, 69, 69], "SN": [64, 66, 68]}
 
     def test_str(self):
@@ -165,8 +159,7 @@ class TestTimeslice(unittest.TestCase):
 
 class TestSummaryslices(unittest.TestCase):
     def setUp(self):
-        self.ss = OnlineReader(os.path.join(SAMPLES_DIR,
-                                            "daq_v1.0.0.root")).summaryslices
+        self.ss = OnlineReader(ONLINE_FILE).summaryslices
 
     def test_headers(self):
         assert 3 == len(self.ss.headers)

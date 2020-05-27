@@ -17,7 +17,7 @@ import km3io as ki
 # with:
 
 
-f = ki.OnlineReader("samples/daq_v1.0.0.root")
+f = ki.OnlineReader("samples/km3net_online.root")
 
 #####################################################
 # Note that only some meta information is read into memory.

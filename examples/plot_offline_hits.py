@@ -14,7 +14,7 @@ import km3io as ki
 # To access offline hits/mc_hits data:
 
 mc_hits = ki.OfflineReader("samples/numucc.root").events.mc_hits
-hits = ki.OfflineReader("samples/aanet_v2.0.0.root").events.hits
+hits = ki.OfflineReader("samples/km3net_offline.root").events.hits
 
 
 #####################################################

@@ -7,7 +7,7 @@ from km3io import OfflineReader
 from km3io.offline import _nested_mapper, Header, fitinf, fitparams, count_nested, _find, mask, best_track, rec_types
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
-OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'aanet_v2.0.0.root')
+OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'km3net_offline.root')
 OFFLINE_USR = OfflineReader(SAMPLES_DIR / 'usr-sample.root')
 OFFLINE_MC_TRACK_USR = OfflineReader(
     SAMPLES_DIR /
@@ -113,7 +113,7 @@ class TestOfflineReader(unittest.TestCase):
         self.n_events = 10
 
     def test_context_manager(self):
-        filename = SAMPLES_DIR / 'aanet_v2.0.0.root'
+        filename = SAMPLES_DIR / 'km3net_offline.root'
         with OfflineReader(filename) as r:
             assert r._filename == filename
 

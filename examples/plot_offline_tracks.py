@@ -13,7 +13,7 @@ import km3io as ki
 # To access offline tracks/mc_tracks data:
 
 mc_tracks = ki.OfflineReader("samples/numucc.root").events.mc_tracks
-tracks = ki.OfflineReader("samples/aanet_v2.0.0.root").events.tracks
+tracks = ki.OfflineReader("samples/km3net_offline.root").events.tracks
 
 
 #####################################################

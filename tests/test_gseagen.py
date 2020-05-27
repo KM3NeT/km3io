@@ -56,7 +56,7 @@ class TestGSGHeader(unittest.TestCase):
         self.assertListEqual(self.header["NuList"].tolist(), [-14, 14])
 
     def test_unsupported_header(self):
-        f = GSGReader(os.path.join(SAMPLES_DIR, "daq_v1.0.0.root"))
+        f = GSGReader(os.path.join(SAMPLES_DIR, "km3net_online.root"))
         with self.assertWarns(UserWarning):
             f.header
 

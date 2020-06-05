@@ -3,8 +3,105 @@
 import unittest
 import awkward1 as ak
 import numpy as np
+
+from pathlib import Path
+from km3io import OfflineReader
 from km3io.tools import (to_num, cached_property, unfold_indices, unique,
-                         uniquecount)
+                         uniquecount, fitinf, fitparams, count_nested, _find,
+                         mask, best_track, rec_types)
+
+SAMPLES_DIR = Path(__file__).parent / 'samples'
+OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'km3net_offline.root')
+
+
+class TestFitinf(unittest.TestCase):
+    def setUp(self):
+        self.tracks = OFFLINE_FILE.events.tracks
+        self.fit = self.tracks.fitinf
+        self.best = self.tracks[:, 0]
+        self.best_fit = self.best.fitinf
+
+    def test_fitinf(self):
+        beta = fitinf('JGANDALF_BETA0_RAD', self.tracks)
+        best_beta = fitinf('JGANDALF_BETA0_RAD', self.best)
+
+        assert beta[0][0] == self.fit[0][0][0]
+        assert beta[0][1] == self.fit[0][1][0]
+        assert beta[0][2] == self.fit[0][2][0]
+
+        assert best_beta[0] == self.best_fit[0][0]
+        assert best_beta[1] == self.best_fit[1][0]
+        assert best_beta[2] == self.best_fit[2][0]
+
+    def test_fitparams(self):
+        keys = set(fitparams())
+
+        assert "JGANDALF_BETA0_RAD" in keys
+
+
+class TestRecoTypes(unittest.TestCase):
+    def test_reco_types(self):
+        keys = set(rec_types())
+
+        assert "JPP_RECONSTRUCTION_TYPE" in keys
+
+
+class TestBestTrack(unittest.TestCase):
+    def setUp(self):
+        self.tracks = OFFLINE_FILE.events.tracks
+
+    def test_best_tracks(self):
+        first_tracks = best_track(self.tracks, strategy="first")
+        rec_stages_tracks = best_track(self.tracks,
+                                       strategy="rec_stages",
+                                       rec_stages=[1, 3, 5, 4])
+        default_best = best_track(self.tracks,
+                                  strategy="default",
+                                  rec_type="JPP_RECONSTRUCTION_TYPE")
+
+        assert first_tracks.dir_z[0] == self.tracks.dir_z[0][0]
+        assert first_tracks.dir_x[1] == self.tracks.dir_x[1][0]
+
+        assert rec_stages_tracks.rec_stages[0] == [1, 3, 5, 4]
+        assert rec_stages_tracks.rec_stages[1] == [1, 3, 5, 4]
+
+        assert default_best.lik[0] == ak.max(self.tracks.lik[0])
+        assert default_best.lik[1] == ak.max(self.tracks.lik[1])
+        assert default_best.rec_type[0] == 4000
+
+
+class TestCountNested(unittest.TestCase):
+    def test_count_nested(self):
+        fit = OFFLINE_FILE.events.tracks.fitinf
+
+        assert count_nested(fit, axis=0) == 10
+        assert count_nested(fit, axis=1)[0:4] == ak.Array([56, 55, 56, 56])
+        assert count_nested(fit, axis=2)[0][0:4] == ak.Array([17, 11, 8, 8])
+
+
+class TestRecStagesMasks(unittest.TestCase):
+    def setUp(self):
+        self.nested = ak.Array([[[1, 2, 3], [1, 2, 3], [1]], [[0], [1, 2, 3]],
+                                [[0], [0, 1, 3], [0], [1, 2, 3], [1, 2, 3]]])
+
+    def test_find(self):
+        builder = ak.ArrayBuilder()
+        _find(self.nested, ak.Array([1, 2, 3]), builder)
+        labels = builder.snapshot()
+
+        assert labels[0][0] == 1
+        assert labels[0][1] == 1
+        assert labels[0][2] == 0
+        assert labels[1][0] == 0
+
+    def test_mask(self):
+        rec_stages = OFFLINE_FILE.events.tracks.rec_stages
+        stages = [1, 3, 5, 4]
+        masks = mask(rec_stages, stages)
+
+        assert masks[0][0] == all(rec_stages[0][0] == ak.Array(stages))
+        assert masks[1][0] == all(rec_stages[1][0] == ak.Array(stages))
+        assert masks[0][1] == False
 
 
 class TestUnique(unittest.TestCase):

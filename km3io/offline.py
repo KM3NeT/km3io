@@ -164,8 +164,10 @@ def best_track(tracks, strategy="first", rec_type=None, rec_stages=None):
     """
     if strategy == "first":
         return tracks[:, 0]
+
     if strategy == "rec_stages" and rec_stages is not None:
         return tracks[mask(tracks.rec_stages, rec_stages)]
+
     if strategy == "default" and rec_type is not None:
         return tracks[tracks.rec_type == reconstruction[rec_type]][
             tracks.lik == ak1.max(tracks.lik, axis=1)][:, 0]

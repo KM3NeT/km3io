@@ -279,7 +279,23 @@ def best_track(tracks, strategy="first", rec_type=None, rec_stages=None):
     tracks : class km3io.offline.OfflineBranch
         the tracks branch.
     strategy : str
-        the trategy desired to select the best tracks.
+        the trategy desired to select the best tracks. It is either: 
+            - "first" : to select the first tracks.
+            - "rec_stages": to select all tracks with a specific reconstruction stages.
+            This requires the user to specify the reconstruction stages in rec_stages input.
+            Example: best_track(my_tracks, strategy="rec_stages", rec_stages=[1, 2, 3, 4, 5]).
+            - "default": to select the best tracks (the first ones) corresponding to a specific
+            reconstruction algorithm (JGandalf, Jshowerfit, etc). This requires rec_type input.
+            Example: best_track(my_tracks, strategy="default", rec_type="JPP_RECONSTRUCTION_TYPE").
+    rec_type : str, optional
+        reconstruction type as defined in the official KM3NeT-Dataformat.
+    rec_stages : list, optional
+        list of the reconstruction stages. Example: [1, 2, 3, 4, 5]
+
+    Returns
+    -------
+    class km3io.offline.OfflineBranch
+        tracks class with the desired "best tracks" selection.
     """
     if strategy == "first":
         return tracks[:, 0]

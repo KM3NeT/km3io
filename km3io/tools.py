@@ -4,7 +4,7 @@ import numpy as np
 import awkward1 as ak1
 import uproot
 
-from .definitions import fitparameters, reconstruction
+from .definitions import fitparameters, reconstruction, w2list_genhen, w2list_gseagen
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
@@ -88,6 +88,56 @@ def uniquecount(array, dtype=np.int64):
         else:
             out[i] = len(unique(sub_array))
     return out
+
+
+def w2list_genhen_keys():
+    """names of the w2list parameters as defined in the official
+    KM3NeT-Dataformat for genhen.
+
+    Returns
+    -------
+    dict_keys
+        genhen w2list keys.
+    """
+    return w2list_genhen.keys()
+
+
+def w2list_gseagen_keys():
+    """names of the w2list parameters as defined in the official
+    KM3NeT-Dataformat for gseagen.
+
+    Returns
+    -------
+    dict_keys
+        gseagen w2list keys.
+    """
+    return w2list_gseagen.keys()
+
+
+def get_w2list_param(events, generator, param):
+    """get all the values of a specific parameter from the w2list
+    in offline neutrino files.
+
+    Parameters
+    ----------
+    events : class km3io.offline.OfflineBranch
+        events class in offline neutrino files.
+    generator : str
+        the name of the software generating neutrinos, it is either
+        'genhen' or 'gseagen'. 
+    param : str
+        the name of the parameters found in w2list as defined in the
+        KM3NeT-Dataformat for both genhen and gseagen.
+
+    Returns
+    -------
+    awkward array
+        array of the values of interest.
+    """
+    if generator == "gseagen":
+        return events.w2list[:, w2list_gseagen[param]]
+    if generator == "genhen":
+        return events.w2list[:, w2list_genhen[param]]
 
 
 def rec_types():

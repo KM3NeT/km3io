@@ -347,7 +347,7 @@ To read an offline file start with opening it with an OfflineReader:
   import km3io
   f = km3io.OfflineReader("mcv5.0.gsg_elec-CC_1-500GeV.sirene.jte.jchain.jsh.aanet.1.root")
 
-Calling the header can be done with
+Calling the header can be done with:
 
 .. code-block:: python3
 
@@ -375,7 +375,7 @@ and provides lazy access. In offline files the header is unique and can be print
   start_run(run_id=1)
   tgen: 31556900.0
 
-An overview of the values in a the header are given in the `Overview of offline files <#overview-of-offline-files>`__
+An overview of the values in a the header are given in the `Overview of offline files <#overview-of-offline-files>`__.
 To read the values in the header one can call them directly:
 
 .. code-block:: python3
@@ -401,6 +401,7 @@ To start reading events call the events method on the file:
 Like the online reader lazy access is used. Using <TAB> completion gives an overview of available data. Alternatively the method `keys` can be used on events and it's data members containing a structure to see what is available for reading. 
 
 .. code-block:: python3
+
   >>> f.events.keys()
   dict_keys(['w2list', 'frame_index', 'overlays', 'comment', 'id', 'w', 'run_id', 'mc_t', 'mc_run_id', 'det_id', 'w3list', 'trigger_mask', 'mc_id', 'flags', 'trigger_counter', 'index', 't_sec', 't_ns', 'n_hits', 'n_mc_hits', 'n_tracks', 'n_mc_tracks'])
   >>> f.events.tracks.keys()
@@ -409,6 +410,7 @@ Like the online reader lazy access is used. Using <TAB> completion gives an over
 Reading the reconstructed values like energy and direction of an event can be done with:
 
 .. code-block:: python3
+
   >>> f.events.tracks.E
   <ChunkedArray [[3.8892237665736844 0.0 0.0 ... 0.0 0.0 0.0] [2.2293441683824318 5.203533524801224 6.083598278897039 ... 0.0 0.0 0.0] [3.044857858677666 3.787165776302862 4.5667729757360656 ... 0.0 0.0 0.0] ... [2.205652079790387 2.120769181474425 1.813066579943641 ... 0.0 0.0 0.0] [2.1000775068170343 3.939512272391431 3.697537355163539 ... 0.0 0.0 0.0] [4.213600763523154 1.7412855636388889 1.6657605276356036 ... 0.0 0.0 0.0]] at 0x7fcd5acb0950>
   >>> f.events.tracks.E[12]
@@ -422,11 +424,12 @@ Reading the reconstructed values like energy and direction of an event can be do
 
 Since reconstruction stages can be done multiple times and events can have multiple reconstructions, the vectors of reconstructed values can have variable length. Other data members like the header are always the same size. The definitions of data members can be found in the `definitions <https://git.km3net.de/km3py/km3io/-/tree/master/km3io/definitions>`__ folder. The definitions contain fit parameters, header information, reconstruction information, generator output and can be expaneded to include more.
 
-To use the definitions imagine the following: the user wants to read out the MC value of the Bjorken-Y of event 12 that was generated with gSeaGen. This can be found in the `gSeaGen definitions<https://git.km3net.de/km3py/km3io/-/blob/master/km3io/definitions/w2list_gseagen.py>`__:  `"W2LIST_GSEAGEN_BY": 8,`
+To use the definitions imagine the following: the user wants to read out the MC value of the Bjorken-Y of event 12 that was generated with gSeaGen. This can be found in the `gSeaGen definitions <https://git.km3net.de/km3py/km3io/-/blob/master/km3io/definitions/w2list_gseagen.py>`__:  `"W2LIST_GSEAGEN_BY": 8,`
 
 This value is saved into `w2list`, so if an event is generated with gSeaGen the value can be fetched like:
 
 .. code-block:: python3
+
   >>> f.events.w2list[12][8]
   0.393755
 

@@ -271,13 +271,13 @@ def mask(rec_stages, stages):
     return builder.snapshot() == 1
 
 
-def best_track(events, strategy="first", rec_type=None, rec_stages=None):
+def best_track(events, strategy="default", rec_type=None, rec_stages=None):
     """best track selection based on different strategies
 
     Parameters
     ----------
     events : class km3io.offline.OfflineBranch
-        the events branch.
+        a subset of reconstructed events where `events.n_tracks > 0` is always true. 
     strategy : str
         the trategy desired to select the best tracks. It is either: 
             - "first" : to select the first tracks.
@@ -296,14 +296,32 @@ def best_track(events, strategy="first", rec_type=None, rec_stages=None):
     -------
     class km3io.offline.OfflineBranch
         tracks class with the desired "best tracks" selection.
+
+    Raises
+    ------
+    ValueError
+        ValueError raised when:
+            - an invalid strategy is requested.
+            - a subset of events with empty tracks is used.
     """
-    tracks = events.tracks[events.n_tracks > 0]
+    options = ['first', 'rec_stages', 'default']
+    if strategy not in options:
+        raise ValueError("{} not in {}".format(strategy, options))
+
+    if any(events.n_tracks == 0):
+        raise ValueError(
+            "'events' should not contain empty tracks. Consider applying the mask: events.n_tracks>0"
+        )
+
+    tracks = events.tracks
     if strategy == "first":
-        return tracks[:, 0]
+        out = tracks[:, 0]
 
-    if strategy == "rec_stages" and rec_stages is not None:
-        return tracks[mask(tracks.rec_stages, rec_stages)]
+    elif strategy == "rec_stages" and rec_stages is not None:
+        out = tracks[mask(tracks.rec_stages, rec_stages)]
 
-    if strategy == "default" and rec_type is not None:
-        return tracks[tracks.rec_type == reconstruction[rec_type]][
+    elif strategy == "default" and rec_type is not None:
+        out = tracks[tracks.rec_type == reconstruction[rec_type]][
             tracks.lik == ak1.max(tracks.lik, axis=1)][:, 0]
+
+    return out

@@ -56,23 +56,27 @@ class TestBestTrack(unittest.TestCase):
         self.events = OFFLINE_FILE.events
 
     def test_best_tracks(self):
-        first_tracks = best_track(self.events, strategy="first")
-        rec_stages_tracks = best_track(self.events,
+        events = self.events[self.events.n_tracks > 0]
+        first_tracks = best_track(events, strategy="first")
+        rec_stages_tracks = best_track(events,
                                        strategy="rec_stages",
                                        rec_stages=[1, 3, 5, 4])
-        default_best = best_track(self.events,
+        default_best = best_track(events,
                                   strategy="default",
                                   rec_type="JPP_RECONSTRUCTION_TYPE")
 
-        assert first_tracks.dir_z[0] == self.events.tracks.dir_z[0][0]
-        assert first_tracks.dir_x[1] == self.events.tracks.dir_x[1][0]
+        assert first_tracks.dir_z[0] == events.tracks.dir_z[0][0]
+        assert first_tracks.dir_x[1] == events.tracks.dir_x[1][0]
 
         assert rec_stages_tracks.rec_stages[0] == [1, 3, 5, 4]
         assert rec_stages_tracks.rec_stages[1] == [1, 3, 5, 4]
 
-        assert default_best.lik[0] == ak.max(self.events.tracks.lik[0])
-        assert default_best.lik[1] == ak.max(self.events.tracks.lik[1])
+        assert default_best.lik[0] == ak.max(events.tracks.lik[0])
+        assert default_best.lik[1] == ak.max(events.tracks.lik[1])
         assert default_best.rec_type[0] == 4000
+
+        with self.assertRaises(ValueError):
+            best_track(events, strategy="Zineb")
 
 
 class TestCountNested(unittest.TestCase):

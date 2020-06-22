@@ -335,12 +335,102 @@ channel, time and ToT:
 Offline files reader
 --------------------
 
+In general an offline file has two methods to fetch data: the header and the events. Let's start with the header.
+
+Reading the file header
+"""""""""""""""""""""""
+
+To read an offline file start with opening it with an OfflineReader:
+
+.. code-block:: python3
+
+  import km3io
+  f = km3io.OfflineReader("mcv5.0.gsg_elec-CC_1-500GeV.sirene.jte.jchain.jsh.aanet.1.root")
+
+Calling the header can be done with:
+
+.. code-block:: python3
+
+  >>> f.header
+  <km3io.offline.Header at 0x7fcd81025990>
+
+and provides lazy access. In offline files the header is unique and can be printed
+
+.. code-block:: python3
+
+  >>> print(f.header)
+  MC Header:
+  DAQ(livetime=35.5)
+  XSecFile: /project/antares/public_student_software/genie/v3.00.02-hedis/Generator/genie_xsec/gSeaGen/G18_02a_00_000/gxspl-seawater.xml
+  coord_origin(x=457.8, y=574.3, z=0)
+  cut_nu(Emin=1, Emax=500, cosTmin=-1, cosTmax=1)
+  drawing: surface
+  fixedcan(xcenter=457.8, ycenter=574.3, zmin=0, zmax=475.6, radius=308.2)
+  genvol(zmin=0, zmax=475.6, r=308.2, volume=148000000.0, numberOfEvents=1000000.0)
+  simul(program='gSeaGen', version='dev', date=200616, time=223726)
+  simul_1: simul_1(field_0='GENIE', field_1='3.0.2', field_2=200616, field_3=223726)
+  simul_2: simul_2(field_0='GENIE_REWEIGHT', field_1='1.0.0', field_2=200616, field_3=223726)
+  simul_3: simul_3(field_0='JSirene', field_1='13.0.0-alpha.5-113-gaa686a6a-D', field_2='06/17/20', field_3=0)
+  spectrum(alpha=-3)
+  start_run(run_id=1)
+  tgen: 31556900.0
+
+An overview of the values in a the header are given in the `Overview of offline files <#overview-of-offline-files>`__.
+To read the values in the header one can call them directly:
+
+.. code-block:: python3
+
+  >>> f.header.DAQ.livetime
+  35.5
+  >>> f.header.cut_nu.Emin 
+  1
+  >>> f.header.genvol.numberOfEvents
+  1000000.0
 
 
+Reading events
+""""""""""""""
 
+To start reading events call the events method on the file:
 
+.. code-block:: python3
 
+  >>> f.events
+  <OfflineBranch[events]: 355 elements>
 
+Like the online reader lazy access is used. Using <TAB> completion gives an overview of available data. Alternatively the method `keys` can be used on events and it's data members containing a structure to see what is available for reading. 
 
+.. code-block:: python3
 
+  >>> f.events.keys()
+  dict_keys(['w2list', 'frame_index', 'overlays', 'comment', 'id', 'w', 'run_id', 'mc_t', 'mc_run_id', 'det_id', 'w3list', 'trigger_mask', 'mc_id', 'flags', 'trigger_counter', 'index', 't_sec', 't_ns', 'n_hits', 'n_mc_hits', 'n_tracks', 'n_mc_tracks'])
+  >>> f.events.tracks.keys()
+  dict_keys(['mother_id', 'status', 'lik', 'error_matrix', 'dir_z', 'len', 'rec_type', 'id', 't', 'dir_x', 'rec_stages', 'dir_y', 'fitinf', 'pos_z', 'hit_ids', 'comment', 'type', 'any', 'E', 'pos_y', 'usr_names', 'pos_x'])
 
+Reading the reconstructed values like energy and direction of an event can be done with:
+
+.. code-block:: python3
+
+  >>> f.events.tracks.E
+  <ChunkedArray [[3.8892237665736844 0.0 0.0 ... 0.0 0.0 0.0] [2.2293441683824318 5.203533524801224 6.083598278897039 ... 0.0 0.0 0.0] [3.044857858677666 3.787165776302862 4.5667729757360656 ... 0.0 0.0 0.0] ... [2.205652079790387 2.120769181474425 1.813066579943641 ... 0.0 0.0 0.0] [2.1000775068170343 3.939512272391431 3.697537355163539 ... 0.0 0.0 0.0] [4.213600763523154 1.7412855636388889 1.6657605276356036 ... 0.0 0.0 0.0]] at 0x7fcd5acb0950>
+  >>> f.events.tracks.E[12]
+  array([ 4.19391543, 15.3079374 , 10.47125863, ...,  0.        ,
+          0.        ,  0.        ])
+  >>> f.events.tracks.dir_z
+  <ChunkedArray [[0.7855203887479368 0.7855203887479368 0.7855203887479368 ... -0.5680647731737454 1.0 1.0] [0.9759269228630431 0.2677622006758061 -0.06664626796127045 ... -2.3205103555187022e-08 1.0 1.0] [-0.12332041078454238 0.09537382569575953 0.09345521875272474 ... -0.6631226836266504 -0.6631226836266504 -0.6631226836266504] ... [-0.1396584943602339 -0.08400681020109765 -0.014562067998281832 ... 1.0 1.0 1.0] [0.011997491147399564 -0.08496327394947281 -0.12675279061755318 ... 0.12053665899140412 1.0 1.0] [0.6548114607791208 0.8115427935470209 0.9043563059276946 ... 1.0 1.0 1.0]] at 0x7fcd73746410>
+  >>> f.events.tracks.dir_z[12]
+  array([ 2.39745910e-01,  3.45008838e-01,  4.81870447e-01,  4.55139657e-01, ..., 
+  -2.32051036e-08,  1.00000000e+00])
+
+Since reconstruction stages can be done multiple times and events can have multiple reconstructions, the vectors of reconstructed values can have variable length. Other data members like the header are always the same size. The definitions of data members can be found in the `definitions <https://git.km3net.de/km3py/km3io/-/tree/master/km3io/definitions>`__ folder. The definitions contain fit parameters, header information, reconstruction information, generator output and can be expaneded to include more.
+
+To use the definitions imagine the following: the user wants to read out the MC value of the Bjorken-Y of event 12 that was generated with gSeaGen. This can be found in the `gSeaGen definitions <https://git.km3net.de/km3py/km3io/-/blob/master/km3io/definitions/w2list_gseagen.py>`__:  `"W2LIST_GSEAGEN_BY": 8,`
+
+This value is saved into `w2list`, so if an event is generated with gSeaGen the value can be fetched like:
+
+.. code-block:: python3
+
+  >>> f.events.w2list[12][8]
+  0.393755
+
+Note that w2list can also contain other values if the event is generated with another generator.

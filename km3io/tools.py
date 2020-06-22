@@ -271,13 +271,13 @@ def mask(rec_stages, stages):
     return builder.snapshot() == 1
 
 
-def best_track(tracks, strategy="first", rec_type=None, rec_stages=None):
+def best_track(events, strategy="first", rec_type=None, rec_stages=None):
     """best track selection based on different strategies
 
     Parameters
     ----------
-    tracks : class km3io.offline.OfflineBranch
-        the tracks branch.
+    events : class km3io.offline.OfflineBranch
+        the events branch.
     strategy : str
         the trategy desired to select the best tracks. It is either: 
             - "first" : to select the first tracks.
@@ -297,6 +297,7 @@ def best_track(tracks, strategy="first", rec_type=None, rec_stages=None):
     class km3io.offline.OfflineBranch
         tracks class with the desired "best tracks" selection.
     """
+    tracks = events.tracks[events.n_tracks > 0]
     if strategy == "first":
         return tracks[:, 0]
 

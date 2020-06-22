@@ -8,10 +8,15 @@ from pathlib import Path
 from km3io import OfflineReader
 from km3io.tools import (to_num, cached_property, unfold_indices, unique,
                          uniquecount, fitinf, fitparams, count_nested, _find,
-                         mask, best_track, rec_types)
+                         mask, best_track, rec_types, get_w2list_param)
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
 OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'km3net_offline.root')
+
+# class TestGetw2listParam(unittest.TestCase):
+#     def test_get_w2list_param(self):
+#         xsec_mean = get_w2list_param(OFFLINE_FILE.events, "gseagen", "W2LIST_GSEAGEN_XSEC_MEAN")
+#         print(xsec_mean)
 
 
 class TestFitinf(unittest.TestCase):
@@ -48,25 +53,25 @@ class TestRecoTypes(unittest.TestCase):
 
 class TestBestTrack(unittest.TestCase):
     def setUp(self):
-        self.tracks = OFFLINE_FILE.events.tracks
+        self.events = OFFLINE_FILE.events
 
     def test_best_tracks(self):
-        first_tracks = best_track(self.tracks, strategy="first")
-        rec_stages_tracks = best_track(self.tracks,
+        first_tracks = best_track(self.events, strategy="first")
+        rec_stages_tracks = best_track(self.events,
                                        strategy="rec_stages",
                                        rec_stages=[1, 3, 5, 4])
-        default_best = best_track(self.tracks,
+        default_best = best_track(self.events,
                                   strategy="default",
                                   rec_type="JPP_RECONSTRUCTION_TYPE")
 
-        assert first_tracks.dir_z[0] == self.tracks.dir_z[0][0]
-        assert first_tracks.dir_x[1] == self.tracks.dir_x[1][0]
+        assert first_tracks.dir_z[0] == self.events.tracks.dir_z[0][0]
+        assert first_tracks.dir_x[1] == self.events.tracks.dir_x[1][0]
 
         assert rec_stages_tracks.rec_stages[0] == [1, 3, 5, 4]
         assert rec_stages_tracks.rec_stages[1] == [1, 3, 5, 4]
 
-        assert default_best.lik[0] == ak.max(self.tracks.lik[0])
-        assert default_best.lik[1] == ak.max(self.tracks.lik[1])
+        assert default_best.lik[0] == ak.max(self.events.tracks.lik[0])
+        assert default_best.lik[1] == ak.max(self.events.tracks.lik[1])
         assert default_best.rec_type[0] == 4000
 
 

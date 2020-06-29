@@ -281,9 +281,6 @@ def best_track(events, strategy="default", rec_type=None, rec_stages=None):
     strategy : str
         the trategy desired to select the best tracks. It is either: 
             - "first" : to select the first tracks.
-            - "rec_stages": to select all tracks with a specific reconstruction stages.
-            This requires the user to specify the reconstruction stages in rec_stages input.
-            Example: best_track(my_tracks, strategy="rec_stages", rec_stages=[1, 2, 3, 4, 5]).
             - "default": to select the best tracks (the first ones) corresponding to a specific
             reconstruction algorithm (JGandalf, Jshowerfit, etc). This requires rec_type input.
             Example: best_track(my_tracks, strategy="default", rec_type="JPP_RECONSTRUCTION_TYPE").
@@ -304,24 +301,32 @@ def best_track(events, strategy="default", rec_type=None, rec_stages=None):
             - an invalid strategy is requested.
             - a subset of events with empty tracks is used.
     """
-    options = ['first', 'rec_stages', 'default']
+    options = ['first', 'default']
     if strategy not in options:
         raise ValueError("{} not in {}".format(strategy, options))
 
-    if any(events.n_tracks == 0):
+    n_events = len(events)
+    if n_events>1 and any(events.n_tracks == 0):
         raise ValueError(
             "'events' should not contain empty tracks. Consider applying the mask: events.n_tracks>0"
         )
 
     tracks = events.tracks
     if strategy == "first":
-        out = tracks[:, 0]
-
-    elif strategy == "rec_stages" and rec_stages is not None:
-        out = tracks[mask(tracks.rec_stages, rec_stages)]
+        if n_events == 1:
+            out = tracks[0]
+        else:
+            out = tracks[:, 0]
 
     elif strategy == "default" and rec_type is not None:
-        out = tracks[tracks.rec_type == reconstruction[rec_type]][
-            tracks.lik == ak1.max(tracks.lik, axis=1)][:, 0]
+        if n_events == 1:
+            out = tracks[tracks.rec_type == reconstruction[rec_type]][
+                tracks.lik == ak1.max(tracks.lik, axis=0)][0]
+        else:
+            out = tracks[tracks.rec_type == reconstruction[rec_type]][
+                tracks.lik == ak1.max(tracks.lik, axis=1)][:, 0]
 
     return out
+
+
+

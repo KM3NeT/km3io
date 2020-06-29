@@ -306,7 +306,7 @@ def best_track(events, strategy="default", rec_type=None, rec_stages=None):
         raise ValueError("{} not in {}".format(strategy, options))
 
     n_events = len(events)
-    if n_events>1 and any(events.n_tracks == 0):
+    if n_events > 1 and any(events.n_tracks == 0):
         raise ValueError(
             "'events' should not contain empty tracks. Consider applying the mask: events.n_tracks>0"
         )

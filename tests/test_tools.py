@@ -8,7 +8,8 @@ from pathlib import Path
 from km3io import OfflineReader
 from km3io.tools import (to_num, cached_property, unfold_indices, unique,
                          uniquecount, fitinf, fitparams, count_nested, _find,
-                         mask, best_track, rec_types, get_w2list_param, get_multiplicity)
+                         mask, best_track, rec_types, get_w2list_param,
+                         get_multiplicity)
 
 SAMPLES_DIR = Path(__file__).parent / 'samples'
 OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'km3net_offline.root')
@@ -90,10 +91,12 @@ class TestBestTrack(unittest.TestCase):
 
 class TestGetMultiplicity(unittest.TestCase):
     def test_get_multiplicity(self):
-        rec_stages_tracks = get_multiplicity(OFFLINE_FILE.events.tracks, [1, 3, 5, 4])
+        rec_stages_tracks = get_multiplicity(OFFLINE_FILE.events.tracks,
+                                             [1, 3, 5, 4])
 
         assert rec_stages_tracks.rec_stages[0] == [1, 3, 5, 4]
         assert rec_stages_tracks.rec_stages[1] == [1, 3, 5, 4]
+
 
 class TestCountNested(unittest.TestCase):
     def test_count_nested(self):

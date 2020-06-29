@@ -271,7 +271,7 @@ def mask(rec_stages, stages):
     return builder.snapshot() == 1
 
 
-def best_track(events, strategy="default", rec_type=None, rec_stages=None):
+def best_track(events, strategy="default", rec_type=None):
     """best track selection based on different strategies
 
     Parameters
@@ -286,8 +286,6 @@ def best_track(events, strategy="default", rec_type=None, rec_stages=None):
             Example: best_track(my_tracks, strategy="default", rec_type="JPP_RECONSTRUCTION_TYPE").
     rec_type : str, optional
         reconstruction type as defined in the official KM3NeT-Dataformat.
-    rec_stages : list, optional
-        list of the reconstruction stages. Example: [1, 2, 3, 4, 5]
 
     Returns
     -------

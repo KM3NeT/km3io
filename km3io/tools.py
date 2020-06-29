@@ -329,4 +329,20 @@ def best_track(events, strategy="default", rec_type=None, rec_stages=None):
     return out
 
 
+def get_multiplicity(tracks, rec_stages):
+    """tracks selection based on specific reconstruction stages (for multiplicity
+    calculations).
 
+    Parameters
+    ----------
+    tracks : class km3io.offline.OfflineBranch
+        tracks or a subste of tracks. 
+    rec_stages : list
+        the reconstruction stages of interest. Examle: [1, 2, 3, 4, 5].
+
+    Returns
+    -------
+    class km3io.offline.OfflineBranch
+        tracks branch with the desired reconstruction stages only.
+    """
+    return tracks[mask(tracks.rec_stages, rec_stages)]

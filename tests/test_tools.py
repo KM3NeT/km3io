@@ -60,8 +60,8 @@ class TestBestTrack(unittest.TestCase):
     def test_best_tracks(self):
         # test selection from multiple events
         events = self.events[self.events.n_tracks > 0]
-        first_tracks = best_track(events, strategy="first")
-        default_best = best_track(events,
+        first_tracks = best_track(events.tracks, strategy="first")
+        default_best = best_track(events.tracks,
                                   strategy="default",
                                   rec_type="JPP_RECONSTRUCTION_TYPE")
 
@@ -73,8 +73,8 @@ class TestBestTrack(unittest.TestCase):
         assert default_best.rec_type[0] == 4000
 
         # test selection from one event
-        first_track = best_track(self.one_event, strategy="first")
-        best = best_track(self.one_event,
+        first_track = best_track(self.one_event.tracks, strategy="first")
+        best = best_track(self.one_event.tracks,
                           strategy="default",
                           rec_type="JPP_RECONSTRUCTION_TYPE")
 
@@ -86,7 +86,7 @@ class TestBestTrack(unittest.TestCase):
 
         # test raising ValueError
         with self.assertRaises(ValueError):
-            best_track(events, strategy="Zineb")
+            best_track(events.tracks, strategy="Zineb")
 
 
 class TestGetMultiplicity(unittest.TestCase):

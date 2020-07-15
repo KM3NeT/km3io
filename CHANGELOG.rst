@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.15.1 / 2020-07-15
+~~~~~~~~~~~~~~~~~~~
+* Added wheel packages for faster installation
+
 0.15.0 / 2020-05-22
 ~~~~~~~~~~~~~~~~~~~
 * Added reverse maps for index lookup of definitions

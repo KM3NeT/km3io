@@ -13,3 +13,4 @@ sphinx-gallery>=0.1.12
 sphinx_rtd_theme
 sphinxcontrib-versioning
 yapf>=0.29.0
+wheel

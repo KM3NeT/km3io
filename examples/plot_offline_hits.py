@@ -9,12 +9,13 @@ Note: the offline file used here has MC offline data and was intentionaly reduce
 to 10 events.
 """
 import km3io as ki
+from km3net_testdata import data_path
 
 #####################################################
 # To access offline hits/mc_hits data:
 
-mc_hits = ki.OfflineReader("samples/numucc.root").events.mc_hits
-hits = ki.OfflineReader("samples/km3net_offline.root").events.hits
+mc_hits = ki.OfflineReader(data_path("offline/numucc.root")).events.mc_hits
+hits = ki.OfflineReader(data_path("offline/km3net_offline.root")).events.hits
 
 
 #####################################################

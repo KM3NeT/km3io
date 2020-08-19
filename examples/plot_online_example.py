@@ -9,6 +9,7 @@ Such a file is usually called "KM3NET_00000001_00000002.root", where the first
 number is the detector ID and the second the run number.
 """
 import km3io as ki
+from km3net_testdata import data_path
 
 #####################################################
 # Accessing the event tree
@@ -17,7 +18,7 @@ import km3io as ki
 # with:
 
 
-f = ki.OnlineReader("samples/km3net_online.root")
+f = ki.OnlineReader(data_path("online/km3net_online.root"))
 
 #####################################################
 # Note that only some meta information is read into memory.

@@ -2,17 +2,15 @@ import unittest
 import numpy as np
 from pathlib import Path
 
+from km3net_testdata import data_path
+
 from km3io import OfflineReader
 from km3io.offline import _nested_mapper, Header
 
-SAMPLES_DIR = Path(__file__).parent / 'samples'
-OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'km3net_offline.root')
-OFFLINE_USR = OfflineReader(SAMPLES_DIR / 'usr-sample.root')
-OFFLINE_MC_TRACK_USR = OfflineReader(
-    SAMPLES_DIR /
-    'mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root'
-)
-OFFLINE_NUMUCC = OfflineReader(SAMPLES_DIR / "numucc.root")  # with mc data
+OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
+OFFLINE_USR = OfflineReader(data_path("offline/usr-sample.root"))
+OFFLINE_MC_TRACK_USR = OfflineReader(data_path('offline/mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root'))
+OFFLINE_NUMUCC = OfflineReader(data_path("offline/numucc.root"))  # with mc data
 
 
 class TestOfflineReader(unittest.TestCase):
@@ -22,9 +20,9 @@ class TestOfflineReader(unittest.TestCase):
         self.n_events = 10
 
     def test_context_manager(self):
-        filename = SAMPLES_DIR / 'km3net_offline.root'
-        with OfflineReader(filename) as r:
-            assert r._filename == filename
+        filename = OFFLINE_FILE
+        with OfflineReader(data_path("offline/km3net_offline.root")) as r:
+            assert r
 
     def test_number_events(self):
         assert self.n_events == len(self.r.events)

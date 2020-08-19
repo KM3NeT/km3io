@@ -2,11 +2,11 @@ import os
 import re
 import unittest
 
+from km3net_testdata import data_path
+
 from km3io.gseagen import GSGReader
 
-SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
-GSG_FILE = os.path.join(SAMPLES_DIR, "gseagen.root")
-GSG_READER = GSGReader(GSG_FILE)
+GSG_READER = GSGReader(data_path("gseagen/gseagen.root"))
 
 
 class TestGSGHeader(unittest.TestCase):
@@ -56,7 +56,7 @@ class TestGSGHeader(unittest.TestCase):
         self.assertListEqual(self.header["NuList"].tolist(), [-14, 14])
 
     def test_unsupported_header(self):
-        f = GSGReader(os.path.join(SAMPLES_DIR, "km3net_online.root"))
+        f = GSGReader(data_path("online/km3net_online.root"))
         with self.assertWarns(UserWarning):
             f.header
 

@@ -9,8 +9,12 @@ from km3io.offline import _nested_mapper, Header
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
 OFFLINE_USR = OfflineReader(data_path("offline/usr-sample.root"))
-OFFLINE_MC_TRACK_USR = OfflineReader(data_path('offline/mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root'))
-OFFLINE_NUMUCC = OfflineReader(data_path("offline/numucc.root"))  # with mc data
+OFFLINE_MC_TRACK_USR = OfflineReader(
+    data_path(
+        'offline/mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root'
+    ))
+OFFLINE_NUMUCC = OfflineReader(
+    data_path("offline/numucc.root"))  # with mc data
 
 
 class TestOfflineReader(unittest.TestCase):

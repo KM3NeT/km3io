@@ -2,10 +2,11 @@ import os
 import re
 import unittest
 
+from km3net_testdata import data_path
+
 from km3io.online import OnlineReader, get_rate, has_udp_trailer, get_udp_max_sequence_number, get_channel_flags, get_number_udp_packets
 
-SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
-ONLINE_FILE = os.path.join(SAMPLES_DIR, "km3net_online.root")
+ONLINE_FILE = data_path("online/km3net_online.root")
 
 
 class TestOnlineReaderContextManager(unittest.TestCase):

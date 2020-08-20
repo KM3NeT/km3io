@@ -9,12 +9,13 @@ Note: the offline file used here has MC offline data and was intentionaly reduce
 to 10 events.
 """
 import km3io as ki
+from km3net_testdata import data_path
 
 #####################################################
 # First, pass a filename to the `OfflineReader` class to open the file.
 # Note that only some meta information is read into memory.
 
-r = ki.OfflineReader("samples/numucc.root")
+r = ki.OfflineReader(data_path("offline/numucc.root"))
 
 
 #####################################################

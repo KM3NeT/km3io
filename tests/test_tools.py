@@ -3,16 +3,17 @@
 import unittest
 import awkward1 as ak
 import numpy as np
-
 from pathlib import Path
+
+from km3net_testdata import data_path
+
 from km3io import OfflineReader
 from km3io.tools import (to_num, cached_property, unfold_indices, unique,
                          uniquecount, fitinf, fitparams, count_nested, _find,
                          mask, best_track, rec_types, get_w2list_param,
                          get_multiplicity)
 
-SAMPLES_DIR = Path(__file__).parent / 'samples'
-OFFLINE_FILE = OfflineReader(SAMPLES_DIR / 'km3net_offline.root')
+OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
 
 # class TestGetw2listParam(unittest.TestCase):
 #     def test_get_w2list_param(self):

@@ -8,12 +8,13 @@ interface. The available keys can be accessed either as attributes or via a
 dictionary lookup:
 """
 import km3io as ki
+from km3net_testdata import data_path
 
 #####################################################
 # First, pass a filename to the `OfflineReader` class to open the file.
 # Note that only some meta information is read into memory.
 
-r = ki.OfflineReader("samples/usr-sample.root")
+r = ki.OfflineReader(data_path("offline/usr-sample.root"))
 
 
 #####################################################

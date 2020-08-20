@@ -8,12 +8,13 @@ written by aanet software.
 Note: the offline files used here were intentionaly reduced to 10 events.
 """
 import km3io as ki
+from km3net_testdata import data_path
 
 #####################################################
 # To access offline tracks/mc_tracks data:
 
-mc_tracks = ki.OfflineReader("samples/numucc.root").events.mc_tracks
-tracks = ki.OfflineReader("samples/km3net_offline.root").events.tracks
+mc_tracks = ki.OfflineReader(data_path("offline/numucc.root")).events.mc_tracks
+tracks = ki.OfflineReader(data_path("offline/km3net_offline.root")).events.tracks
 
 
 #####################################################

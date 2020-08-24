@@ -11,8 +11,8 @@ from km3io.definitions import w2list_genhen as kw2gen
 from km3io.definitions import w2list_gseagen as kw2gsg
 
 # 110 MB based on the size of the largest basket found so far in km3net
-BASKET_CACHE_SIZE = 110 * 1024 ** 2
-BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
+BASKET_CACHE_SIZE = 110 * 1024**2
+BASKET_CACHE = uproot.cache.LRUArrayCache(BASKET_CACHE_SIZE)
 
 
 class cached_property:

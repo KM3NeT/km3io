@@ -5,10 +5,10 @@ import numpy as np
 
 import numba as nb
 
-TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
-SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
-BASKET_CACHE_SIZE = 110 * 1024 ** 2
-BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
+TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
+SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
+BASKET_CACHE_SIZE = 110 * 1024**2
+BASKET_CACHE = uproot.cache.LRUArrayCache(BASKET_CACHE_SIZE)
 
 # Parameters for PMT rate conversions, since the rates in summary slices are
 # stored as a single byte to save space. The values from 0-255 can be decoded
@@ -215,28 +215,16 @@ class SummarySlices:
 
     def _read_summaryslices(self):
         """Reads a lazyarray of summary slices"""
-        tree = self._fobj[b"KM3NET_SUMMARYSLICE"][b"KM3NET_SUMMARYSLICE"]
-        return tree[b"vector<KM3NETDAQ::JDAQSummaryFrame>"].lazyarray(
-            uproot.asjagged(
-                uproot.astable(
-                    uproot.asdtype(
-                        [
-                            ("dom_id", "i4"),
-                            ("dq_status", "u4"),
-                            ("hrv", "u4"),
-                            ("fifo", "u4"),
-                            ("status3", "u4"),
-                            ("status4", "u4"),
-                        ]
-                        + [(c, "u1") for c in self._ch_selector]
-                    )
-                ),
-                skipbytes=10,
-            ),
-            basketcache=uproot.cache.ThreadSafeArrayCache(
-                SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE
-            ),
-        )
+        tree = self._fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
+        return tree[b'vector<KM3NETDAQ::JDAQSummaryFrame>'].lazyarray(
+            uproot.asjagged(uproot.astable(
+                uproot.asdtype([("dom_id", "i4"), ("dq_status", "u4"),
+                                ("hrv", "u4"), ("fifo", "u4"),
+                                ("status3", "u4"), ("status4", "u4")] +
+                               [(c, "u1") for c in self._ch_selector])),
+                            skipbytes=10),
+            basketcache=uproot.cache.LRUArrayCache(
+                SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE))
 
     def _read_headers(self):
         """Reads a lazyarray of summary slice headers"""
@@ -276,25 +264,15 @@ class Timeslices:
             superframes = tree[b"vector<KM3NETDAQ::JDAQSuperFrame>"]
             hits_dtype = np.dtype([("pmt", "u1"), ("tdc", "<u4"), ("tot", "u1")])
             hits_buffer = superframes[
-                b"vector<KM3NETDAQ::JDAQSuperFrame>.buffer"
-            ].lazyarray(
-                uproot.asjagged(
-                    uproot.astable(uproot.asdtype(hits_dtype)), skipbytes=6
-                ),
-                basketcache=uproot.cache.ThreadSafeArrayCache(
-                    TIMESLICE_FRAME_BASKET_CACHE_SIZE
-                ),
-            )
-            self._timeslices[stream.decode("ascii")] = (
-                headers,
-                superframes,
-                hits_buffer,
-            )
-            setattr(
-                self,
-                stream.decode("ascii"),
-                TimesliceStream(headers, superframes, hits_buffer),
-            )
+                b'vector<KM3NETDAQ::JDAQSuperFrame>.buffer'].lazyarray(
+                    uproot.asjagged(uproot.astable(uproot.asdtype(hits_dtype)),
+                                    skipbytes=6),
+                    basketcache=uproot.cache.LRUArrayCache(
+                        TIMESLICE_FRAME_BASKET_CACHE_SIZE))
+            self._timeslices[stream.decode("ascii")] = (headers, superframes,
+                                                        hits_buffer)
+            setattr(self, stream.decode("ascii"),
+                    TimesliceStream(headers, superframes, hits_buffer))
 
     def stream(self, stream, idx):
         ts = self._timeslices[stream]
@@ -317,7 +295,7 @@ class TimesliceStream:
         #             np.dtype([('a', 'i4'), ('b', 'i4'), ('c', 'i4'),
         #                       ('d', 'i4'), ('e', 'i4')]))),
         #                     skipbytes=6),
-        #     basketcache=uproot.cache.ThreadSafeArrayCache(
+        #     basketcache=uproot.cache.LRUArrayCache(
         #         TIMESLICE_FRAME_BASKET_CACHE_SIZE))
         self.headers = headers
         self.superframes = superframes

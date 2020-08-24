@@ -1,6 +1,6 @@
 import binascii
 from collections import namedtuple
-import uproot
+import uproot4 as uproot
 import warnings
 import numba as nb
 import awkward1 as ak1

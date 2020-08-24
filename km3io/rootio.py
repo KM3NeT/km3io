@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 import awkward1 as ak
-import uproot
+import uproot4 as uproot
 
 from .tools import unfold_indices
 

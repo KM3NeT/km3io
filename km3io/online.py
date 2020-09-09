@@ -214,9 +214,9 @@ class SummarySlices:
         return self._rates
 
     def _read_summaryslices(self):
-        """Reads a lazyarray of summary slices"""
+        """Reads the summary slices"""
         tree = self._fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
-        return tree[b'vector<KM3NETDAQ::JDAQSummaryFrame>'].lazyarray(
+        return tree[b'vector<KM3NETDAQ::JDAQSummaryFrame>'].array(
             uproot.asjagged(uproot.astable(
                 uproot.asdtype([("dom_id", "i4"), ("dq_status", "u4"),
                                 ("hrv", "u4"), ("fifo", "u4"),
@@ -227,11 +227,11 @@ class SummarySlices:
                 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE))
 
     def _read_headers(self):
-        """Reads a lazyarray of summary slice headers"""
-        tree = self._fobj[b"KM3NET_SUMMARYSLICE"][b"KM3NET_SUMMARYSLICE"]
-        return tree[b"KM3NETDAQ::JDAQSummarysliceHeader"].lazyarray(
-            uproot.interpret(tree[b"KM3NETDAQ::JDAQSummarysliceHeader"], cntvers=True)
-        )
+        """Reads the summary slice headers"""
+        tree = self._fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
+        return tree[b'KM3NETDAQ::JDAQSummarysliceHeader'].array(
+            uproot.interpret(tree[b'KM3NETDAQ::JDAQSummarysliceHeader'],
+                             cntvers=True))
 
     def __str__(self):
         return "Number of summaryslices: {}".format(len(self.headers))
@@ -264,7 +264,7 @@ class Timeslices:
             superframes = tree[b"vector<KM3NETDAQ::JDAQSuperFrame>"]
             hits_dtype = np.dtype([("pmt", "u1"), ("tdc", "<u4"), ("tot", "u1")])
             hits_buffer = superframes[
-                b'vector<KM3NETDAQ::JDAQSuperFrame>.buffer'].lazyarray(
+                b'vector<KM3NETDAQ::JDAQSuperFrame>.buffer'].array(
                     uproot.asjagged(uproot.astable(uproot.asdtype(hits_dtype)),
                                     skipbytes=6),
                     basketcache=uproot.cache.LRUArrayCache(
@@ -289,7 +289,7 @@ class Timeslices:
 
 class TimesliceStream:
     def __init__(self, headers, superframes, hits_buffer):
-        # self.headers = headers.lazyarray(
+        # self.headers = headers.array(
         #     uproot.asjagged(uproot.astable(
         #         uproot.asdtype(
         #             np.dtype([('a', 'i4'), ('b', 'i4'), ('c', 'i4'),
@@ -303,10 +303,10 @@ class TimesliceStream:
 
     # def frames(self):
     #     n_hits = self._superframe[
-    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].lazyarray(
+    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].array(
     #             basketcache=BASKET_CACHE)[self._idx]
     #     module_ids = self._superframe[
-    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].lazyarray(basketcache=BASKET_CACHE)[self._idx]
+    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].array(basketcache=BASKET_CACHE)[self._idx]
     #     idx = 0
     #     for module_id, n_hits in zip(module_ids, n_hits):
     #         self._frames[module_id] = hits_buffer[idx:idx + n_hits]
@@ -335,18 +335,15 @@ class Timeslice:
         """Populate a dictionary of frames with the module ID as key"""
         hits_buffer = self._hits_buffer[self._idx]
         n_hits = self._superframe[
-            b"vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits"
-        ].lazyarray(basketcache=BASKET_CACHE)[self._idx]
+            b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].array(
+                basketcache=BASKET_CACHE)[self._idx]
         try:
             module_ids = self._superframe[
-                b"vector<KM3NETDAQ::JDAQSuperFrame>.id"
-            ].lazyarray(basketcache=BASKET_CACHE)[self._idx]
+                b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].array(
+                    basketcache=BASKET_CACHE)[self._idx]
         except KeyError:
-            module_ids = (
-                self._superframe[
-                    b"vector<KM3NETDAQ::JDAQSuperFrame>.KM3NETDAQ::JDAQModuleIdentifier"
-                ]
-                .lazyarray(
+            module_ids = self._superframe[
+                b'vector<KM3NETDAQ::JDAQSuperFrame>.KM3NETDAQ::JDAQModuleIdentifier'].array(
                     uproot.asjagged(
                         uproot.astable(uproot.asdtype([("dom_id", ">i4")]))
                     ),
@@ -363,10 +360,8 @@ class Timeslice:
     def __len__(self):
         if self._n_frames is None:
             self._n_frames = len(
-                self._superframe[b"vector<KM3NETDAQ::JDAQSuperFrame>.id"].lazyarray(
-                    basketcache=BASKET_CACHE
-                )[self._idx]
-            )
+                self._superframe[b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].
+                array(basketcache=BASKET_CACHE)[self._idx])
         return self._n_frames
 
     def __str__(self):

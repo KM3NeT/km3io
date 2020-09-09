@@ -133,13 +133,13 @@ class Usr:
 
         self._usr_names = [
             n.decode("utf-8")
-            for n in self._branch[self._usr_key + "_names"].lazyarray()[0]
+            for n in self._branch[self._usr_key + '_names'].array()[0]
         ]
         self._usr_idx_lookup = {
             name: index for index, name in enumerate(self._usr_names)
         }
 
-        data = self._branch[self._usr_key].lazyarray()
+        data = self._branch[self._usr_key].array()
 
         if self._index_chain:
             data = unfold_indices(data, self._index_chain)

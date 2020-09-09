@@ -108,9 +108,7 @@ class Branch:
     def _initialise_keys(self):
         """Create the keymap and instance attributes for branch keys"""
         # TODO: this could be a cached property
-        keys = set(k.decode("utf-8") for k in self._branch.keys()) - set(
-            self._mapper.exclude
-        )
+        keys = set(self._branch.keys()) - set(self._mapper.exclude)
         self._keymap = {
             **{self._mapper.attrparser(k): k for k in keys},
             **self._mapper.extra,
@@ -154,9 +152,8 @@ class Branch:
                 6,
             )
 
-        out = self._branch[self._keymap[key]].lazyarray(
-            interpretation=interpretation, basketcache=BASKET_CACHE
-        )
+        out = self._branch[self._keymap[key]].array(
+            interpretation=interpretation)
         if self._index_chain is not None and key in self._mapper.toawkward:
             cache_key = self._mapper.name + "/" + key
             if cache_key not in self._awkward_cache:
@@ -199,10 +196,7 @@ class Branch:
         else:
             return len(
                 unfold_indices(
-                    self._branch[self._keymap["id"]].lazyarray(
-                        basketcache=BASKET_CACHE
-                    ),
-                    self._index_chain,
+                    self._branch[self._keymap['id']].array(), self._index_chain))
                 )
             )
 

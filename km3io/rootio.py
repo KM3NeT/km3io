@@ -158,6 +158,9 @@ class Branch:
         if isinstance(item, str):
             return self.__getkey__(item)
 
+        if isinstance(item, (np.int32, np.int64)):
+            item = int(item)
+
         # if item.__class__.__name__ == "ChunkedArray":
         #     item = np.array(item)
 

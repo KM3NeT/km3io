@@ -69,7 +69,7 @@ def get_channel_flags(value):
     value : int32
         The integer value to be parsed.
     """
-    channel_bits = np.bitwise_and(value, 0x4FFFFFFF)
+    channel_bits = np.bitwise_and(value, 0x7FFFFFFF)
     flags = unpack_bits(channel_bits, CHANNEL_BITS_TEMPLATE)
     return np.flip(flags, axis=-1)
 

@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* Fixed a bug where the last bit of HRV or FIFO were incorrectly
+  masked when using ``km3io.online.get_channel_flags``
 
 Version 0
 ---------

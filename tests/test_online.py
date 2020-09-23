@@ -1,3 +1,5 @@
+from collections import namedtuple
+import itertools
 import os
 import re
 import unittest
@@ -5,6 +7,7 @@ import unittest
 from km3net_testdata import data_path
 
 from km3io.online import OnlineReader, get_rate, has_udp_trailer, get_udp_max_sequence_number, get_channel_flags, get_number_udp_packets
+from km3io.tools import to_num
 
 ONLINE_FILE = data_path("online/km3net_online.root")
 
@@ -397,6 +400,45 @@ class TestSummaryslices(unittest.TestCase):
 
     def test_str(self):
         print(str(self.ss))
+
+
+class TestGetChannelFlags_Issue59(unittest.TestCase):
+    def test_sample_summaryslice_dump(self):
+        fieldnames = ["dom_id"]
+
+        for i in range(31):
+            fieldnames.append(f"ch{i}")
+            fieldnames.append(f"hrvfifo{i}")
+
+        Entry = namedtuple("Entry", fieldnames)
+
+        with open(
+            data_path("online/KM3NeT_00000049_00008456.summaryslice-167941.txt")
+        ) as fobj:
+            ref_entries = [Entry(*list(l.strip().split())) for l in fobj.readlines()]
+
+        r = OnlineReader(
+            data_path("online/KM3NeT_00000049_00008456.summaryslice-167941.root")
+        )
+        summaryslice = r.summaryslices.slices[0]
+
+        for ours, ref in zip(summaryslice, ref_entries):
+            assert ours.dom_id == to_num(ref.dom_id)
+            fifos = get_channel_flags(ours.fifo)
+            hrvs = get_channel_flags(ours.hrv)
+            for i in range(31):
+                attr = f"ch{i}"
+                self.assertAlmostEqual(
+                    get_rate(getattr(ours, attr)) / 1000.0,
+                    to_num(getattr(ref, attr)),
+                    places=1,
+                )
+
+                hrvfifo = getattr(ref, f"hrvfifo{i}")
+                ref_hrv = bool(int(hrvfifo[0]))
+                ref_fifo = bool(int(hrvfifo[1]))
+                assert hrvs[i] == ref_hrv
+                assert fifos[i] == ref_fifo
 
 
 class TestGetRate(unittest.TestCase):

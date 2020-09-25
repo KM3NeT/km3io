@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.15.3 / 2020-09-25
+~~~~~~~~~~~~~~~~~~~
+* Updated KM3NeT definitions to v1.2.4
+
 0.15.2 / 2020-09-23
 ~~~~~~~~~~~~~~~~~~~
 * Fixed a bug where the last bit of HRV or FIFO were incorrectly

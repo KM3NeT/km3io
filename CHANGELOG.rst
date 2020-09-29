@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 0
 ---------
+0.15.2 / 2020-09-23
+~~~~~~~~~~~~~~~~~~~
+* Fixed a bug where the last bit of HRV or FIFO were incorrectly
+  masked when using ``km3io.online.get_channel_flags``
+
 0.15.1 / 2020-07-15
 ~~~~~~~~~~~~~~~~~~~
 * Added wheel packages for faster installation

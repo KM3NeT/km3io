@@ -3,6 +3,12 @@ Unreleased changes
 
 Version 0
 ---------
+0.15.4 / 2020-09-30
+~~~~~~~~~~~~~~~~~~~
+* Improved ``km3io.tools.best_track`` which now works nicely
+  when passing events and improves the error reporting
+* ``tracks.usr`` is now hidden (again) from the user
+
 0.15.3 / 2020-09-25
 ~~~~~~~~~~~~~~~~~~~
 * Updated KM3NeT definitions to v1.2.4

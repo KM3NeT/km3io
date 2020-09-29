@@ -89,6 +89,10 @@ class TestBestTrack(unittest.TestCase):
         with self.assertRaises(ValueError):
             best_track(events.tracks, strategy="Zineb")
 
+        # test raising KeyError
+        with self.assertRaises(KeyError):
+            best_track(events.tracks)
+
 
 class TestGetMultiplicity(unittest.TestCase):
     def test_get_multiplicity(self):

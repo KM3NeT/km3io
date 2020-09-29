@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KM3NeT Data Definitions v1.2.3
+KM3NeT Data Definitions v1.2.4
 https://git.km3net.de/common/km3net-dataformat
 """
 
@@ -31,7 +31,7 @@ data = {
     "DUSJSHOWERPREFIT": 201,
     "DUSJSHOWERPOSITIONFIT": 202,
     "DUSJSHOWERCOMPLETEFIT": 203,
-    "DUSJSHOWERBEND": 299,
+    "DUSJSHOWEREND": 299,
     "AANET_RECONSTRUCTION_TYPE": 101,
     "AASHOWERBEGIN": 300,
     "AASHOWERFITPREFIT": 302,

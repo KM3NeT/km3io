@@ -316,7 +316,7 @@ def best_track(tracks, strategy="default", rec_type=None):
             out = tracks[:, 0]
 
     if strategy == "default" and rec_type is None:
-        raise KeyError(
+        raise ValueError(
             "rec_type must be provided when the default strategy is used.")
 
     if strategy == "default" and rec_type is not None:

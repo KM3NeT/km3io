@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.16.1 / 2020-09-30
+~~~~~~~~~~~~~~~~~~~
+* Fixed a bug in ``Branch.is_single``
+
 0.16.0 / 2020-09-30
 ~~~~~~~~~~~~~~~~~~~
 * Fixed the inconsistency of ``len()`` of mapped branches

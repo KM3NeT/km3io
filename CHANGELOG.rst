@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.15.5 / 2020-09-30
+~~~~~~~~~~~~~~~~~~~
+* Fixed a tiny bug in ``km3io.tools.best_track``
+
 0.15.4 / 2020-09-30
 ~~~~~~~~~~~~~~~~~~~
 * Improved ``km3io.tools.best_track`` which now works nicely

@@ -302,10 +302,7 @@ def best_track(tracks, strategy="default", rec_type=None):
     if strategy not in options:
         raise ValueError("{} not in {}".format(strategy, options))
 
-    try:
-        n_events = len(count_nested(tracks.lik, axis=1))
-    except ValueError:
-        n_events = 1
+    n_events = 1 if tracks.is_single else len(tracks)
 
     if n_events > 1 and any(count_nested(tracks.lik, axis=1) == 0):
         raise ValueError(

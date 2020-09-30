@@ -61,9 +61,7 @@ class TestBestTrack(unittest.TestCase):
     def test_best_track_from_multiple_events(self):
         events = self.events[self.events.n_tracks > 0]
         first_tracks = best_track(events.tracks, strategy="first")
-        default_best = best_track(events.tracks,
-                                  strategy="default",
-                                  rec_type="JPP_RECONSTRUCTION_TYPE")
+        default_best = best_track(events.tracks, strategy="default", reco="jmuon")
 
         assert first_tracks.dir_z[0] == events.tracks.dir_z[0][0]
         assert first_tracks.dir_x[1] == events.tracks.dir_x[1][0]
@@ -74,9 +72,7 @@ class TestBestTrack(unittest.TestCase):
 
     def test_best_track_from_a_single_event(self):
         first_track = best_track(self.one_event.tracks, strategy="first")
-        best = best_track(self.one_event.tracks,
-                          strategy="default",
-                          rec_type="JPP_RECONSTRUCTION_TYPE")
+        best = best_track(self.one_event.tracks, strategy="default", reco="jmuon")
 
         assert first_track.dir_z == self.one_event.tracks.dir_z[0]
         assert first_track.lik == self.one_event.tracks.lik[0]
@@ -95,9 +91,7 @@ class TestBestTrack(unittest.TestCase):
     def test_best_track_on_slices(self):
         tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type == 4000]
         first_track = best_track(tracks_slice, strategy="first")
-        best = best_track(tracks_slice,
-                          strategy="default",
-                          rec_type="JPP_RECONSTRUCTION_TYPE")
+        best = best_track(tracks_slice, strategy="default", reco="jmuon")
 
         assert first_track.dir_z == self.one_event.tracks.dir_z[0]
         assert first_track.lik == self.one_event.tracks.lik[0]

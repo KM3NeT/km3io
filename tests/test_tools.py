@@ -92,6 +92,19 @@ class TestBestTrack(unittest.TestCase):
         with self.assertRaises(ValueError):
             best_track(self.events.tracks)
 
+    def test_best_track_on_slices(self):
+        tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type == 4000]
+        first_track = best_track(tracks_slice, strategy="first")
+        best = best_track(tracks_slice,
+                          strategy="default",
+                          rec_type="JPP_RECONSTRUCTION_TYPE")
+
+        assert first_track.dir_z == self.one_event.tracks.dir_z[0]
+        assert first_track.lik == self.one_event.tracks.lik[0]
+
+        assert best.lik == ak.max(self.one_event.tracks.lik)
+        assert best.rec_type == 4000
+
 
 class TestGetMultiplicity(unittest.TestCase):
     def test_get_multiplicity(self):

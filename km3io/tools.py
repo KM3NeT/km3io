@@ -30,11 +30,10 @@ def unfold_indices(obj, indices):
         try:
             obj = obj[idx]
         except IndexError:
-            print(
+            raise IndexError(
                 "IndexError while accessing an item from '{}' at depth {} ({}) "
                 "using the index chain {}".format(repr(original_obj), depth,
                                                   idx, indices))
-            raise
     return obj
 
 

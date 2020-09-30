@@ -176,7 +176,10 @@ class Branch:
             return len(self._branch)
         elif isinstance(self._index_chain[-1], (int, np.int32, np.int64)):
             if len(self._index_chain) == 1:
-                return len(self[:])
+                try:
+                    return len(self[:])
+                except IndexError:
+                    return 1
             return 1
         else:
             return len(

@@ -335,10 +335,10 @@ def best_track(tracks, strategy="default", reco=None):
             rec_stage_max_idx = np.iinfo(np.int32).max
 
         if n_events == 1:
-            raise NotImplementedError
             # first mask to select those with the correct reconstruction type
             rec_types = tracks[tracks.rec_type == reconstruction[rec_type]]
-            # TODO: check if rec_stages are all between rec_stage_min_idx and rec_stage_max_idx
+            # TODO: select tracks where rec_stages are all between rec_stage_min_idx and rec_stage_max_idx
+            tracks = tracks[]
             len_stages = count_nested(rec_types.rec_stages, axis=1)
             # TODO:  etc.
             longest = rec_types[len_stages == ak1.max(len_stages, axis=0)]

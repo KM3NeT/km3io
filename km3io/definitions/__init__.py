@@ -13,3 +13,10 @@ fitparameters_idx = {v: k for k, v in fitparameters.items()}
 reconstruction_idx = {v: k for k, v in reconstruction.items()}
 w2list_genhen_idx = {v: k for k, v in w2list_genhen.items()}
 w2list_gseagen_idx = {v: k for k, v in w2list_gseagen.items()}
+
+recos = {
+    "jmuon": reconstruction["JPP_RECONSTRUCTION_TYPE"],
+    "jshower": reconstruction["JPP_RECONSTRUCTION_TYPE"],
+    "dusjshower": reconstruction["DUSJ_RECONSTRUCTION_TYPE"],
+    "aashower": reconstruction["AANET_RECONSTRUCTION_TYPE"],
+}

@@ -3,7 +3,7 @@ Unreleased changes
 
 Version 0
 ---------
-0.15.6 / 2020-09-30
+0.16.0 / 2020-09-30
 ~~~~~~~~~~~~~~~~~~~
 * Fixed the inconsistency of ``len()`` of mapped branches
   See https://git.km3net.de/km3py/km3io/-/issues/39#note_18429

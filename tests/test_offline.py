@@ -305,8 +305,8 @@ class TestOfflineTracks(unittest.TestCase):
 
     def test_slicing(self):
         tracks = self.tracks
-        self.assertEqual(10, len(tracks))
-        self.assertEqual(1, len(tracks[0]))
+        self.assertEqual(10, len(tracks))  # 10 events
+        self.assertEqual(56, len(tracks[0]))  # number of tracks in first event
         track_selection = tracks[2:7]
         assert 5 == len(track_selection)
         track_selection_2 = tracks[1:3]

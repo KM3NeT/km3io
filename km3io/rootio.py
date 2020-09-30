@@ -174,7 +174,7 @@ class Branch:
     def __len__(self):
         if not self._index_chain:
             return len(self._branch)
-        elif isinstance(self._index_chain[0], (int, np.int32, np.int64)):
+        elif isinstance(self._index_chain[-1], (int, np.int32, np.int64)):
             if len(self._index_chain) == 1:
                 try:
                     return len(self[:])
@@ -191,10 +191,9 @@ class Branch:
     def is_single(self):
         """Returns True when a single branch is selected."""
         if len(self._index_chain) > 0:
-            if isinstance(self._index_chain[-1], (int, np.int32, np.int64)):
+            if isinstance(self._index_chain[0], (int, np.int32, np.int64)):
                 return True
         return False
-
 
     def __iter__(self):
         self._iterator_index = 0

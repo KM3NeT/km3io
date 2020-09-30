@@ -321,13 +321,13 @@ def best_track(tracks, strategy="default", rec_type=None):
 
     if strategy == "default" and rec_type is not None:
         if n_events == 1:
-            len_stages = count_nested(tracks.rec_stages, axis=1)
             rec_types = tracks[tracks.rec_type == reconstruction[rec_type]]
+            len_stages = count_nested(rec_types.rec_stages, axis=1)
             longest = rec_types[len_stages == ak1.max(len_stages, axis=0)]
             out = longest[longest.lik == ak1.max(longest.lik, axis=0)]
         else:
-            len_stages = count_nested(tracks.rec_stages, axis=2)
             rec_types = tracks[tracks.rec_type == reconstruction[rec_type]]
+            len_stages = count_nested(rec_types.rec_stages, axis=2)
             longest = rec_types[len_stages == ak1.max(len_stages, axis=1)]
             out = longest[longest.lik == ak1.max(longest.lik, axis=1)]
 

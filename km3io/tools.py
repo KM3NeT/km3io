@@ -4,7 +4,7 @@ import numpy as np
 import awkward1 as ak1
 import uproot
 
-from km3io.definitions import reconstructions as krec
+from km3io.definitions import reconstruction as krec
 from km3io.definitions import trigger as ktrg
 from km3io.definitions import fitparameters as kfit
 

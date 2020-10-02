@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from km3io.tools import AttrDict
+
 from .mc_header import data as mc_header
 
 from .trigger import data as trigger
@@ -7,6 +9,12 @@ from .fitparameters import data as fitparameters
 from .reconstruction import data as reconstruction
 from .w2list_genhen import data as w2list_genhen
 from .w2list_gseagen import data as w2list_gseagen
+
+trigger = AttrDict(trigger)
+fitparameters = AttrDict(fitparameters)
+reconstruction = AttrDict(reconstruction)
+w2list_genhen = AttrDict(w2list_genhen)
+w3list_gseagen = AttrDict(w2list_gseagen)
 
 trigger_idx = {v: k for k, v in trigger.items()}
 fitparameters_idx = {v: k for k, v in fitparameters.items()}

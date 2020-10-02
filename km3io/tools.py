@@ -11,6 +11,13 @@ BASKET_CACHE_SIZE = 110 * 1024**2
 BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 
+class AttrDict(dict):
+    """A dictionary which allows access to its key through attributes."""
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
+
+
 class cached_property:
     """A simple cache decorator for properties."""
     def __init__(self, function):

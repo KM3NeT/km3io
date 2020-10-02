@@ -4,7 +4,9 @@ import numpy as np
 import awkward1 as ak1
 import uproot
 
-import km3io.definitions as kdef
+from km3io.definitions import reconstructions as krec
+from km3io.definitions import trigger as ktrg
+from km3io.definitions import fitparameters as kfit
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
@@ -105,7 +107,7 @@ def w2list_genhen_keys():
     dict_keys
         genhen w2list keys.
     """
-    return kdef.reconstruction.w2list_genhen.keys()
+    return krec.w2list_genhen.keys()
 
 
 def w2list_gseagen_keys():
@@ -117,7 +119,7 @@ def w2list_gseagen_keys():
     dict_keys
         gseagen w2list keys.
     """
-    return kdef.reconstruction.w2list_gseagen.keys()
+    return krec.w2list_gseagen.keys()
 
 
 def get_w2list_param(events, generator, param):
@@ -141,9 +143,9 @@ def get_w2list_param(events, generator, param):
         array of the values of interest.
     """
     if generator == "gseagen":
-        return events.w2list[:, kdef.reconstruction.w2list_gseagen[param]]
+        return events.w2list[:, krec.w2list_gseagen[param]]
     if generator == "genhen":
-        return events.w2list[:, kdef.reconstruction.w2list_genhen[param]]
+        return events.w2list[:, krec.w2list_genhen[param]]
 
 
 def rec_types():
@@ -155,7 +157,7 @@ def rec_types():
     dict_keys
         reconstruction types.
     """
-    return kdef.reconstruction.keys()
+    return krec.keys()
 
 
 def fitinf(fitparam, tracks):
@@ -176,7 +178,7 @@ def fitinf(fitparam, tracks):
         awkward array of the values of the fit parameter requested.
     """
     fit = tracks.fitinf
-    index = kdef.fitparameters[fitparam]
+    index = kfit[fitparam]
     try:
         params = fit[count_nested(fit, axis=2) > index]
         return ak1.Array([i[:, index] for i in params])
@@ -195,7 +197,7 @@ def fitparams():
     dict_keys
         fit parameters keys.
     """
-    return kdef.fitparameters.keys()
+    return kfit.keys()
 
 
 def count_nested(Array, axis=0):
@@ -328,12 +330,12 @@ def best_track(tracks, strategy="default", rec_type=None):
 
     if strategy == "default" and rec_type is not None:
         if n_events == 1:
-            rec_types = tracks[tracks.rec_type == kdef.reconstruction[rec_type]]
+            rec_types = tracks[tracks.rec_type == krec[rec_type]]
             len_stages = count_nested(rec_types.rec_stages, axis=1)
             longest = rec_types[len_stages == ak1.max(len_stages, axis=0)]
             out = longest[longest.lik == ak1.max(longest.lik, axis=0)]
         else:
-            rec_types = tracks[tracks.rec_type == kdef.reconstruction[rec_type]]
+            rec_types = tracks[tracks.rec_type == krec[rec_type]]
             len_stages = count_nested(rec_types.rec_stages, axis=2)
             longest = rec_types[len_stages == ak1.max(len_stages, axis=1)]
             out = longest[longest.lik == ak1.max(longest.lik, axis=1)]

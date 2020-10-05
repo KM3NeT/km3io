@@ -53,57 +53,58 @@ class TestRecoTypes(unittest.TestCase):
         assert "JPP_RECONSTRUCTION_TYPE" in keys
 
 
-class TestBestTrack(unittest.TestCase):
-    def setUp(self):
-        self.events = OFFLINE_FILE.events
-        self.one_event = OFFLINE_FILE.events[0]
+# class TestBestTrack(unittest.TestCase):
+#     def setUp(self):
+#         self.events = OFFLINE_FILE.events
+#         self.one_event = OFFLINE_FILE.events[0]
 
-    def test_best_track_from_multiple_events(self):
-        events = self.events[self.events.n_tracks > 0]
-        first_tracks = best_track(events.tracks, strategy="first")
-        default_best = best_track(events.tracks,
-                                  strategy="default",
-                                  rec_type="JPP_RECONSTRUCTION_TYPE")
+#     def test_best_track_from_multiple_events(self):
+#         events = self.events[self.events.n_tracks > 0]
+#         first_tracks = best_track(events.tracks, strategy="first")
+#         default_best = best_track(events.tracks,
+#                                   strategy="default",
+#                                   rec_type="JPP_RECONSTRUCTION_TYPE")
 
-        assert first_tracks.dir_z[0] == events.tracks.dir_z[0][0]
-        assert first_tracks.dir_x[1] == events.tracks.dir_x[1][0]
+#         assert first_tracks.dir_z[0] == events.tracks.dir_z[0][0]
+#         assert first_tracks.dir_x[1] == events.tracks.dir_x[1][0]
 
-        assert default_best.lik[0] == ak.max(events.tracks.lik[0])
-        assert default_best.lik[1] == ak.max(events.tracks.lik[1])
-        assert default_best.rec_type[0] == 4000
+#         assert default_best.lik[0] == ak.max(events.tracks.lik[0])
+#         assert default_best.lik[1] == ak.max(events.tracks.lik[1])
+#         assert default_best.rec_type[0] == 4000
 
-    def test_best_track_from_a_single_event(self):
-        first_track = best_track(self.one_event.tracks, strategy="first")
-        best = best_track(self.one_event.tracks,
-                          strategy="default",
-                          rec_type="JPP_RECONSTRUCTION_TYPE")
+#     def test_best_track_from_a_single_event(self):
+#         first_track = best_track(self.one_event.tracks, strategy="first")
+#         best = best_track(self.one_event.tracks,
+#                           strategy="default",
+#                           rec_type="JPP_RECONSTRUCTION_TYPE")
 
-        assert first_track.dir_z == self.one_event.tracks.dir_z[0]
-        assert first_track.lik == self.one_event.tracks.lik[0]
+#         assert first_track.dir_z == self.one_event.tracks.dir_z[0]
+#         assert first_track.lik == self.one_event.tracks.lik[0]
 
-        assert best.lik == ak.max(self.one_event.tracks.lik)
-        assert best.rec_type == 4000
+#         assert best.lik == ak.max(self.one_event.tracks.lik)
+#         assert best.rec_type == 4000
 
-    def test_best_track_raises_when_unknown_strategy(self):
-        with self.assertRaises(ValueError):
-            best_track(self.events.tracks, strategy="Zineb")
+#     def test_best_track_raises_when_unknown_strategy(self):
+#         with self.assertRaises(ValueError):
+#             best_track(self.events.tracks, strategy="Zineb")
 
-    def test_best_track_raises_when_default_strategy_and_no_rectype(self):
-        with self.assertRaises(ValueError):
-            best_track(self.events.tracks)
+#     def test_best_track_raises_when_default_strategy_and_no_rectype(self):
+#         with self.assertRaises(ValueError):
+#             best_track(self.events.tracks)
 
-    def test_best_track_on_slices(self):
-        tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type == 4000]
-        first_track = best_track(tracks_slice, strategy="first")
-        best = best_track(tracks_slice,
-                          strategy="default",
-                          rec_type="JPP_RECONSTRUCTION_TYPE")
+#     def test_best_track_on_slices(self):
+#         tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type ==
+#                                              4000]
+#         first_track = best_track(tracks_slice, strategy="first")
+#         best = best_track(tracks_slice,
+#                           strategy="default",
+#                           rec_type="JPP_RECONSTRUCTION_TYPE")
 
-        assert first_track.dir_z == self.one_event.tracks.dir_z[0]
-        assert first_track.lik == self.one_event.tracks.lik[0]
+#         assert first_track.dir_z == self.one_event.tracks.dir_z[0]
+#         assert first_track.lik == self.one_event.tracks.lik[0]
 
-        assert best.lik == ak.max(self.one_event.tracks.lik)
-        assert best.rec_type == 4000
+#         assert best.lik == ak.max(self.one_event.tracks.lik)
+#         assert best.rec_type == 4000
 
 
 class TestGetMultiplicity(unittest.TestCase):

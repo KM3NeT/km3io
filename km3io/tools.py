@@ -272,68 +272,68 @@ def mask(rec_stages, stages):
     return builder.snapshot() == 1
 
 
-def best_track(tracks, strategy="default", rec_type=None):
-    """best track selection based on different strategies
+# def best_track(tracks, strategy="default", rec_type=None):
+#     """best track selection based on different strategies
 
-    Parameters
-    ----------
-    tracks : class km3io.offline.OfflineBranch
-        a subset of reconstructed tracks where `events.n_tracks > 0` is always true. 
-    strategy : str
-        the trategy desired to select the best tracks. It is either: 
-            - "first" : to select the first tracks.
-            - "default": to select the best tracks (the first ones) corresponding to a specific
-            reconstruction algorithm (JGandalf, Jshowerfit, etc). This requires rec_type input.
-            Example: best_track(my_tracks, strategy="default", rec_type="JPP_RECONSTRUCTION_TYPE").
-    rec_type : str, optional
-        reconstruction type as defined in the official KM3NeT-Dataformat.
+#     Parameters
+#     ----------
+#     tracks : class km3io.offline.OfflineBranch
+#         a subset of reconstructed tracks where `events.n_tracks > 0` is always true. 
+#     strategy : str
+#         the trategy desired to select the best tracks. It is either: 
+#             - "first" : to select the first tracks.
+#             - "default": to select the best tracks (the first ones) corresponding to a specific
+#             reconstruction algorithm (JGandalf, Jshowerfit, etc). This requires rec_type input.
+#             Example: best_track(my_tracks, strategy="default", rec_type="JPP_RECONSTRUCTION_TYPE").
+#     rec_type : str, optional
+#         reconstruction type as defined in the official KM3NeT-Dataformat.
 
-    Returns
-    -------
-    class km3io.offline.OfflineBranch
-        tracks class with the desired "best tracks" selection.
+#     Returns
+#     -------
+#     class km3io.offline.OfflineBranch
+#         tracks class with the desired "best tracks" selection.
 
-    Raises
-    ------
-    ValueError
-        ValueError raised when:
-            - an invalid strategy is requested.
-            - a subset of events with empty tracks is used.
-    """
-    options = ['first', 'default']
-    if strategy not in options:
-        raise ValueError("{} not in {}".format(strategy, options))
+#     Raises
+#     ------
+#     ValueError
+#         ValueError raised when:
+#             - an invalid strategy is requested.
+#             - a subset of events with empty tracks is used.
+#     """
+#     options = ['first', 'default']
+#     if strategy not in options:
+#         raise ValueError("{} not in {}".format(strategy, options))
 
-    n_events = 1 if tracks.is_single else len(tracks)
+#     n_events = 1 if tracks.is_single else len(tracks)
 
-    if n_events > 1 and any(count_nested(tracks.lik, axis=1) == 0):
-        raise ValueError(
-            "'events' should not contain empty tracks. Consider applying the mask: events.n_tracks>0"
-        )
+#     if n_events > 1 and any(count_nested(tracks.lik, axis=1) == 0):
+#         raise ValueError(
+#             "'events' should not contain empty tracks. Consider applying the mask: events.n_tracks>0"
+#         )
 
-    if strategy == "first":
-        if n_events == 1:
-            out = tracks[0]
-        else:
-            out = tracks[:, 0]
+#     if strategy == "first":
+#         if n_events == 1:
+#             out = tracks[0]
+#         else:
+#             out = tracks[:, 0]
 
-    if strategy == "default" and rec_type is None:
-        raise ValueError(
-            "rec_type must be provided when the default strategy is used.")
+#     if strategy == "default" and rec_type is None:
+#         raise ValueError(
+#             "rec_type must be provided when the default strategy is used.")
 
-    if strategy == "default" and rec_type is not None:
-        if n_events == 1:
-            rec_types = tracks[tracks.rec_type == krec[rec_type]]
-            len_stages = count_nested(rec_types.rec_stages, axis=1)
-            longest = rec_types[len_stages == ak1.max(len_stages, axis=0)]
-            out = longest[longest.lik == ak1.max(longest.lik, axis=0)]
-        else:
-            rec_types = tracks[tracks.rec_type == krec[rec_type]]
-            len_stages = count_nested(rec_types.rec_stages, axis=2)
-            longest = rec_types[len_stages == ak1.max(len_stages, axis=1)]
-            out = longest[longest.lik == ak1.max(longest.lik, axis=1)]
+#     if strategy == "default" and rec_type is not None:
+#         if n_events == 1:
+#             rec_types = tracks[tracks.rec_type == krec[rec_type]]
+#             len_stages = count_nested(rec_types.rec_stages, axis=1)
+#             longest = rec_types[len_stages == ak1.max(len_stages, axis=0)]
+#             out = longest[longest.lik == ak1.max(longest.lik, axis=0)]
+#         else:
+#             rec_types = tracks[tracks.rec_type == krec[rec_type]]
+#             len_stages = count_nested(rec_types.rec_stages, axis=2)
+#             longest = rec_types[len_stages == ak1.max(len_stages, axis=1)]
+#             out = longest[longest.lik == ak1.max(longest.lik, axis=1)]
 
-    return out
+#     return out
 
 
 def get_multiplicity(tracks, rec_stages):
@@ -444,7 +444,7 @@ def _reco_stages(reco):
     return stages
 
 
-def best_JMuon(tracks, reco, start=None, end=None, stages=[]):
+def best_track(tracks, reco, start=None, end=None, stages=[]):
 
     valid_stages = _reco_stages(reco)
 

@@ -234,7 +234,7 @@ def get_multiplicity(tracks, rec_stages):
     class km3io.offline.OfflineBranch
         tracks branch with the desired reconstruction stages only.
     """
-    return tracks[mask(tracks.rec_stages, rec_stages)]
+    return tracks[mask(tracks, rec_stages)]
 
 
 def _longest_tracks(tracks):
@@ -376,7 +376,6 @@ def _find_between(rec_stages, start, end, builder):
             else:
                 builder.append(0)
         builder.end_list()
-
 
 @nb.jit(nopython=True)
 def _find_between_single(rec_stages, start, end, builder):

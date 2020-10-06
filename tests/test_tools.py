@@ -159,25 +159,25 @@ class TestCountNested(unittest.TestCase):
 
 class TestRecStagesMasks(unittest.TestCase):
     def setUp(self):
-        self.nested = ak.Array([[[1, 2, 3], [1, 2, 3], [1]], [[0], [1, 2, 3]],
-                                [[0], [0, 1, 3], [0], [1, 2, 3], [1, 2, 3]]])
+        # self.nested = ak.Array([[[1, 2, 3], [1, 2, 3], [1]], [[0], [1, 2, 3]],
+        #                         [[0], [0, 1, 3], [0], [1, 2, 3], [1, 2, 3]]])
 
         self.tracks = OFFLINE_FILE.events.tracks
 
-    def test_find(self):
-        builder = ak.ArrayBuilder()
-        _find(self.nested, ak.Array([1, 2, 3]), builder)
-        labels = builder.snapshot()
+    # def test_find(self):
+    #     builder = ak.ArrayBuilder()
+    #     _find(self.nested, ak.Array([1, 2, 3]), builder)
+    #     labels = builder.snapshot()
 
-        assert labels[0][0] == 1
-        assert labels[0][1] == 1
-        assert labels[0][2] == 0
-        assert labels[1][0] == 0
+    #     assert labels[0][0] == 1
+    #     assert labels[0][1] == 1
+    #     assert labels[0][2] == 0
+    #     assert labels[1][0] == 0
 
     def test_mask_with_explicit_rec_stages(self):
         rec_stages = self.tracks.rec_stages
         stages = [1, 3, 5, 4]
-        masks = mask(rec_stages, stages=stages)
+        masks = mask(self.tracks, stages=stages)
 
         assert masks[0][0] == all(rec_stages[0][0] == ak.Array(stages))
         assert masks[1][0] == all(rec_stages[1][0] == ak.Array(stages))
@@ -186,12 +186,11 @@ class TestRecStagesMasks(unittest.TestCase):
     def test_mask_with_start_and_end_of_rec_stages(self):
         rec_stages = self.tracks.rec_stages
         stages = [1, 3, 5, 4]
-        masks = mask(rec_stages, start=1, end=4)
+        masks = mask(self.tracks, start=1, end=4)
 
         assert masks[0][0] == all(rec_stages[0][0] == ak.Array(stages))
         assert masks[1][0] == all(rec_stages[1][0] == ak.Array(stages))
         assert masks[0][1] == False
-
 
 
 class TestUnique(unittest.TestCase):

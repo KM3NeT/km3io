@@ -183,6 +183,16 @@ class TestRecStagesMasks(unittest.TestCase):
         assert masks[1][0] == all(rec_stages[1][0] == ak.Array(stages))
         assert masks[0][1] == False
 
+    def test_mask_with_start_and_end_of_rec_stages(self):
+        rec_stages = self.tracks.rec_stages
+        stages = [1, 3, 5, 4]
+        masks = mask(rec_stages, start=1, end=4)
+
+        assert masks[0][0] == all(rec_stages[0][0] == ak.Array(stages))
+        assert masks[1][0] == all(rec_stages[1][0] == ak.Array(stages))
+        assert masks[0][1] == False
+
+
 
 class TestUnique(unittest.TestCase):
     def run_random_test_with_dtype(self, dtype):

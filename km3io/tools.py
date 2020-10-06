@@ -279,22 +279,6 @@ def best_track(tracks, start=None, end=None, stages=None):
     return _max_lik_track(_longest_tracks(selected_tracks))
 
 
-def _JShower_stages():
-    return set(range(krec.JSHOWERBEGIN, krec.JSHOWEREND))
-
-
-def _JMuon_stages():
-    return set(range(krec.JMUONBEGIN, krec.JMUONEND))
-
-
-def _AAShower_stages():
-    return set(range(krec.AASHOWERBEGIN, krec.AASHOWEREND))
-
-
-def _DUSJShower_stages():
-    return set(range(krec.DUSJSHOWERBEGIN, krec.DUSJSHOWEREND))
-
-
 @nb.jit(nopython=True)
 def _find_between(rec_stages, start, end, builder):
     """construct an awkward1 array with the same structure as tracks.rec_stages.

@@ -284,25 +284,25 @@ def _best_track(tracks, start=None, end=None, stages=[]):
 
 
 def _JShower_stages():
-    return set((krec.JSHOWERPREFIT, krec.JSHOWERPOSITIONFIT,
-               krec.JSHOWERCOMPLETEFIT, krec.JSHOWER_BJORKEN_Y,
-               krec.JSHOWERENERGYPREFIT, krec.JSHOWERPOINTSIMPLEX,
-               krec.JSHOWERDIRECTIONPREFIT))
+    return set(
+        (krec.JSHOWERPREFIT, krec.JSHOWERPOSITIONFIT, krec.JSHOWERCOMPLETEFIT,
+         krec.JSHOWER_BJORKEN_Y, krec.JSHOWERENERGYPREFIT,
+         krec.JSHOWERPOINTSIMPLEX, krec.JSHOWERDIRECTIONPREFIT))
 
 
 def _JMuon_stages():
     return set((krec.JMUONPREFIT, krec.JMUONSIMPLEX, krec.JMUONGANDALF,
-               krec.JMUONENERGY, krec.JMUONSTART, krec.JLINEFIT))
+                krec.JMUONENERGY, krec.JMUONSTART, krec.JLINEFIT))
 
 
 def _AAShower_stages():
     return set((krec.AASHOWERFITPREFIT, krec.AASHOWERFITPOSITIONFIT,
-               krec.AASHOWERFITDIRECTIONENERGYFIT))
+                krec.AASHOWERFITDIRECTIONENERGYFIT))
 
 
 def _DUSJShower_stages():
     return set((krec.DUSJSHOWERPREFIT, krec.DUSJSHOWERPOSITIONFIT,
-               krec.DUSJSHOWERCOMPLETEFIT))
+                krec.DUSJSHOWERCOMPLETEFIT))
 
 
 def _reco_stages(reco):
@@ -334,7 +334,7 @@ def best_track(tracks, reco, start=None, end=None, stages=[]):
 
     if (start is not None) and (end is not None):
         if (start not in valid_stages) or (end not in valid_stages):
-            raise KeyError(
+            raise ValueError(
                 f" start and/or end are not in {reco} reconstruction stages")
 
     if len(stages) > 0:

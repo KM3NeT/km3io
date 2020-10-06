@@ -263,17 +263,16 @@ def _max_lik_track(tracks):
 
 
 def best_track(tracks, start=None, end=None, stages=None):
-    if (stages is None) and (start is None) and (end is None):
+    if (start is None) and (end is None) and (stages is not None):
         selected_tracks = tracks[mask(tracks, stages=stages)]
 
     if (start is not None) and (end is not None) and (stages is None):
         selected_tracks = tracks[mask(tracks, start=start, end=end)]
 
     if (start is None) and (end is None) and (stages is None):
-        # this should be modified to a log print and not just a simple print
         raise ValueError("No reconstruction stages were specified")
 
-    if (stages is not None) and ((start is not None) or (end is not None)):
+    if ((start is not None) or (end is not None)) and (stages is not None):
         raise ValueError("too many inputs are specified")
 
     return _max_lik_track(_longest_tracks(selected_tracks))
@@ -483,7 +482,14 @@ def mask(tracks, stages=None, start=None, end=None):
         raise ValueError("too many inputs are specified")
 
     if (stages is not None) and (start is None) and (end is None):
-        return _mask_explicit_rec_stages(tracks, stages)
+        if isinstance(stages, list):
+            # order of stages is conserved
+            return _mask_explicit_rec_stages(tracks, stages)
+        if isinstance(stages, set):
+            # order of stages is no longer conserved
+            s = min(stages)
+            e = max(stages)
+            return _mask_rec_stages_in_range_start_end(tracks, s, e)
 
     if (stages is None) and (start is not None) and (end is not None):
         return _mask_rec_stages_between_start_end(tracks, start, end)

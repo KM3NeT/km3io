@@ -104,39 +104,39 @@ class TestBestTrack(unittest.TestCase):
             best_track(self.events.tracks, "JMUON", stages=[233, 100, 500])
 
 
-#     def test_best_track_from_a_single_event(self):
-#         first_track = best_track(self.one_event.tracks, strategy="first")
-#         best = best_track(self.one_event.tracks,
-#                           strategy="default",
-#                           rec_type="JPP_RECONSTRUCTION_TYPE")
+    def test_best_track_from_a_single_event(self):
+        best = best_track(self.one_event.tracks, "JMUON")
 
-#         assert first_track.dir_z == self.one_event.tracks.dir_z[0]
-#         assert first_track.lik == self.one_event.tracks.lik[0]
+        assert best.lik == ak.max(self.one_event.tracks.lik)
+        assert best.rec_stages[0][0] == 1
+        assert best.rec_stages[0][-1] == 4
 
-#         assert best.lik == ak.max(self.one_event.tracks.lik)
-#         assert best.rec_type == 4000
+    def test_best_track_on_slices(self):
+        tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type ==
+                                             4000]
+        best = best_track(tracks_slice, "JMUON")
 
-#     def test_best_track_raises_when_unknown_strategy(self):
-#         with self.assertRaises(ValueError):
-#             best_track(self.events.tracks, strategy="Zineb")
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0][0] == 1
+        assert best.rec_stages[0][-1] == 4
 
-#     def test_best_track_raises_when_default_strategy_and_no_rectype(self):
-#         with self.assertRaises(ValueError):
-#             best_track(self.events.tracks)
 
-#     def test_best_track_on_slices(self):
-#         tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type ==
-#                                              4000]
-#         first_track = best_track(tracks_slice, strategy="first")
-#         best = best_track(tracks_slice,
-#                           strategy="default",
-#                           rec_type="JPP_RECONSTRUCTION_TYPE")
+    def test_best_track_on_slices_with_start_end(self):
+        tracks_slice = self.one_event.tracks[0:5]
+        best = best_track(tracks_slice, "JMUON", start=1, end=4)
 
-#         assert first_track.dir_z == self.one_event.tracks.dir_z[0]
-#         assert first_track.lik == self.one_event.tracks.lik[0]
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0][0] == 1
+        assert best.rec_stages[0][-1] == 4
 
-#         assert best.lik == ak.max(self.one_event.tracks.lik)
-#         assert best.rec_type == 4000
+    def test_best_track_on_slices_with_explicit_rec_stages(self):
+        tracks_slice = self.one_event.tracks[0:5]
+        best = best_track(tracks_slice, "JMUON", stages=[1, 3, 5, 4])
+
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0][0] == 1
+        assert best.rec_stages[0][-1] == 4
+
 
 
 class TestGetMultiplicity(unittest.TestCase):

@@ -237,6 +237,22 @@ def get_multiplicity(tracks, rec_stages):
     return tracks[mask(tracks, rec_stages)]
 
 
+def best_track(tracks, start=None, end=None, stages=None):
+    if (start is None) and (end is None) and (stages is not None):
+        selected_tracks = tracks[mask(tracks, stages=stages)]
+
+    if (start is not None) and (end is not None) and (stages is None):
+        selected_tracks = tracks[mask(tracks, start=start, end=end)]
+
+    if (start is None) and (end is None) and (stages is None):
+        raise ValueError("No reconstruction stages were specified")
+
+    if ((start is not None) or (end is not None)) and (stages is not None):
+        raise ValueError("too many inputs are specified")
+
+    return _max_lik_track(_longest_tracks(selected_tracks))
+
+
 def _longest_tracks(tracks):
     if tracks.is_single:
         stages_nesting_level = 1
@@ -262,20 +278,67 @@ def _max_lik_track(tracks):
     return tracks[tracks.lik == ak1.max(tracks.lik, axis=tracks_nesting_level)]
 
 
-def best_track(tracks, start=None, end=None, stages=None):
-    if (start is None) and (end is None) and (stages is not None):
-        selected_tracks = tracks[mask(tracks, stages=stages)]
+def mask(tracks, stages=None, start=None, end=None):
+    """create a mask on tracks.rec_stages .
 
-    if (start is not None) and (end is not None) and (stages is None):
-        selected_tracks = tracks[mask(tracks, start=start, end=end)]
+    Parameters
+    ----------
+    rec_stages : awkward1 Array
+        tracks.rec_stages .
+    stages : list
+        reconstruction stages of interest.
 
-    if (start is None) and (end is None) and (stages is None):
-        raise ValueError("No reconstruction stages were specified")
+    Returns
+    -------
+    awkward1 Array
+        an awkward1 Array mask where True corresponds to the positions
+        where stages were found. False otherwise.
+    """
+    if (stages is None) and (start is None) and (end is None):
+        raise KeyError("either stages or (start and end) must be specified")
 
-    if ((start is not None) or (end is not None)) and (stages is not None):
+    if (stages is not None) and (start is not None) and (end is not None):
         raise ValueError("too many inputs are specified")
 
-    return _max_lik_track(_longest_tracks(selected_tracks))
+    if (stages is not None) and (start is None) and (end is None):
+        if isinstance(stages, list):
+            # order of stages is conserved
+            return _mask_explicit_rec_stages(tracks, stages)
+        if isinstance(stages, set):
+            # order of stages is no longer conserved
+            s = min(stages)
+            e = max(stages)
+            return _mask_rec_stages_in_range_start_end(tracks, s, e)
+
+    if (stages is None) and (start is not None) and (end is not None):
+        return _mask_rec_stages_between_start_end(tracks, start, end)
+
+
+def _mask_rec_stages_between_start_end(tracks, start, end):
+    """mask tracks where tracks.rec_stages  are between start and end .
+
+    Parameters
+    ----------
+    rec_stages : awkward1 Array
+        tracks.rec_stages .
+    start : int
+        start of reconstruction stages of interest.
+    end : int
+        end of reconstruction stages of interest.
+
+    Returns
+    -------
+    awkward1 Array
+        an awkward1 Array mask where True corresponds to the positions
+        where stages were found. False otherwise.
+    """
+    builder = ak1.ArrayBuilder()
+    if tracks.is_single:
+        _find_between_single(tracks.rec_stages, start, end, builder)
+        return (builder.snapshot() == 1)[0]
+    else:
+        _find_between(tracks.rec_stages, start, end, builder)
+        return builder.snapshot() == 1
 
 
 @nb.jit(nopython=True)
@@ -341,17 +404,15 @@ def _find_between_single(rec_stages, start, end, builder):
     builder.end_list()
 
 
-def _mask_rec_stages_between_start_end(tracks, start, end):
-    """mask tracks where tracks.rec_stages  are between start and end .
+def _mask_explicit_rec_stages(tracks, stages):
+    """create a mask on tracks.rec_stages .
 
     Parameters
     ----------
     rec_stages : awkward1 Array
         tracks.rec_stages .
-    start : int
-        start of reconstruction stages of interest.
-    end : int
-        end of reconstruction stages of interest.
+    stages : list
+        reconstruction stages of interest.
 
     Returns
     -------
@@ -359,12 +420,13 @@ def _mask_rec_stages_between_start_end(tracks, start, end):
         an awkward1 Array mask where True corresponds to the positions
         where stages were found. False otherwise.
     """
+    # rec_stages = tracks.rec_stages
     builder = ak1.ArrayBuilder()
     if tracks.is_single:
-        _find_between_single(tracks.rec_stages, start, end, builder)
+        _find_single(tracks.rec_stages, ak1.Array(stages), builder)
         return (builder.snapshot() == 1)[0]
     else:
-        _find_between(tracks.rec_stages, start, end, builder)
+        _find(tracks.rec_stages, ak1.Array(stages), builder)
         return builder.snapshot() == 1
 
 
@@ -433,15 +495,45 @@ def _find_single(rec_stages, stages, builder):
     builder.end_list()
 
 
-def _mask_explicit_rec_stages(tracks, stages):
-    """create a mask on tracks.rec_stages .
+def best_jmuon(tracks):
+    mask = _mask_rec_stages_in_range_start_end(tracks, krec.JMUONBEGIN,
+                                               krec.JMUONEND)
+
+    return _max_lik_track(_longest_tracks(tracks[mask]))
+
+
+def best_jshower(tracks):
+    mask = _mask_rec_stages_in_range_start_end(tracks, krec.JSHOWERBEGIN,
+                                               krec.JSHOWEREND)
+
+    return _max_lik_track(_longest_tracks(tracks[mask]))
+
+
+def best_aashower(tracks):
+    mask = _mask_rec_stages_in_range_start_end(tracks, krec.AASHOWERBEGIN,
+                                               krec.AASHOWEREND)
+
+    return _max_lik_track(_longest_tracks(tracks[mask]))
+
+
+def best_dusjshower(tracks):
+    mask = _mask_rec_stages_in_range_start_end(tracks, krec.DUSJSHOWERBEGIN,
+                                               krec.DUSJSHOWEREND)
+
+    return _max_lik_track(_longest_tracks(tracks[mask]))
+
+
+def _mask_rec_stages_in_range_start_end(tracks, start, end):
+    """mask tracks where tracks.rec_stages  are between start and end .
 
     Parameters
     ----------
     rec_stages : awkward1 Array
         tracks.rec_stages .
-    stages : list
-        reconstruction stages of interest.
+    start : int
+        start of reconstruction stages of interest.
+    end : int
+        end of reconstruction stages of interest.
 
     Returns
     -------
@@ -449,50 +541,13 @@ def _mask_explicit_rec_stages(tracks, stages):
         an awkward1 Array mask where True corresponds to the positions
         where stages were found. False otherwise.
     """
-    # rec_stages = tracks.rec_stages
     builder = ak1.ArrayBuilder()
     if tracks.is_single:
-        _find_single(tracks.rec_stages, ak1.Array(stages), builder)
+        _find_in_range_single(tracks.rec_stages, start, end, builder)
         return (builder.snapshot() == 1)[0]
     else:
-        _find(tracks.rec_stages, ak1.Array(stages), builder)
+        _find_in_range(tracks.rec_stages, start, end, builder)
         return builder.snapshot() == 1
-
-
-def mask(tracks, stages=None, start=None, end=None):
-    """create a mask on tracks.rec_stages .
-
-    Parameters
-    ----------
-    rec_stages : awkward1 Array
-        tracks.rec_stages .
-    stages : list
-        reconstruction stages of interest.
-
-    Returns
-    -------
-    awkward1 Array
-        an awkward1 Array mask where True corresponds to the positions
-        where stages were found. False otherwise.
-    """
-    if (stages is None) and (start is None) and (end is None):
-        raise KeyError("either stages or (start and end) must be specified")
-
-    if (stages is not None) and (start is not None) and (end is not None):
-        raise ValueError("too many inputs are specified")
-
-    if (stages is not None) and (start is None) and (end is None):
-        if isinstance(stages, list):
-            # order of stages is conserved
-            return _mask_explicit_rec_stages(tracks, stages)
-        if isinstance(stages, set):
-            # order of stages is no longer conserved
-            s = min(stages)
-            e = max(stages)
-            return _mask_rec_stages_in_range_start_end(tracks, s, e)
-
-    if (stages is None) and (start is not None) and (end is not None):
-        return _mask_rec_stages_between_start_end(tracks, start, end)
 
 
 @nb.jit(nopython=True)
@@ -565,58 +620,3 @@ def _find_in_range_single(rec_stages, start, end, builder):
         else:
             builder.append(0)
     builder.end_list()
-
-
-def _mask_rec_stages_in_range_start_end(tracks, start, end):
-    """mask tracks where tracks.rec_stages  are between start and end .
-
-    Parameters
-    ----------
-    rec_stages : awkward1 Array
-        tracks.rec_stages .
-    start : int
-        start of reconstruction stages of interest.
-    end : int
-        end of reconstruction stages of interest.
-
-    Returns
-    -------
-    awkward1 Array
-        an awkward1 Array mask where True corresponds to the positions
-        where stages were found. False otherwise.
-    """
-    builder = ak1.ArrayBuilder()
-    if tracks.is_single:
-        _find_in_range_single(tracks.rec_stages, start, end, builder)
-        return (builder.snapshot() == 1)[0]
-    else:
-        _find_in_range(tracks.rec_stages, start, end, builder)
-        return builder.snapshot() == 1
-
-
-def best_jmuon(tracks):
-    mask = _mask_rec_stages_in_range_start_end(tracks, krec.JMUONBEGIN,
-                                               krec.JMUONEND)
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))
-
-
-def best_jshower(tracks):
-    mask = _mask_rec_stages_in_range_start_end(tracks, krec.JSHOWERBEGIN,
-                                               krec.JSHOWEREND)
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))
-
-
-def best_aashower(tracks):
-    mask = _mask_rec_stages_in_range_start_end(tracks, krec.AASHOWERBEGIN,
-                                               krec.AASHOWEREND)
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))
-
-
-def best_dusjshower(tracks):
-    mask = _mask_rec_stages_in_range_start_end(tracks, krec.DUSJSHOWERBEGIN,
-                                               krec.DUSJSHOWEREND)
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))

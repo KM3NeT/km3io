@@ -111,7 +111,7 @@ class TestBestTrack(unittest.TestCase):
         assert best.rec_stages[0][0] == 1
         assert best.rec_stages[0][-1] == 4
 
-    def test_best_track_on_slices(self):
+    def test_best_track_on_slices_one_event(self):
         tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type ==
                                              4000]
         best = best_track(tracks_slice, "JMUON")
@@ -121,7 +121,7 @@ class TestBestTrack(unittest.TestCase):
         assert best.rec_stages[0][-1] == 4
 
 
-    def test_best_track_on_slices_with_start_end(self):
+    def test_best_track_on_slices_with_start_end_one_event(self):
         tracks_slice = self.one_event.tracks[0:5]
         best = best_track(tracks_slice, "JMUON", start=1, end=4)
 
@@ -129,7 +129,7 @@ class TestBestTrack(unittest.TestCase):
         assert best.rec_stages[0][0] == 1
         assert best.rec_stages[0][-1] == 4
 
-    def test_best_track_on_slices_with_explicit_rec_stages(self):
+    def test_best_track_on_slices_with_explicit_rec_stages_one_event(self):
         tracks_slice = self.one_event.tracks[0:5]
         best = best_track(tracks_slice, "JMUON", stages=[1, 3, 5, 4])
 

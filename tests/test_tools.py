@@ -11,7 +11,8 @@ from km3io import OfflineReader
 from km3io.tools import (to_num, cached_property, unfold_indices, unique,
                          uniquecount, fitinf, fitparams, count_nested, _find,
                          mask, best_track, rec_types, get_w2list_param,
-                         get_multiplicity)
+                         get_multiplicity, best_jmuon, best_jshower,
+                         best_aashower, best_dusjshower)
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
 
@@ -248,6 +249,73 @@ class TestBestTrackSelection(unittest.TestCase):
     def test_best_track_raises_when_too_many_inputs(self):
         with self.assertRaises(ValueError):
             best_track(self.events.tracks, start=1, end=4, stages=[1, 3, 5, 4])
+
+
+class TestBestJmuon(unittest.TestCase):
+    def test_best_jmuon(self):
+        best = best_jmuon(OFFLINE_FILE.events.tracks)
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+        assert best.rec_stages[1] == [1, 3, 5, 4]
+        assert best.rec_stages[2] == [1, 3, 5, 4]
+        assert best.rec_stages[3] == [1, 3, 5, 4]
+
+        assert best.lik[0] == ak.max(OFFLINE_FILE.events.tracks.lik[0])
+        assert best.lik[1] == ak.max(OFFLINE_FILE.events.tracks.lik[1])
+        assert best.lik[2] == ak.max(OFFLINE_FILE.events.tracks.lik[2])
+
+
+class TestBestJshower(unittest.TestCase):
+    def test_best_jshower(self):
+        # there are no jshower events in this file
+        best = best_jshower(OFFLINE_FILE.events.tracks)
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] is None
+        assert best.rec_stages[1] is None
+        assert best.rec_stages[2] is None
+        assert best.rec_stages[3] is None
+
+        assert best.lik[0] is None
+        assert best.lik[1] is None
+        assert best.lik[2] is None
+
+
+class TestBestAashower(unittest.TestCase):
+    def test_best_aashower(self):
+        # there are no aashower events in this file
+        best = best_aashower(OFFLINE_FILE.events.tracks)
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] is None
+        assert best.rec_stages[1] is None
+        assert best.rec_stages[2] is None
+        assert best.rec_stages[3] is None
+
+        assert best.lik[0] is None
+        assert best.lik[1] is None
+        assert best.lik[2] is None
+
+
+class TestBestDusjshower(unittest.TestCase):
+    def test_best_dusjshower(self):
+        # there are no aashower events in this file
+        best = best_dusjshower(OFFLINE_FILE.events.tracks)
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] is None
+        assert best.rec_stages[1] is None
+        assert best.rec_stages[2] is None
+        assert best.rec_stages[3] is None
+
+        assert best.lik[0] is None
+        assert best.lik[1] is None
+        assert best.lik[2] is None
 
 
 class TestGetMultiplicity(unittest.TestCase):

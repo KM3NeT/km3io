@@ -196,7 +196,7 @@ def fitparams():
 
 
 def count_nested(Array, axis=0):
-    """count elements in a nested awkward Array.
+    """Count elements in a nested awkward Array.
 
     Parameters
     ----------

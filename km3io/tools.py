@@ -277,7 +277,7 @@ def best_track(tracks, start=None, end=None, stages=None):
         raise ValueError("No reconstruction stages were specified")
 
     if ((start is not None) or (end is not None)) and (stages is not None):
-        raise ValueError("too many inputs are specified")
+        raise ValueError("Please specify either a range or a set of rec stages.")
 
     return _max_lik_track(_longest_tracks(selected_tracks))
 

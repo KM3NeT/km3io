@@ -1,9 +1,11 @@
 Unreleased changes
 ------------------
-* Adds ``.uuid`` attributes to ``OfflineReader`` and ``OnlineReader``
-
 Version 0
 ---------
+0.16.2 / 2020-10-07
+~~~~~~~~~~~~~~~~~~~
+* Adds ``.uuid`` attributes to ``OfflineReader`` and ``OnlineReader``
+
 0.16.1 / 2020-09-30
 ~~~~~~~~~~~~~~~~~~~
 * Fixed a bug in ``Branch.is_single``

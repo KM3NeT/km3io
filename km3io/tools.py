@@ -233,7 +233,7 @@ def get_multiplicity(tracks, rec_stages):
 
     Returns
     -------
-    class km3io.offline.OfflineBranch
+    km3io.offline.OfflineBranch
         tracks branch with the desired reconstruction stages only.
     """
     return tracks[mask(tracks, rec_stages)]

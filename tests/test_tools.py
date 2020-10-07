@@ -48,24 +48,14 @@ class TestRecoTypes(unittest.TestCase):
         assert "JPP_RECONSTRUCTION_TYPE" in keys
 
 
-class TestBestTrack(unittest.TestCase):
+class TestBestTrackSelection(unittest.TestCase):
     def setUp(self):
         self.events = OFFLINE_FILE.events
         self.one_event = OFFLINE_FILE.events[0]
 
-    def test_best_track_selection_from_multiple_events_with_no_stages(self):
-        longest = best_track(self.events.tracks, "JMUON")
-
-        assert len(longest) == 10
-
-        assert longest.rec_stages[0] == [1, 3, 5, 4]
-        assert longest.rec_stages[1] == [1, 3, 5, 4]
-        assert longest.rec_stages[2] == [1, 3, 5, 4]
-        assert longest.rec_stages[3] == [1, 3, 5, 4]
-
     def test_best_track_selection_from_multiple_events_with_explicit_stages(
             self):
-        best = best_track(self.events.tracks, "JMUON", stages=[1, 3, 5, 4])
+        best = best_track(self.events.tracks, stages=[1, 3, 5, 4])
 
         assert len(best) == 10
 
@@ -75,8 +65,8 @@ class TestBestTrack(unittest.TestCase):
         assert best.rec_stages[3] == [1, 3, 5, 4]
 
     def test_best_track_selection_from_multiple_events_with_start_end(self):
-        best = best_track(self.events.tracks, "JMUON", start=1, end=4)
-        best2 = best_track(self.events.tracks, "JMUON", start=1, end=3)
+        best = best_track(self.events.tracks, start=1, end=4)
+        best2 = best_track(self.events.tracks, start=1, end=3)
 
         assert len(best) == 10
         assert len(best2) == 10
@@ -91,21 +81,8 @@ class TestBestTrack(unittest.TestCase):
         assert best2.rec_stages[2] == [1, 3]
         assert best2.rec_stages[3] == [1, 3]
 
-    def test_best_track_raises_when_unknown_reco(self):
-        with self.assertRaises(KeyError):
-            best_track(self.events.tracks, "Zineb")
-
-    def test_best_track_raises_when_start_or_end_not_valid(self):
-        with self.assertRaises(ValueError):
-            best_track(self.events.tracks, "JMUON", start=100, end=103)
-
-    def test_best_track_raises_when_wrong_reco_stages(self):
-        with self.assertRaises(KeyError):
-            best_track(self.events.tracks, "JMUON", stages=[233, 100, 500])
-
-
     def test_best_track_from_a_single_event(self):
-        best = best_track(self.one_event.tracks, "JMUON")
+        best = best_track(self.one_event.tracks, stages=[1, 3, 5, 4])
 
         assert best.lik == ak.max(self.one_event.tracks.lik)
         assert best.rec_stages[0][0] == 1
@@ -114,16 +91,15 @@ class TestBestTrack(unittest.TestCase):
     def test_best_track_on_slices_one_event(self):
         tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type ==
                                              4000]
-        best = best_track(tracks_slice, "JMUON")
+        best = best_track(tracks_slice, stages=[1, 3, 5, 4])
 
         assert best.lik == ak.max(tracks_slice.lik)
         assert best.rec_stages[0][0] == 1
         assert best.rec_stages[0][-1] == 4
 
-
     def test_best_track_on_slices_with_start_end_one_event(self):
         tracks_slice = self.one_event.tracks[0:5]
-        best = best_track(tracks_slice, "JMUON", start=1, end=4)
+        best = best_track(tracks_slice, start=1, end=4)
 
         assert best.lik == ak.max(tracks_slice.lik)
         assert best.rec_stages[0][0] == 1
@@ -131,12 +107,11 @@ class TestBestTrack(unittest.TestCase):
 
     def test_best_track_on_slices_with_explicit_rec_stages_one_event(self):
         tracks_slice = self.one_event.tracks[0:5]
-        best = best_track(tracks_slice, "JMUON", stages=[1, 3, 5, 4])
+        best = best_track(tracks_slice, stages=[1, 3, 5, 4])
 
         assert best.lik == ak.max(tracks_slice.lik)
         assert best.rec_stages[0][0] == 1
         assert best.rec_stages[0][-1] == 4
-
 
 
 class TestGetMultiplicity(unittest.TestCase):

@@ -1,3 +1,4 @@
+import binascii
 from collections import namedtuple
 import uproot
 import warnings
@@ -159,6 +160,11 @@ class OfflineReader:
         self._fobj = uproot.open(file_path)
         self._filename = file_path
         self._tree = self._fobj[MAIN_TREE_NAME]
+        self._uuid = binascii.hexlify(self._fobj._context.uuid)
+
+    @property
+    def uuid(self):
+        return self._uuid
 
     def close(self):
         self._fobj.close()

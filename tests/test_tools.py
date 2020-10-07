@@ -53,7 +53,7 @@ class TestBestTrackSelection(unittest.TestCase):
         self.events = OFFLINE_FILE.events
         self.one_event = OFFLINE_FILE.events[0]
 
-    def test_best_track_selection_from_multiple_events_with_explicit_stages(
+    def test_best_track_selection_from_multiple_events_with_explicit_stages_in_list(
             self):
         best = best_track(self.events.tracks, stages=[1, 3, 5, 4])
 
@@ -64,43 +64,144 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best.rec_stages[2] == [1, 3, 5, 4]
         assert best.rec_stages[3] == [1, 3, 5, 4]
 
-    def test_best_track_selection_from_multiple_events_with_start_end(self):
-        best = best_track(self.events.tracks, start=1, end=4)
-        best2 = best_track(self.events.tracks, start=1, end=3)
+        # test with a shorter set of rec_stages
+        best2 = best_track(self.events.tracks, stages=[1, 3])
 
-        assert len(best) == 10
         assert len(best2) == 10
-
-        assert best.rec_stages[0] == [1, 3, 5, 4]
-        assert best.rec_stages[1] == [1, 3, 5, 4]
-        assert best.rec_stages[2] == [1, 3, 5, 4]
-        assert best.rec_stages[3] == [1, 3, 5, 4]
 
         assert best2.rec_stages[0] == [1, 3]
         assert best2.rec_stages[1] == [1, 3]
         assert best2.rec_stages[2] == [1, 3]
         assert best2.rec_stages[3] == [1, 3]
 
+        # test the importance of order in rec_stages in lists
+        best3 = best_track(self.events.tracks, stages=[3, 1])
+
+        assert len(best3) == 10
+
+        assert best3.rec_stages[0] is None
+        assert best3.rec_stages[1] is None
+        assert best3.rec_stages[2] is None
+        assert best3.rec_stages[3] is None
+
+    def test_best_track_selection_from_multiple_events_with_explicit_stages_in_set(
+            self):
+        best = best_track(self.events.tracks, stages={1, 2, 3, 4, 5})
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+        assert best.rec_stages[1] == [1, 3, 5, 4]
+        assert best.rec_stages[2] == [1, 3, 5, 4]
+        assert best.rec_stages[3] == [1, 3, 5, 4]
+
+        # test with a shorter set of rec_stages
+        best2 = best_track(self.events.tracks, stages={1, 2, 3})
+
+        assert len(best2) == 10
+
+        assert best2.rec_stages[0] == [1, 3]
+        assert best2.rec_stages[1] == [1, 3]
+        assert best2.rec_stages[2] == [1, 3]
+        assert best2.rec_stages[3] == [1, 3]
+
+        # test the irrelevance of order in rec_stages in sets
+        best3 = best_track(self.events.tracks, stages={3, 1})
+
+        assert len(best3) == 10
+
+        assert best3.rec_stages[0] == [1, 3]
+        assert best3.rec_stages[1] == [1, 3]
+        assert best3.rec_stages[2] == [1, 3]
+        assert best3.rec_stages[3] == [1, 3]
+
+    def test_best_track_selection_from_multiple_events_with_start_end(self):
+        best = best_track(self.events.tracks, start=1, end=4)
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+        assert best.rec_stages[1] == [1, 3, 5, 4]
+        assert best.rec_stages[2] == [1, 3, 5, 4]
+        assert best.rec_stages[3] == [1, 3, 5, 4]
+
+        # test with shorter stages
+        best2 = best_track(self.events.tracks, start=1, end=3)
+
+        assert len(best2) == 10
+
+        assert best2.rec_stages[0] == [1, 3]
+        assert best2.rec_stages[1] == [1, 3]
+        assert best2.rec_stages[2] == [1, 3]
+        assert best2.rec_stages[3] == [1, 3]
+
+        # test the importance of start as a real start of rec_stages
+        best3 = best_track(self.events.tracks, start=0, end=3)
+
+        assert len(best3) == 10
+
+        assert best3.rec_stages[0] is None
+        assert best3.rec_stages[1] is None
+        assert best3.rec_stages[2] is None
+        assert best3.rec_stages[3] is None
+
+        # test the importance of end as a real end of rec_stages
+        best4 = best_track(self.events.tracks, start=1, end=10)
+
+        assert len(best4) == 10
+
+        assert best4.rec_stages[0] is None
+        assert best4.rec_stages[1] is None
+        assert best4.rec_stages[2] is None
+        assert best4.rec_stages[3] is None
+
     def test_best_track_from_a_single_event(self):
+        # stages as a list
         best = best_track(self.one_event.tracks, stages=[1, 3, 5, 4])
 
+        assert len(best) == 1
         assert best.lik == ak.max(self.one_event.tracks.lik)
-        assert best.rec_stages[0][0] == 1
-        assert best.rec_stages[0][-1] == 4
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+
+        # stages as a set
+        best2 = best_track(self.one_event.tracks, stages={1, 2, 3, 5, 4})
+
+        assert len(best2) == 1
+        assert best2.lik == ak.max(self.one_event.tracks.lik)
+        assert best2.rec_stages[0] == [1, 3, 5, 4]
+
+        # stages with start and end
+        best3 = best_track(self.one_event.tracks, start=1, end=4)
+
+        assert len(best3) == 1
+        assert best3.lik == ak.max(self.one_event.tracks.lik)
+        assert best3.rec_stages[0] == [1, 3, 5, 4]
 
     def test_best_track_on_slices_one_event(self):
         tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type ==
                                              4000]
+
+        # test stages with list
         best = best_track(tracks_slice, stages=[1, 3, 5, 4])
 
+        assert len(best) == 1
+
         assert best.lik == ak.max(tracks_slice.lik)
-        assert best.rec_stages[0][0] == 1
-        assert best.rec_stages[0][-1] == 4
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+
+        # test stages with set
+        best2 = best_track(tracks_slice, stages={1, 2, 3, 5, 4})
+
+        assert len(best2) == 1
+
+        assert best2.lik == ak.max(tracks_slice.lik)
+        assert best2.rec_stages[0] == [1, 3, 5, 4]
 
     def test_best_track_on_slices_with_start_end_one_event(self):
         tracks_slice = self.one_event.tracks[0:5]
         best = best_track(tracks_slice, start=1, end=4)
 
+        assert len(best) == 1
         assert best.lik == ak.max(tracks_slice.lik)
         assert best.rec_stages[0][0] == 1
         assert best.rec_stages[0][-1] == 4
@@ -112,6 +213,41 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best.lik == ak.max(tracks_slice.lik)
         assert best.rec_stages[0][0] == 1
         assert best.rec_stages[0][-1] == 4
+
+    def test_best_track_on_slices_multiple_events(self):
+        tracks_slice = self.events.tracks[0:5]
+
+        # stages in list
+        best = best_track(tracks_slice, stages=[1, 3, 5, 4])
+
+        assert len(best) == 5
+
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+
+        # stages in set
+        best = best_track(tracks_slice, stages={1, 2, 3, 5, 4})
+
+        assert len(best) == 5
+
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+
+        # using start and end
+        best = best_track(tracks_slice, start=1, end=4)
+
+        assert len(best) == 5
+
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+
+    def test_best_track_raises_when_unknown_stages(self):
+        with self.assertRaises(ValueError):
+            best_track(self.events.tracks)
+
+    def test_best_track_raises_when_too_many_inputs(self):
+        with self.assertRaises(ValueError):
+            best_track(self.events.tracks, start=1, end=4, stages=[1, 3, 5, 4])
 
 
 class TestGetMultiplicity(unittest.TestCase):

@@ -229,7 +229,7 @@ def get_multiplicity(tracks, rec_stages):
     tracks : class km3io.offline.OfflineBranch
         tracks or a subste of tracks. 
     rec_stages : list
-        the reconstruction stages of interest. Examle: [1, 2, 3, 4, 5].
+        Reconstruction stages (the ordering is respected) e.g. [1, 2, 3, 4, 5].
 
     Returns
     -------

@@ -221,7 +221,7 @@ def count_nested(Array, axis=0):
 
 
 def get_multiplicity(tracks, rec_stages):
-    """tracks selection based on specific reconstruction stages (for multiplicity
+    """Tracks selection based on specific reconstruction stages (for multiplicity
     calculations).
 
     Parameters

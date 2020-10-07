@@ -18,6 +18,11 @@ class TestOnlineReaderContextManager(unittest.TestCase):
             assert r._filename == ONLINE_FILE
 
 
+class TestUUID(unittest.TestCase):
+    def test_uuid(self):
+        assert OnlineReader(ONLINE_FILE).uuid == "00010c85603008c611ea971772f09e86beef"
+
+
 class TestOnlineEvents(unittest.TestCase):
     def setUp(self):
         self.events = OnlineReader(ONLINE_FILE).events

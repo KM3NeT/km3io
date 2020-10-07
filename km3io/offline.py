@@ -160,7 +160,7 @@ class OfflineReader:
         self._fobj = uproot.open(file_path)
         self._filename = file_path
         self._tree = self._fobj[MAIN_TREE_NAME]
-        self._uuid = binascii.hexlify(self._fobj._context.uuid)
+        self._uuid = binascii.hexlify(self._fobj._context.uuid).decode("ascii")
 
     @property
     def uuid(self):

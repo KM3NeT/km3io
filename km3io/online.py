@@ -116,7 +116,7 @@ class OnlineReader:
         self._events = None
         self._timeslices = None
         self._summaryslices = None
-        self._uuid = binascii.hexlify(self._fobj._context.uuid)
+        self._uuid = binascii.hexlify(self._fobj._context.uuid).decode("ascii")
 
     @property
     def uuid(self):

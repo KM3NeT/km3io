@@ -31,6 +31,9 @@ class TestOfflineReader(unittest.TestCase):
     def test_number_events(self):
         assert self.n_events == len(self.r.events)
 
+    def test_uuid(self):
+        assert self.r.uuid == "0001b192d888fcc711e9b4306cf09e86beef"
+
 
 class TestHeader(unittest.TestCase):
     def test_str_header(self):

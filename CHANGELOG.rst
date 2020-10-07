@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Adds ``.uuid`` attributes to ``OfflineReader`` and ``OnlineReader``
 
 Version 0
 ---------

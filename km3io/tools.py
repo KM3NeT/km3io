@@ -118,7 +118,7 @@ def w2list_gseagen_keys():
 
 
 def get_w2list_param(events, generator, param):
-    """get all the values of a specific parameter from the w2list
+    """Get all the values of a specific parameter from the w2list
     in offline neutrino files.
 
     Parameters

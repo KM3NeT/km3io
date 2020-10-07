@@ -7,6 +7,8 @@ import uproot
 from km3io.definitions import reconstruction as krec
 from km3io.definitions import trigger as ktrg
 from km3io.definitions import fitparameters as kfit
+from km3io.definitions import w2list_genhen as kw2gen
+from km3io.definitions import w2list_gseagen as kw2gsg
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024**2
@@ -100,7 +102,7 @@ def w2list_genhen_keys():
     dict_keys
         genhen w2list keys.
     """
-    return krec.w2list_genhen.keys()
+    return kw2gen.keys()
 
 
 def w2list_gseagen_keys():
@@ -112,7 +114,7 @@ def w2list_gseagen_keys():
     dict_keys
         gseagen w2list keys.
     """
-    return krec.w2list_gseagen.keys()
+    return kw2gsg.keys()
 
 
 def get_w2list_param(events, generator, param):
@@ -136,9 +138,9 @@ def get_w2list_param(events, generator, param):
         array of the values of interest.
     """
     if generator == "gseagen":
-        return events.w2list[:, krec.w2list_gseagen[param]]
+        return events.w2list[:, kw2gsg[param]]
     if generator == "genhen":
-        return events.w2list[:, krec.w2list_genhen[param]]
+        return events.w2list[:, kw2gen[param]]
 
 
 def rec_types():
@@ -295,7 +297,7 @@ def mask(tracks, stages=None, start=None, end=None):
         where stages were found. False otherwise.
     """
     if (stages is None) and (start is None) and (end is None):
-        raise KeyError("either stages or (start and end) must be specified")
+        raise ValueError("either stages or (start and end) must be specified")
 
     if (stages is not None) and (start is not None) and (end is not None):
         raise ValueError("too many inputs are specified")

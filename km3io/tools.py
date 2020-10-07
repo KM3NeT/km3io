@@ -134,7 +134,7 @@ def get_w2list_param(events, generator, param):
 
     Returns
     -------
-    awkward array
+    awkward.Array
         array of the values of interest.
     """
     if generator == "gseagen":

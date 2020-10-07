@@ -240,6 +240,33 @@ def get_multiplicity(tracks, rec_stages):
 
 
 def best_track(tracks, start=None, end=None, stages=None):
+    """Best track selection.
+
+    Parameters
+    ----------
+    tracks : class km3io.offline.OfflineBranch
+        tracks of interest. tracks can be from multiple events, or from one event, or a slice of tracks.
+    start : None, optional
+        the exact starting step of rec_stages, as in tracks.rec_stages.
+    end : None, optional
+        the exact ending step of rec_stages, as in tracks.rec_stages.
+    stages : None, optional
+        either a list or a set of stages:
+        - if stages is a list, the order of the rec_stages is conserved.
+        - if stages in a set, the order is irrelevant.
+
+    Returns
+    -------
+    class km3io.offline.OfflineBranch
+        the best tracks based on the rec_stages selection. The logest track and the highest likelihood track is returned.
+
+    Raises
+    ------
+    ValueError
+        valueError raised when:
+            - too many inputs specified.
+            - no inputs are specified.
+    """
     if (start is None) and (end is None) and (stages is not None):
         selected_tracks = tracks[mask(tracks, stages=stages)]
 
@@ -256,6 +283,7 @@ def best_track(tracks, start=None, end=None, stages=None):
 
 
 def _longest_tracks(tracks):
+    """ select the longest reconstructed track"""
     if tracks.is_single:
         stages_nesting_level = 1
         tracks_nesting_level = 0
@@ -272,6 +300,7 @@ def _longest_tracks(tracks):
 
 
 def _max_lik_track(tracks):
+    """ select the track with the highest likelihood """
     if tracks.is_single:
         tracks_nesting_level = 0
     else:
@@ -281,20 +310,33 @@ def _max_lik_track(tracks):
 
 
 def mask(tracks, stages=None, start=None, end=None):
-    """create a mask on tracks.rec_stages .
+    """create a mask for tracks.rec_stages .
 
     Parameters
     ----------
-    rec_stages : awkward1 Array
-        tracks.rec_stages .
-    stages : list
-        reconstruction stages of interest.
+    tracks : class km3io.offline.OfflineBranch
+        tracks, or one track, or slice of tracks, or slice of one track.
+    stages : list or set
+        reconstruction stages of interest:
+        - if stages is a list: the order of rec_stages in conserved.
+        - if stages is a set: the order of rec_stages in irrelevant.
+    start : None, optional
+        the exact starting step of rec_stages, as in tracks.rec_stages.
+    end : None, optional
+        the exact ending step of rec_stages, as in tracks.rec_stages.
 
     Returns
     -------
     awkward1 Array
         an awkward1 Array mask where True corresponds to the positions
         where stages were found. False otherwise.
+
+    Raises
+    ------
+    ValueError
+        valueError raised when:
+            - too many inputs specified.
+            - no inputs are specified.
     """
     if (stages is None) and (start is None) and (end is None):
         raise ValueError("either stages or (start and end) must be specified")
@@ -308,32 +350,16 @@ def mask(tracks, stages=None, start=None, end=None):
             return _mask_explicit_rec_stages(tracks, stages)
         if isinstance(stages, set):
             # order of stages is no longer conserved
-            s = min(stages)
-            e = max(stages)
-            return _mask_rec_stages_in_range_start_end(tracks, s, e)
+            mini = min(stages)
+            maxi = max(stages)
+            return _mask_rec_stages_in_range_min_max(tracks, mini, maxi)
 
     if (stages is None) and (start is not None) and (end is not None):
         return _mask_rec_stages_between_start_end(tracks, start, end)
 
 
 def _mask_rec_stages_between_start_end(tracks, start, end):
-    """mask tracks where tracks.rec_stages  are between start and end .
-
-    Parameters
-    ----------
-    rec_stages : awkward1 Array
-        tracks.rec_stages .
-    start : int
-        start of reconstruction stages of interest.
-    end : int
-        end of reconstruction stages of interest.
-
-    Returns
-    -------
-    awkward1 Array
-        an awkward1 Array mask where True corresponds to the positions
-        where stages were found. False otherwise.
-    """
+    """ mask tracks.rec_stages that start exactly with start and end exactly with end. ie [start, a, b ...,z , end] """
     builder = ak1.ArrayBuilder()
     if tracks.is_single:
         _find_between_single(tracks.rec_stages, start, end, builder)
@@ -345,21 +371,7 @@ def _mask_rec_stages_between_start_end(tracks, start, end):
 
 @nb.jit(nopython=True)
 def _find_between(rec_stages, start, end, builder):
-    """construct an awkward1 array with the same structure as tracks.rec_stages.
-    When stages are between start and end, the Array is filled with value 1, otherwise it is filled
-    with value 0.
-
-    Parameters
-    ----------
-    rec_stages : awkward1 Array
-        tracks.rec_stages .
-    start : int
-        start of reconstruction stages of interest.
-    end : int
-        end of reconstruction stages of interest.
-    builder : awkward1.highlevel.ArrayBuilder
-        awkward1 Array builder.
-    """
+    """ find tracks.rec_stages where rec_stages[0] == start and rec_stages[-1] == end."""
 
     for s in rec_stages:
         builder.begin_list()
@@ -377,21 +389,7 @@ def _find_between(rec_stages, start, end, builder):
 
 @nb.jit(nopython=True)
 def _find_between_single(rec_stages, start, end, builder):
-    """construct an awkward1 array with the same structure as tracks.rec_stages.
-    When stages are between start and end, the Array is filled with value 1, otherwise it is filled
-    with value 0.
-
-    Parameters
-    ----------
-    rec_stages : awkward1 Array
-        tracks.rec_stages .
-    start : int
-        start of reconstruction stages of interest.
-    end : int
-        end of reconstruction stages of interest.
-    builder : awkward1.highlevel.ArrayBuilder
-        awkward1 Array builder.
-    """
+    """ find tracks.rec_stages where rec_stages[0] == start and rec_stages[-1] == end in a single track. """
 
     builder.begin_list()
     for s in rec_stages:
@@ -407,14 +405,14 @@ def _find_between_single(rec_stages, start, end, builder):
 
 
 def _mask_explicit_rec_stages(tracks, stages):
-    """create a mask on tracks.rec_stages .
+    """mask explicit rec_stages .
 
     Parameters
     ----------
-    rec_stages : awkward1 Array
-        tracks.rec_stages .
+    tracks : class km3io.offline.OfflineBranch
+        tracks or one track, or slice of tracks.
     stages : list
-        reconstruction stages of interest.
+        reconstruction stages of interest. The order of stages is conserved.
 
     Returns
     -------
@@ -422,7 +420,7 @@ def _mask_explicit_rec_stages(tracks, stages):
         an awkward1 Array mask where True corresponds to the positions
         where stages were found. False otherwise.
     """
-    # rec_stages = tracks.rec_stages
+
     builder = ak1.ArrayBuilder()
     if tracks.is_single:
         _find_single(tracks.rec_stages, ak1.Array(stages), builder)
@@ -441,7 +439,7 @@ def _find(rec_stages, stages, builder):
     Parameters
     ----------
     rec_stages : awkward1 Array
-        tracks.rec_stages .
+        tracks.rec_stages from multiple events.
     stages : awkward1 Array
         reconstruction stages of interest.
     builder : awkward1.highlevel.ArrayBuilder
@@ -474,7 +472,7 @@ def _find_single(rec_stages, stages, builder):
     Parameters
     ----------
     rec_stages : awkward1 Array
-        tracks.rec_stages .
+        tracks.rec_stages from a SINGLE event.
     stages : awkward1 Array
         reconstruction stages of interest.
     builder : awkward1.highlevel.ArrayBuilder
@@ -498,44 +496,92 @@ def _find_single(rec_stages, stages, builder):
 
 
 def best_jmuon(tracks):
-    mask = _mask_rec_stages_in_range_start_end(tracks, krec.JMUONBEGIN,
-                                               krec.JMUONEND)
+    """select the best JMUON track.
+
+    Parameters
+    ----------
+    tracks : class km3io.offline.OfflineBranch
+        tracks, or one track, or slice of tracks, or slices of tracks.
+
+    Returns
+    -------
+    km3io.offline.OfflineBranch
+        the longest + highest likelihood track reconstructed with JMUON.
+    """
+    mask = _mask_rec_stages_in_range_min_max(tracks, krec.JMUONBEGIN,
+                                             krec.JMUONEND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
 
 def best_jshower(tracks):
-    mask = _mask_rec_stages_in_range_start_end(tracks, krec.JSHOWERBEGIN,
-                                               krec.JSHOWEREND)
+    """select the best JSHOWER track.
+
+    Parameters
+    ----------
+    tracks : class km3io.offline.OfflineBranch
+        tracks, or one track, or slice of tracks, or slices of tracks.
+
+    Returns
+    -------
+    km3io.offline.OfflineBranch
+        the longest + highest likelihood track reconstructed with JSHOWER.
+    """
+    mask = _mask_rec_stages_in_range_min_max(tracks, krec.JSHOWERBEGIN,
+                                             krec.JSHOWEREND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
 
 def best_aashower(tracks):
-    mask = _mask_rec_stages_in_range_start_end(tracks, krec.AASHOWERBEGIN,
-                                               krec.AASHOWEREND)
+    """select the best AASHOWER track.
+
+    Parameters
+    ----------
+    tracks : class km3io.offline.OfflineBranch
+        tracks, or one track, or slice of tracks, or slices of tracks.
+
+    Returns
+    -------
+    km3io.offline.OfflineBranch
+        the longest + highest likelihood track reconstructed with AASHOWER.
+    """
+    mask = _mask_rec_stages_in_range_min_max(tracks, krec.AASHOWERBEGIN,
+                                             krec.AASHOWEREND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
 
 def best_dusjshower(tracks):
-    mask = _mask_rec_stages_in_range_start_end(tracks, krec.DUSJSHOWERBEGIN,
-                                               krec.DUSJSHOWEREND)
+    """select the best DISJSHOWER track.
+
+    Parameters
+    ----------
+    tracks : class km3io.offline.OfflineBranch
+        tracks, or one track, or slice of tracks, or slices of tracks.
+
+    Returns
+    -------
+    km3io.offline.OfflineBranch
+        the longest + highest likelihood track reconstructed with DUSJSHOWER.
+    """
+    mask = _mask_rec_stages_in_range_min_max(tracks, krec.DUSJSHOWERBEGIN,
+                                             krec.DUSJSHOWEREND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
 
-def _mask_rec_stages_in_range_start_end(tracks, start, end):
-    """mask tracks where tracks.rec_stages  are between start and end .
+def _mask_rec_stages_in_range_min_max(tracks, min, max):
+    """mask tracks where rec_stages are withing the range(min, max).
 
     Parameters
     ----------
-    rec_stages : awkward1 Array
-        tracks.rec_stages .
-    start : int
-        start of reconstruction stages of interest.
-    end : int
-        end of reconstruction stages of interest.
+    tracks : class km3io.offline.OfflineBranch
+        tracks, or one track, or slice of tracks, or slices of tracks.
+    min : int
+        minimum range of rec_stages.
+    max : int
+        maximum range of rec_stages.
 
     Returns
     -------
@@ -545,31 +591,31 @@ def _mask_rec_stages_in_range_start_end(tracks, start, end):
     """
     builder = ak1.ArrayBuilder()
     if tracks.is_single:
-        _find_in_range_single(tracks.rec_stages, start, end, builder)
+        _find_in_range_single(tracks.rec_stages, min, max, builder)
         return (builder.snapshot() == 1)[0]
     else:
-        _find_in_range(tracks.rec_stages, start, end, builder)
+        _find_in_range(tracks.rec_stages, min, max, builder)
         return builder.snapshot() == 1
 
 
 @nb.jit(nopython=True)
-def _find_in_range(rec_stages, start, end, builder):
+def _find_in_range(rec_stages, min, max, builder):
     """construct an awkward1 array with the same structure as tracks.rec_stages.
-    When stages are between start and end, the Array is filled with value 1, otherwise it is filled
+    When stages are within the range(min, max), the Array is filled with value 1, otherwise it is filled
     with value 0.
 
     Parameters
     ----------
     rec_stages : awkward1 Array
-        tracks.rec_stages .
-    start : int
-        start of reconstruction stages of interest.
-    end : int
-        end of reconstruction stages of interest.
+        tracks.rec_stages of MULTILPLE events.
+    min : int
+        minimum range of rec_stages.
+    max : int
+        maximum range of rec_stages.
     builder : awkward1.highlevel.ArrayBuilder
         awkward1 Array builder.
     """
-    valid_stages = set(range(start, end + 1))
+    valid_stages = set(range(min, max + 1))
     for s in rec_stages:
         builder.begin_list()
         for i in s:
@@ -589,25 +635,25 @@ def _find_in_range(rec_stages, start, end, builder):
 
 
 @nb.jit(nopython=True)
-def _find_in_range_single(rec_stages, start, end, builder):
+def _find_in_range_single(rec_stages, min, max, builder):
     """construct an awkward1 array with the same structure as tracks.rec_stages.
-    When stages are between start and end, the Array is filled with value 1, otherwise it is filled
+    When stages are within the range(min, max), the Array is filled with value 1, otherwise it is filled
     with value 0.
 
     Parameters
     ----------
     rec_stages : awkward1 Array
-        tracks.rec_stages .
-    start : int
-        start of reconstruction stages of interest.
-    end : int
-        end of reconstruction stages of interest.
+        tracks.rec_stages of a SINGLE event.
+    min : int
+        minimum range of rec_stages.
+    max : int
+        maximum range of rec_stages.
     builder : awkward1.highlevel.ArrayBuilder
         awkward1 Array builder.
     """
 
     builder.begin_list()
-    valid_stages = set(range(start, end + 1))
+    valid_stages = set(range(min, max + 1))
     for s in rec_stages:
         num_stages = len(s)
         if num_stages != 0:

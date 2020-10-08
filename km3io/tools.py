@@ -93,29 +93,6 @@ def uniquecount(array, dtype=np.int64):
     return out
 
 
-def w2list_genhen_keys():
-    """names of the w2list parameters as defined in the official
-    KM3NeT-Dataformat for genhen.
-
-    Returns
-    -------
-    dict_keys
-        genhen w2list keys.
-    """
-    return kw2gen.keys()
-
-
-def w2list_gseagen_keys():
-    """names of the w2list parameters as defined in the official
-    KM3NeT-Dataformat for gseagen.
-
-    Returns
-    -------
-    dict_keys
-        gseagen w2list keys.
-    """
-    return kw2gsg.keys()
-
 
 def get_w2list_param(events, generator, param):
     """Get all the values of a specific parameter from the w2list
@@ -137,22 +114,14 @@ def get_w2list_param(events, generator, param):
     awkward.Array
         array of the values of interest.
     """
-    if generator == "gseagen":
+    w2list_gseagen_keys = set(kw2gsg.keys())
+    w2list_genhen_keys = set(kw2gen.keys())
+
+    if (generator == "gseagen") and param in w2list_gseagen_keys:
         return events.w2list[:, kw2gsg[param]]
-    if generator == "genhen":
+    if generator == "genhen" and param in w2list_genhen_keys:
         return events.w2list[:, kw2gen[param]]
 
-
-def rec_types():
-    """name of the reconstruction type as defined in the official
-    KM3NeT-Dataformat.
-
-    Returns
-    -------
-    dict_keys
-        reconstruction types.
-    """
-    return krec.keys()
 
 
 def fitinf(fitparam, tracks):
@@ -233,10 +202,17 @@ def get_multiplicity(tracks, rec_stages):
 
     Returns
     -------
-    km3io.offline.OfflineBranch
-        tracks branch with the desired reconstruction stages only.
+    awkward1.Array
+        tracks multiplicty.
     """
-    return tracks[mask(tracks, rec_stages)]
+    masked_tracks = tracks[mask(tracks, rec_stages)]
+
+    if tracks.is_single:
+        out = count_nested(masked_tracks.rec_stages, axis=0)
+    else:
+        out = count_nested(masked_tracks.rec_stages, axis=1)
+
+    return out
 
 
 def best_track(tracks, start=None, end=None, stages=None):

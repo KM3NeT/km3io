@@ -93,7 +93,6 @@ def uniquecount(array, dtype=np.int64):
     return out
 
 
-
 def get_w2list_param(events, generator, param):
     """Get all the values of a specific parameter from the w2list
     in offline neutrino files.
@@ -121,7 +120,6 @@ def get_w2list_param(events, generator, param):
         return events.w2list[:, kw2gsg[param]]
     if generator == "genhen" and param in w2list_genhen_keys:
         return events.w2list[:, kw2gen[param]]
-
 
 
 def fitinf(fitparam, tracks):
@@ -215,7 +213,12 @@ def get_multiplicity(tracks, rec_stages):
     return out
 
 
-def best_track(tracks, start=None, end=None, stages=None):
+def best_track(tracks,
+               start_stages=None,
+               end_stages=None,
+               min_stages=None,
+               max_stages=None,
+               stages=None):
     """Best track selection.
 
     Parameters
@@ -243,17 +246,23 @@ def best_track(tracks, start=None, end=None, stages=None):
             - too many inputs specified.
             - no inputs are specified.
     """
-    if (start is None) and (end is None) and (stages is not None):
+    if (start_stages is None) and (end_stages is None) and (stages
+                                                            is not None):
         selected_tracks = tracks[mask(tracks, stages=stages)]
 
-    if (start is not None) and (end is not None) and (stages is None):
-        selected_tracks = tracks[mask(tracks, start=start, end=end)]
+    if (start_stages is not None) and (end_stages
+                                       is not None) and (stages is None):
+        selected_tracks = tracks[mask(tracks,
+                                      start_stages=start_stages,
+                                      end_stages=end_stages)]
 
-    if (start is None) and (end is None) and (stages is None):
+    if (start_stages is None) and (end_stages is None) and (stages is None):
         raise ValueError("No reconstruction stages were specified")
 
-    if ((start is not None) or (end is not None)) and (stages is not None):
-        raise ValueError("Please specify either a range or a set of rec stages.")
+    if ((start_stages is not None) or
+        (end_stages is not None)) and (stages is not None):
+        raise ValueError(
+            "Please specify either a range or a set of rec stages.")
 
     return _max_lik_track(_longest_tracks(selected_tracks))
 
@@ -285,7 +294,12 @@ def _max_lik_track(tracks):
     return tracks[tracks.lik == ak1.max(tracks.lik, axis=tracks_nesting_level)]
 
 
-def mask(tracks, stages=None, start=None, end=None):
+def mask(tracks,
+         stages=None,
+         start_stages=None,
+         end_stages=None,
+         min_stages=None,
+         max_stages=None):
     """create a mask for tracks.rec_stages .
 
     Parameters
@@ -314,24 +328,37 @@ def mask(tracks, stages=None, start=None, end=None):
             - too many inputs specified.
             - no inputs are specified.
     """
-    if (stages is None) and (start is None) and (end is None):
-        raise ValueError("either stages or (start and end) must be specified")
+    if (stages is None) and (start_stages is None) and (
+            end_stages is None) and (min_stages is None) and (max_stages is
+                                                              None):
+        raise ValueError(
+            "either stages or (start_stages and end_stages) or (min_stages and max_stages) must be specified"
+        )
 
-    if (stages is not None) and (start is not None) and (end is not None):
+    if (stages is not None) and (start_stages is not None) and (end_stages
+                                                                is not None):
         raise ValueError("too many inputs are specified")
 
-    if (stages is not None) and (start is None) and (end is None):
+    if (stages
+            is not None) and (start_stages is None) and (end_stages is None):
         if isinstance(stages, list):
             # order of stages is conserved
             return _mask_explicit_rec_stages(tracks, stages)
         if isinstance(stages, set):
             # order of stages is no longer conserved
-            mini = min(stages)
-            maxi = max(stages)
-            return _mask_rec_stages_in_range_min_max(tracks, mini, maxi)
+            return _mask_rec_stages_in_range_min_max(tracks,
+                                                     valid_stages=stages)
 
-    if (stages is None) and (start is not None) and (end is not None):
-        return _mask_rec_stages_between_start_end(tracks, start, end)
+    if (stages is None) and (start_stages is not None) and (end_stages
+                                                            is not None):
+        return _mask_rec_stages_between_start_end(tracks, start_stages,
+                                                  end_stages)
+
+    if (stages is None) and (min_stages is not None) and (max_stages
+                                                          is not None):
+        return _mask_rec_stages_in_range_min_max(tracks,
+                                                 min_stages=min_stages,
+                                                 max_stages=max_stages)
 
 
 def _mask_rec_stages_between_start_end(tracks, start, end):
@@ -484,8 +511,9 @@ def best_jmuon(tracks):
     km3io.offline.OfflineBranch
         the longest + highest likelihood track reconstructed with JMUON.
     """
-    mask = _mask_rec_stages_in_range_min_max(tracks, krec.JMUONBEGIN,
-                                             krec.JMUONEND)
+    mask = _mask_rec_stages_in_range_min_max(tracks,
+                                             min_stages=krec.JMUONBEGIN,
+                                             max_stages=krec.JMUONEND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
@@ -503,8 +531,9 @@ def best_jshower(tracks):
     km3io.offline.OfflineBranch
         the longest + highest likelihood track reconstructed with JSHOWER.
     """
-    mask = _mask_rec_stages_in_range_min_max(tracks, krec.JSHOWERBEGIN,
-                                             krec.JSHOWEREND)
+    mask = _mask_rec_stages_in_range_min_max(tracks,
+                                             min_stages=krec.JSHOWERBEGIN,
+                                             max_stages=krec.JSHOWEREND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
@@ -522,8 +551,9 @@ def best_aashower(tracks):
     km3io.offline.OfflineBranch
         the longest + highest likelihood track reconstructed with AASHOWER.
     """
-    mask = _mask_rec_stages_in_range_min_max(tracks, krec.AASHOWERBEGIN,
-                                             krec.AASHOWEREND)
+    mask = _mask_rec_stages_in_range_min_max(tracks,
+                                             min_stages=krec.AASHOWERBEGIN,
+                                             max_stages=krec.AASHOWEREND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
@@ -541,13 +571,17 @@ def best_dusjshower(tracks):
     km3io.offline.OfflineBranch
         the longest + highest likelihood track reconstructed with DUSJSHOWER.
     """
-    mask = _mask_rec_stages_in_range_min_max(tracks, krec.DUSJSHOWERBEGIN,
-                                             krec.DUSJSHOWEREND)
+    mask = _mask_rec_stages_in_range_min_max(tracks,
+                                             min_stages=krec.DUSJSHOWERBEGIN,
+                                             max_stages=krec.DUSJSHOWEREND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
 
-def _mask_rec_stages_in_range_min_max(tracks, min, max):
+def _mask_rec_stages_in_range_min_max(tracks,
+                                      min_stages=None,
+                                      max_stages=None,
+                                      valid_stages=None):
     """mask tracks where rec_stages are withing the range(min, max).
 
     Parameters
@@ -565,17 +599,21 @@ def _mask_rec_stages_in_range_min_max(tracks, min, max):
         an awkward1 Array mask where True corresponds to the positions
         where stages were found. False otherwise.
     """
+    if (min_stages is not None) and (max_stages
+                                     is not None) and (valid_stages is None):
+        valid_stages = set(range(min_stages, max_stages))
+
     builder = ak1.ArrayBuilder()
     if tracks.is_single:
-        _find_in_range_single(tracks.rec_stages, min, max, builder)
+        _find_in_range_single(tracks.rec_stages, valid_stages, builder)
         return (builder.snapshot() == 1)[0]
     else:
-        _find_in_range(tracks.rec_stages, min, max, builder)
+        _find_in_range(tracks.rec_stages, valid_stages, builder)
         return builder.snapshot() == 1
 
 
 @nb.jit(nopython=True)
-def _find_in_range(rec_stages, min, max, builder):
+def _find_in_range(rec_stages, valid_stages, builder):
     """construct an awkward1 array with the same structure as tracks.rec_stages.
     When stages are within the range(min, max), the Array is filled with value 1, otherwise it is filled
     with value 0.
@@ -591,7 +629,6 @@ def _find_in_range(rec_stages, min, max, builder):
     builder : awkward1.highlevel.ArrayBuilder
         awkward1 Array builder.
     """
-    valid_stages = set(range(min, max + 1))
     for s in rec_stages:
         builder.begin_list()
         for i in s:
@@ -611,7 +648,7 @@ def _find_in_range(rec_stages, min, max, builder):
 
 
 @nb.jit(nopython=True)
-def _find_in_range_single(rec_stages, min, max, builder):
+def _find_in_range_single(rec_stages, valid_stages, builder):
     """construct an awkward1 array with the same structure as tracks.rec_stages.
     When stages are within the range(min, max), the Array is filled with value 1, otherwise it is filled
     with value 0.
@@ -629,7 +666,6 @@ def _find_in_range_single(rec_stages, min, max, builder):
     """
 
     builder.begin_list()
-    valid_stages = set(range(min, max + 1))
     for s in rec_stages:
         num_stages = len(s)
         if num_stages != 0:

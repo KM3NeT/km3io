@@ -10,10 +10,9 @@ from km3net_testdata import data_path
 from km3io import OfflineReader
 from km3io.tools import (to_num, cached_property, unfold_indices, unique,
                          uniquecount, fitinf, fitparams, count_nested, _find,
-                         mask, best_track, rec_types, get_w2list_param,
-                         get_multiplicity, best_jmuon, best_jshower,
-                         best_aashower, best_dusjshower, w2list_genhen_keys,
-                         w2list_gseagen_keys)
+                         mask, best_track, get_w2list_param, get_multiplicity,
+                         best_jmuon, best_jshower, best_aashower,
+                         best_dusjshower)
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
 
@@ -41,13 +40,6 @@ class TestFitinf(unittest.TestCase):
         keys = set(fitparams())
 
         assert "JGANDALF_BETA0_RAD" in keys
-
-
-class TestRecoTypes(unittest.TestCase):
-    def test_reco_types(self):
-        keys = set(rec_types())
-
-        assert "JPP_RECONSTRUCTION_TYPE" in keys
 
 
 class TestBestTrackSelection(unittest.TestCase):
@@ -118,7 +110,7 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best3.rec_stages[3] == [1, 3]
 
     def test_best_track_selection_from_multiple_events_with_start_end(self):
-        best = best_track(self.events.tracks, start=1, end=4)
+        best = best_track(self.events.tracks, start_stages=1, end_stages=4)
 
         assert len(best) == 10
 
@@ -128,7 +120,7 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best.rec_stages[3] == [1, 3, 5, 4]
 
         # test with shorter stages
-        best2 = best_track(self.events.tracks, start=1, end=3)
+        best2 = best_track(self.events.tracks, start_stages=1, end_stages=3)
 
         assert len(best2) == 10
 
@@ -138,7 +130,7 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best2.rec_stages[3] == [1, 3]
 
         # test the importance of start as a real start of rec_stages
-        best3 = best_track(self.events.tracks, start=0, end=3)
+        best3 = best_track(self.events.tracks, start_stages=0, end_stages=3)
 
         assert len(best3) == 10
 
@@ -148,7 +140,7 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best3.rec_stages[3] is None
 
         # test the importance of end as a real end of rec_stages
-        best4 = best_track(self.events.tracks, start=1, end=10)
+        best4 = best_track(self.events.tracks, start_stages=1, end_stages=10)
 
         assert len(best4) == 10
 
@@ -173,7 +165,7 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best2.rec_stages[0] == [1, 3, 5, 4]
 
         # stages with start and end
-        best3 = best_track(self.one_event.tracks, start=1, end=4)
+        best3 = best_track(self.one_event.tracks, start_stages=1, end_stages=4)
 
         assert len(best3) == 1
         assert best3.lik == ak.max(self.one_event.tracks.lik)
@@ -201,7 +193,7 @@ class TestBestTrackSelection(unittest.TestCase):
 
     def test_best_track_on_slices_with_start_end_one_event(self):
         tracks_slice = self.one_event.tracks[0:5]
-        best = best_track(tracks_slice, start=1, end=4)
+        best = best_track(tracks_slice, start_stages=1, end_stages=4)
 
         assert len(best) == 1
         assert best.lik == ak.max(tracks_slice.lik)
@@ -236,7 +228,7 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best.rec_stages[0] == [1, 3, 5, 4]
 
         # using start and end
-        best = best_track(tracks_slice, start=1, end=4)
+        best = best_track(tracks_slice, start_stages=1, end_stages=4)
 
         assert len(best) == 5
 
@@ -249,7 +241,10 @@ class TestBestTrackSelection(unittest.TestCase):
 
     def test_best_track_raises_when_too_many_inputs(self):
         with self.assertRaises(ValueError):
-            best_track(self.events.tracks, start=1, end=4, stages=[1, 3, 5, 4])
+            best_track(self.events.tracks,
+                       start_stages=1,
+                       end_stages=4,
+                       stages=[1, 3, 5, 4])
 
 
 class TestBestJmuon(unittest.TestCase):
@@ -321,11 +316,24 @@ class TestBestDusjshower(unittest.TestCase):
 
 class TestGetMultiplicity(unittest.TestCase):
     def test_get_multiplicity(self):
-        rec_stages_tracks = get_multiplicity(OFFLINE_FILE.events.tracks,
-                                             [1, 3, 5, 4])
+        multiplicity = get_multiplicity(OFFLINE_FILE.events.tracks,
+                                        [1, 3, 5, 4])
 
-        assert rec_stages_tracks.rec_stages[0] == [1, 3, 5, 4]
-        assert rec_stages_tracks.rec_stages[1] == [1, 3, 5, 4]
+        assert len(multiplicity) == 10
+        assert multiplicity[0] == 1
+        assert multiplicity[1] == 1
+        assert multiplicity[2] == 1
+        assert multiplicity[3] == 1
+
+        # test with no nexisting rec_stages
+        multiplicity2 = get_multiplicity(OFFLINE_FILE.events.tracks,
+                                         [1, 2, 3, 4, 5])
+
+        assert len(multiplicity2) == 10
+        assert multiplicity2[0] == 0
+        assert multiplicity2[1] == 0
+        assert multiplicity2[2] == 0
+        assert multiplicity2[3] == 0
 
 
 class TestCountNested(unittest.TestCase):
@@ -376,7 +384,7 @@ class TestRecStagesMasks(unittest.TestCase):
     def test_mask_with_start_and_end_of_rec_stages_with_multiple_events(self):
         rec_stages = self.tracks.rec_stages
         stages = [1, 3, 5, 4]
-        masks = mask(self.tracks, start=1, end=4)
+        masks = mask(self.tracks, start_stages=1, end_stages=4)
 
         assert masks[0][0] == all(rec_stages[0][0] == ak.Array(stages))
         assert masks[1][0] == all(rec_stages[1][0] == ak.Array(stages))
@@ -386,7 +394,7 @@ class TestRecStagesMasks(unittest.TestCase):
         rec_stages = self.tracks.rec_stages[0][0]
         stages = [1, 3, 5, 4]
         track = self.tracks[0]
-        masks = mask(track, start=1, end=4)
+        masks = mask(track, start_stages=1, end_stages=4)
 
         assert track[masks].rec_stages[0][0] == 1
         assert track[masks].rec_stages[0][-1] == 4
@@ -402,21 +410,14 @@ class TestRecStagesMasks(unittest.TestCase):
 
     def test_mask_raises_when_too_many_inputs(self):
         with self.assertRaises(ValueError):
-            mask(self.tracks, start=1, end=4, stages=[1, 3, 5, 4])
+            mask(self.tracks,
+                 start_stages=1,
+                 end_stages=4,
+                 stages=[1, 3, 5, 4])
 
     def test_mask_raises_when_no_inputs(self):
         with self.assertRaises(ValueError):
             mask(self.tracks)
-
-
-class TestW2listGenhenKeys(unittest.TestCase):
-    def test_w2list_genhen_keys(self):
-        assert 'W2LIST_GENHEN_REFF' in w2list_genhen_keys()
-
-
-class TestW2listGseangenKeys(unittest.TestCase):
-    def test_w2list_gseagen_keys(self):
-        assert 'W2LIST_GSEAGEN_PS' in w2list_gseagen_keys()
 
 
 class TestUnique(unittest.TestCase):

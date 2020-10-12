@@ -99,7 +99,7 @@ def get_w2list_param(events, generator, param):
 
     Parameters
     ----------
-    events : class km3io.offline.OfflineBranch
+    events : km3io.offline.OfflineBranch
         events class in offline neutrino files.
     generator : str
         the name of the software generating neutrinos, it is either
@@ -130,7 +130,7 @@ def fitinf(fitparam, tracks):
     fitparam : str
         the fit parameter name according to fitparameters defined in
         KM3NeT-Dataformat.
-    tracks : class km3io.offline.OfflineBranch
+    tracks : km3io.offline.OfflineBranch
         the tracks class. both full tracks branch or a slice of the
         tracks branch (example tracks[:, 0]) work.
 
@@ -167,7 +167,7 @@ def count_nested(Array, axis=0):
 
     Parameters
     ----------
-    Array : Awkward1 Array
+    Array : awkward1.Array
         Array of data. Example tracks.fitinf or tracks.rec_stages.
     axis : int, optional
         axis = 0: to count elements in the outmost level of nesting.
@@ -176,7 +176,7 @@ def count_nested(Array, axis=0):
 
     Returns
     -------
-    awkward1 Array or int
+    awkward1.Array or int
         counts of elements found in a nested awkward1 Array.
     """
     if axis == 0:
@@ -223,20 +223,24 @@ def best_track(tracks,
 
     Parameters
     ----------
-    tracks : class km3io.offline.OfflineBranch
+    tracks : km3io.offline.OfflineBranch
         tracks of interest. tracks can be from multiple events, or from one event, or a slice of tracks.
-    start : None, optional
+    start_stages : int, optional
         the exact starting step of rec_stages, as in tracks.rec_stages.
-    end : None, optional
+    end_stages : int, optional
         the exact ending step of rec_stages, as in tracks.rec_stages.
-    stages : None, optional
+    min_stages : int, optional
+        the minimum range of rec_stages.
+    max_stages : int, optional
+        the maximum range of rec_stages.
+    stages : list or set, optional
         either a list or a set of stages:
         - if stages is a list, the order of the rec_stages is conserved.
         - if stages in a set, the order is irrelevant.
 
     Returns
     -------
-    class km3io.offline.OfflineBranch
+    km3io.offline.OfflineBranch
         the best tracks based on the rec_stages selection. The logest track and the highest likelihood track is returned.
 
     Raises
@@ -245,6 +249,7 @@ def best_track(tracks,
         valueError raised when:
             - too many inputs specified.
             - no inputs are specified.
+
     """
     if (start_stages is None) and (end_stages is None) and (stages
                                                             is not None):
@@ -304,20 +309,24 @@ def mask(tracks,
 
     Parameters
     ----------
-    tracks : class km3io.offline.OfflineBranch
+    tracks : km3io.offline.OfflineBranch
         tracks, or one track, or slice of tracks, or slice of one track.
     stages : list or set
         reconstruction stages of interest:
         - if stages is a list: the order of rec_stages in conserved.
         - if stages is a set: the order of rec_stages in irrelevant.
-    start : None, optional
+    start_stages : int, optional
         the exact starting step of rec_stages, as in tracks.rec_stages.
-    end : None, optional
+    end_stages : int, optional
         the exact ending step of rec_stages, as in tracks.rec_stages.
+    min_stages : int, optional
+        the minimum range of rec_stages.
+    max_stages : int, optional
+        the maximum range of rec_stages.
 
     Returns
     -------
-    awkward1 Array
+    awkward1.Array
         an awkward1 Array mask where True corresponds to the positions
         where stages were found. False otherwise.
 
@@ -412,14 +421,14 @@ def _mask_explicit_rec_stages(tracks, stages):
 
     Parameters
     ----------
-    tracks : class km3io.offline.OfflineBranch
+    tracks : km3io.offline.OfflineBranch
         tracks or one track, or slice of tracks.
     stages : list
         reconstruction stages of interest. The order of stages is conserved.
 
     Returns
     -------
-    awkward1 Array
+    awkward1.Array
         an awkward1 Array mask where True corresponds to the positions
         where stages were found. False otherwise.
     """
@@ -441,9 +450,9 @@ def _find(rec_stages, stages, builder):
 
     Parameters
     ----------
-    rec_stages : awkward1 Array
+    rec_stages : awkward1.Array
         tracks.rec_stages from multiple events.
-    stages : awkward1 Array
+    stages : awkward1.Array
         reconstruction stages of interest.
     builder : awkward1.highlevel.ArrayBuilder
         awkward1 Array builder.
@@ -474,9 +483,9 @@ def _find_single(rec_stages, stages, builder):
 
     Parameters
     ----------
-    rec_stages : awkward1 Array
+    rec_stages : awkward1.Array
         tracks.rec_stages from a SINGLE event.
-    stages : awkward1 Array
+    stages : awkward1.Array
         reconstruction stages of interest.
     builder : awkward1.highlevel.ArrayBuilder
         awkward1 Array builder.
@@ -503,7 +512,7 @@ def best_jmuon(tracks):
 
     Parameters
     ----------
-    tracks : class km3io.offline.OfflineBranch
+    tracks : km3io.offline.OfflineBranch
         tracks, or one track, or slice of tracks, or slices of tracks.
 
     Returns
@@ -523,7 +532,7 @@ def best_jshower(tracks):
 
     Parameters
     ----------
-    tracks : class km3io.offline.OfflineBranch
+    tracks : km3io.offline.OfflineBranch
         tracks, or one track, or slice of tracks, or slices of tracks.
 
     Returns
@@ -543,7 +552,7 @@ def best_aashower(tracks):
 
     Parameters
     ----------
-    tracks : class km3io.offline.OfflineBranch
+    tracks : km3io.offline.OfflineBranch
         tracks, or one track, or slice of tracks, or slices of tracks.
 
     Returns
@@ -563,7 +572,7 @@ def best_dusjshower(tracks):
 
     Parameters
     ----------
-    tracks : class km3io.offline.OfflineBranch
+    tracks : km3io.offline.OfflineBranch
         tracks, or one track, or slice of tracks, or slices of tracks.
 
     Returns
@@ -586,16 +595,18 @@ def _mask_rec_stages_in_range_min_max(tracks,
 
     Parameters
     ----------
-    tracks : class km3io.offline.OfflineBranch
+    tracks : km3io.offline.OfflineBranch
         tracks, or one track, or slice of tracks, or slices of tracks.
-    min : int
+    min_stages : int
         minimum range of rec_stages.
-    max : int
+    max_stages : int
         maximum range of rec_stages.
+    valid_stages : set, optional
+        set of valid stages.
 
     Returns
     -------
-    awkward1 Array
+    awkward1.Array
         an awkward1 Array mask where True corresponds to the positions
         where stages were found. False otherwise.
     """
@@ -620,14 +631,13 @@ def _find_in_range(rec_stages, valid_stages, builder):
 
     Parameters
     ----------
-    rec_stages : awkward1 Array
+    rec_stages : awkward1.Array
         tracks.rec_stages of MULTILPLE events.
-    min : int
-        minimum range of rec_stages.
-    max : int
-        maximum range of rec_stages.
+    valid_stages : set
+        set of valid stages.
     builder : awkward1.highlevel.ArrayBuilder
         awkward1 Array builder.
+
     """
     for s in rec_stages:
         builder.begin_list()
@@ -655,12 +665,10 @@ def _find_in_range_single(rec_stages, valid_stages, builder):
 
     Parameters
     ----------
-    rec_stages : awkward1 Array
+    rec_stages : awkward1.Array
         tracks.rec_stages of a SINGLE event.
-    min : int
-        minimum range of rec_stages.
-    max : int
-        maximum range of rec_stages.
+    valid_stages : set
+        set of valid stages.
     builder : awkward1.highlevel.ArrayBuilder
         awkward1 Array builder.
     """

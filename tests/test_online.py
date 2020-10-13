@@ -418,13 +418,16 @@ class TestGetChannelFlags_Issue59(unittest.TestCase):
         Entry = namedtuple("Entry", fieldnames)
 
         with open(
-            data_path("online/KM3NeT_00000049_00008456.summaryslice-167941.txt")
+                data_path(
+                    "online/KM3NeT_00000049_00008456.summaryslice-167941.txt")
         ) as fobj:
-            ref_entries = [Entry(*list(l.strip().split())) for l in fobj.readlines()]
+            ref_entries = [
+                Entry(*list(l.strip().split())) for l in fobj.readlines()
+            ]
 
         r = OnlineReader(
-            data_path("online/KM3NeT_00000049_00008456.summaryslice-167941.root")
-        )
+            data_path(
+                "online/KM3NeT_00000049_00008456.summaryslice-167941.root"))
         summaryslice = r.summaryslices.slices[0]
 
         for ours, ref in zip(summaryslice, ref_entries):

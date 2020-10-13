@@ -236,7 +236,7 @@ def best_track(tracks,
         the maximum range of rec_stages.
     stages : list or set, optional
         either a list or a set of stages:
-        - if stages is a list, the order of the rec_stages is conserved.
+        - list: the order of the rec_stages is conserved.
         - if stages in a set, the order is irrelevant.
 
     Returns

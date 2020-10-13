@@ -3,6 +3,15 @@ Unreleased changes
 
 Version 0
 ---------
+0.17.0 / 2020-10-13
+~~~~~~~~~~~~~~~~~~~
+* Final ;) ``km3io.tools.best_track`` implementation which provides
+  many different ways to chose the one and only "best track".
+* Similar to ``km3net-dataformat/scripts/reconstruction.hh``, the
+  following functions can be used to retrieve the best track according
+  to the "standard definitions": ``km3io.tools.best_jmuon``, ``best_jshower``,
+  ``best_dusjshower`` and ``best_aashower``
+
 0.16.1 / 2020-09-30
 ~~~~~~~~~~~~~~~~~~~
 * Fixed a bug in ``Branch.is_single``

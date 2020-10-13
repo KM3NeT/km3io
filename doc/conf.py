@@ -34,8 +34,7 @@ author = 'Zineb Aly, Tamas Gal, Johannes Schumann'
 # ones.
 extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.viewcode',
-    'autoapi.extension', 'numpydoc',
-    'sphinx_gallery.gen_gallery'
+    'autoapi.extension', 'numpydoc', 'sphinx_gallery.gen_gallery'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

@@ -9,16 +9,12 @@ from km3net_testdata import data_path
 
 from km3io import OfflineReader
 from km3io.tools import (to_num, cached_property, unfold_indices, unique,
-                         uniquecount, fitinf, fitparams, count_nested, _find,
-                         mask, best_track, rec_types, get_w2list_param,
-                         get_multiplicity)
+                         uniquecount, fitinf, count_nested, _find,
+                         mask, best_track, get_w2list_param, get_multiplicity,
+                         best_jmuon, best_jshower, best_aashower,
+                         best_dusjshower)
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
-
-# class TestGetw2listParam(unittest.TestCase):
-#     def test_get_w2list_param(self):
-#         xsec_mean = get_w2list_param(OFFLINE_FILE.events, "gseagen", "W2LIST_GSEAGEN_XSEC_MEAN")
-#         print(xsec_mean)
 
 
 class TestFitinf(unittest.TestCase):
@@ -40,79 +36,296 @@ class TestFitinf(unittest.TestCase):
         assert best_beta[1] == self.best_fit[1][0]
         assert best_beta[2] == self.best_fit[2][0]
 
-    def test_fitparams(self):
-        keys = set(fitparams())
 
-        assert "JGANDALF_BETA0_RAD" in keys
-
-
-class TestRecoTypes(unittest.TestCase):
-    def test_reco_types(self):
-        keys = set(rec_types())
-
-        assert "JPP_RECONSTRUCTION_TYPE" in keys
-
-
-class TestBestTrack(unittest.TestCase):
+class TestBestTrackSelection(unittest.TestCase):
     def setUp(self):
         self.events = OFFLINE_FILE.events
         self.one_event = OFFLINE_FILE.events[0]
 
-    def test_best_track_from_multiple_events(self):
-        events = self.events[self.events.n_tracks > 0]
-        first_tracks = best_track(events.tracks, strategy="first")
-        default_best = best_track(events.tracks,
-                                  strategy="default",
-                                  rec_type="JPP_RECONSTRUCTION_TYPE")
+    def test_best_track_selection_from_multiple_events_with_explicit_stages_in_list(
+            self):
+        best = best_track(self.events.tracks, stages=[1, 3, 5, 4])
 
-        assert first_tracks.dir_z[0] == events.tracks.dir_z[0][0]
-        assert first_tracks.dir_x[1] == events.tracks.dir_x[1][0]
+        assert len(best) == 10
 
-        assert default_best.lik[0] == ak.max(events.tracks.lik[0])
-        assert default_best.lik[1] == ak.max(events.tracks.lik[1])
-        assert default_best.rec_type[0] == 4000
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+        assert best.rec_stages[1] == [1, 3, 5, 4]
+        assert best.rec_stages[2] == [1, 3, 5, 4]
+        assert best.rec_stages[3] == [1, 3, 5, 4]
+
+        # test with a shorter set of rec_stages
+        best2 = best_track(self.events.tracks, stages=[1, 3])
+
+        assert len(best2) == 10
+
+        assert best2.rec_stages[0] == [1, 3]
+        assert best2.rec_stages[1] == [1, 3]
+        assert best2.rec_stages[2] == [1, 3]
+        assert best2.rec_stages[3] == [1, 3]
+
+        # test the importance of order in rec_stages in lists
+        best3 = best_track(self.events.tracks, stages=[3, 1])
+
+        assert len(best3) == 10
+
+        assert best3.rec_stages[0] is None
+        assert best3.rec_stages[1] is None
+        assert best3.rec_stages[2] is None
+        assert best3.rec_stages[3] is None
+
+    def test_best_track_selection_from_multiple_events_with_explicit_stages_in_set(
+            self):
+        best = best_track(self.events.tracks, stages={1, 2, 3, 4, 5})
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+        assert best.rec_stages[1] == [1, 3, 5, 4]
+        assert best.rec_stages[2] == [1, 3, 5, 4]
+        assert best.rec_stages[3] == [1, 3, 5, 4]
+
+        # test with a shorter set of rec_stages
+        best2 = best_track(self.events.tracks, stages={1, 2, 3})
+
+        assert len(best2) == 10
+
+        assert best2.rec_stages[0] == [1, 3]
+        assert best2.rec_stages[1] == [1, 3]
+        assert best2.rec_stages[2] == [1, 3]
+        assert best2.rec_stages[3] == [1, 3]
+
+        # test the irrelevance of order in rec_stages in sets
+        best3 = best_track(self.events.tracks, stages={3, 1})
+
+        assert len(best3) == 10
+
+        assert best3.rec_stages[0] == [1, 3]
+        assert best3.rec_stages[1] == [1, 3]
+        assert best3.rec_stages[2] == [1, 3]
+        assert best3.rec_stages[3] == [1, 3]
+
+    def test_best_track_selection_from_multiple_events_with_start_end(self):
+        best = best_track(self.events.tracks, startend=(1, 4))
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+        assert best.rec_stages[1] == [1, 3, 5, 4]
+        assert best.rec_stages[2] == [1, 3, 5, 4]
+        assert best.rec_stages[3] == [1, 3, 5, 4]
+
+        # test with shorter stages
+        best2 = best_track(self.events.tracks, startend=(1, 3))
+
+        assert len(best2) == 10
+
+        assert best2.rec_stages[0] == [1, 3]
+        assert best2.rec_stages[1] == [1, 3]
+        assert best2.rec_stages[2] == [1, 3]
+        assert best2.rec_stages[3] == [1, 3]
+
+        # test the importance of start as a real start of rec_stages
+        best3 = best_track(self.events.tracks, startend=(0, 3))
+
+        assert len(best3) == 10
+
+        assert best3.rec_stages[0] is None
+        assert best3.rec_stages[1] is None
+        assert best3.rec_stages[2] is None
+        assert best3.rec_stages[3] is None
+
+        # test the importance of end as a real end of rec_stages
+        best4 = best_track(self.events.tracks, startend=(1, 10))
+
+        assert len(best4) == 10
+
+        assert best4.rec_stages[0] is None
+        assert best4.rec_stages[1] is None
+        assert best4.rec_stages[2] is None
+        assert best4.rec_stages[3] is None
 
     def test_best_track_from_a_single_event(self):
-        first_track = best_track(self.one_event.tracks, strategy="first")
-        best = best_track(self.one_event.tracks,
-                          strategy="default",
-                          rec_type="JPP_RECONSTRUCTION_TYPE")
+        # stages as a list
+        best = best_track(self.one_event.tracks, stages=[1, 3, 5, 4])
 
-        assert first_track.dir_z == self.one_event.tracks.dir_z[0]
-        assert first_track.lik == self.one_event.tracks.lik[0]
-
+        assert len(best) == 1
         assert best.lik == ak.max(self.one_event.tracks.lik)
-        assert best.rec_type == 4000
+        assert best.rec_stages[0] == [1, 3, 5, 4]
 
-    def test_best_track_raises_when_unknown_strategy(self):
-        with self.assertRaises(ValueError):
-            best_track(self.events.tracks, strategy="Zineb")
+        # stages as a set
+        best2 = best_track(self.one_event.tracks, stages={1, 2, 3, 5, 4})
 
-    def test_best_track_raises_when_default_strategy_and_no_rectype(self):
+        assert len(best2) == 1
+        assert best2.lik == ak.max(self.one_event.tracks.lik)
+        assert best2.rec_stages[0] == [1, 3, 5, 4]
+
+        # stages with start and end
+        best3 = best_track(self.one_event.tracks, startend=(1, 4))
+
+        assert len(best3) == 1
+        assert best3.lik == ak.max(self.one_event.tracks.lik)
+        assert best3.rec_stages[0] == [1, 3, 5, 4]
+
+    def test_best_track_on_slices_one_event(self):
+        tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type ==
+                                             4000]
+
+        # test stages with list
+        best = best_track(tracks_slice, stages=[1, 3, 5, 4])
+
+        assert len(best) == 1
+
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+
+        # test stages with set
+        best2 = best_track(tracks_slice, stages={1, 2, 3, 5, 4})
+
+        assert len(best2) == 1
+
+        assert best2.lik == ak.max(tracks_slice.lik)
+        assert best2.rec_stages[0] == [1, 3, 5, 4]
+
+    def test_best_track_on_slices_with_start_end_one_event(self):
+        tracks_slice = self.one_event.tracks[0:5]
+        best = best_track(tracks_slice, startend=(1, 4))
+
+        assert len(best) == 1
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0][0] == 1
+        assert best.rec_stages[0][-1] == 4
+
+    def test_best_track_on_slices_with_explicit_rec_stages_one_event(self):
+        tracks_slice = self.one_event.tracks[0:5]
+        best = best_track(tracks_slice, stages=[1, 3, 5, 4])
+
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0][0] == 1
+        assert best.rec_stages[0][-1] == 4
+
+    def test_best_track_on_slices_multiple_events(self):
+        tracks_slice = self.events.tracks[0:5]
+
+        # stages in list
+        best = best_track(tracks_slice, stages=[1, 3, 5, 4])
+
+        assert len(best) == 5
+
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+
+        # stages in set
+        best = best_track(tracks_slice, stages={1, 2, 3, 5, 4})
+
+        assert len(best) == 5
+
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+
+        # using start and end
+        best = best_track(tracks_slice, startend=(1, 4))
+
+        assert len(best) == 5
+
+        assert best.lik == ak.max(tracks_slice.lik)
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+
+    def test_best_track_raises_when_unknown_stages(self):
         with self.assertRaises(ValueError):
             best_track(self.events.tracks)
 
-    def test_best_track_on_slices(self):
-        tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type == 4000]
-        first_track = best_track(tracks_slice, strategy="first")
-        best = best_track(tracks_slice,
-                          strategy="default",
-                          rec_type="JPP_RECONSTRUCTION_TYPE")
+    def test_best_track_raises_when_too_many_inputs(self):
+        with self.assertRaises(ValueError):
+            best_track(self.events.tracks, startend=(1, 4), stages=[1, 3, 5, 4])
 
-        assert first_track.dir_z == self.one_event.tracks.dir_z[0]
-        assert first_track.lik == self.one_event.tracks.lik[0]
 
-        assert best.lik == ak.max(self.one_event.tracks.lik)
-        assert best.rec_type == 4000
+class TestBestJmuon(unittest.TestCase):
+    def test_best_jmuon(self):
+        best = best_jmuon(OFFLINE_FILE.events.tracks)
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] == [1, 3, 5, 4]
+        assert best.rec_stages[1] == [1, 3, 5, 4]
+        assert best.rec_stages[2] == [1, 3, 5, 4]
+        assert best.rec_stages[3] == [1, 3, 5, 4]
+
+        assert best.lik[0] == ak.max(OFFLINE_FILE.events.tracks.lik[0])
+        assert best.lik[1] == ak.max(OFFLINE_FILE.events.tracks.lik[1])
+        assert best.lik[2] == ak.max(OFFLINE_FILE.events.tracks.lik[2])
+
+
+class TestBestJshower(unittest.TestCase):
+    def test_best_jshower(self):
+        # there are no jshower events in this file
+        best = best_jshower(OFFLINE_FILE.events.tracks)
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] is None
+        assert best.rec_stages[1] is None
+        assert best.rec_stages[2] is None
+        assert best.rec_stages[3] is None
+
+        assert best.lik[0] is None
+        assert best.lik[1] is None
+        assert best.lik[2] is None
+
+
+class TestBestAashower(unittest.TestCase):
+    def test_best_aashower(self):
+        # there are no aashower events in this file
+        best = best_aashower(OFFLINE_FILE.events.tracks)
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] is None
+        assert best.rec_stages[1] is None
+        assert best.rec_stages[2] is None
+        assert best.rec_stages[3] is None
+
+        assert best.lik[0] is None
+        assert best.lik[1] is None
+        assert best.lik[2] is None
+
+
+class TestBestDusjshower(unittest.TestCase):
+    def test_best_dusjshower(self):
+        # there are no aashower events in this file
+        best = best_dusjshower(OFFLINE_FILE.events.tracks)
+
+        assert len(best) == 10
+
+        assert best.rec_stages[0] is None
+        assert best.rec_stages[1] is None
+        assert best.rec_stages[2] is None
+        assert best.rec_stages[3] is None
+
+        assert best.lik[0] is None
+        assert best.lik[1] is None
+        assert best.lik[2] is None
 
 
 class TestGetMultiplicity(unittest.TestCase):
     def test_get_multiplicity(self):
-        rec_stages_tracks = get_multiplicity(OFFLINE_FILE.events.tracks,
-                                             [1, 3, 5, 4])
+        multiplicity = get_multiplicity(OFFLINE_FILE.events.tracks,
+                                        [1, 3, 5, 4])
 
-        assert rec_stages_tracks.rec_stages[0] == [1, 3, 5, 4]
-        assert rec_stages_tracks.rec_stages[1] == [1, 3, 5, 4]
+        assert len(multiplicity) == 10
+        assert multiplicity[0] == 1
+        assert multiplicity[1] == 1
+        assert multiplicity[2] == 1
+        assert multiplicity[3] == 1
+
+        # test with no nexisting rec_stages
+        multiplicity2 = get_multiplicity(OFFLINE_FILE.events.tracks,
+                                         [1, 2, 3, 4, 5])
+
+        assert len(multiplicity2) == 10
+        assert multiplicity2[0] == 0
+        assert multiplicity2[1] == 0
+        assert multiplicity2[2] == 0
+        assert multiplicity2[3] == 0
 
 
 class TestCountNested(unittest.TestCase):
@@ -129,6 +342,8 @@ class TestRecStagesMasks(unittest.TestCase):
         self.nested = ak.Array([[[1, 2, 3], [1, 2, 3], [1]], [[0], [1, 2, 3]],
                                 [[0], [0, 1, 3], [0], [1, 2, 3], [1, 2, 3]]])
 
+        self.tracks = OFFLINE_FILE.events.tracks
+
     def test_find(self):
         builder = ak.ArrayBuilder()
         _find(self.nested, ak.Array([1, 2, 3]), builder)
@@ -139,14 +354,59 @@ class TestRecStagesMasks(unittest.TestCase):
         assert labels[0][2] == 0
         assert labels[1][0] == 0
 
-    def test_mask(self):
-        rec_stages = OFFLINE_FILE.events.tracks.rec_stages
+    def test_mask_with_explicit_rec_stages_in_list_with_multiple_events(self):
+        rec_stages = self.tracks.rec_stages
         stages = [1, 3, 5, 4]
-        masks = mask(rec_stages, stages)
+        masks = mask(self.tracks, stages=stages)
 
         assert masks[0][0] == all(rec_stages[0][0] == ak.Array(stages))
         assert masks[1][0] == all(rec_stages[1][0] == ak.Array(stages))
         assert masks[0][1] == False
+
+    def test_mask_with_explicit_rec_stages_in_set_with_multiple_events(self):
+        stages = {1, 2, 3, 4, 5}
+        masks = mask(self.tracks, stages=stages)
+        tracks = self.tracks[masks]
+
+        assert 1 in tracks.rec_stages[0][0]
+        assert 3 in tracks.rec_stages[0][0]
+        assert 4 in tracks.rec_stages[0][0]
+        assert 5 in tracks.rec_stages[0][0]
+
+    def test_mask_with_start_and_end_of_rec_stages_with_multiple_events(self):
+        rec_stages = self.tracks.rec_stages
+        stages = [1, 3, 5, 4]
+        masks = mask(self.tracks, startend=(1, 4))
+
+        assert masks[0][0] == all(rec_stages[0][0] == ak.Array(stages))
+        assert masks[1][0] == all(rec_stages[1][0] == ak.Array(stages))
+        assert masks[0][1] == False
+
+    def test_mask_with_start_and_end_of_rec_stages_signle_event(self):
+        rec_stages = self.tracks.rec_stages[0][0]
+        stages = [1, 3, 5, 4]
+        track = self.tracks[0]
+        masks = mask(track, startend=(1, 4))
+
+        assert track[masks].rec_stages[0][0] == 1
+        assert track[masks].rec_stages[0][-1] == 4
+
+    def test_mask_with_explicit_rec_stages_with_single_event(self):
+        rec_stages = self.tracks.rec_stages[0][0]
+        stages = [1, 3]
+        track = self.tracks[0]
+        masks = mask(track, stages=stages)
+
+        assert track[masks].rec_stages[0][0] == stages[0]
+        assert track[masks].rec_stages[0][1] == stages[1]
+
+    def test_mask_raises_when_too_many_inputs(self):
+        with self.assertRaises(ValueError):
+            mask(self.tracks, startend=(1, 4), stages=[1, 3, 5, 4])
+
+    def test_mask_raises_when_no_inputs(self):
+        with self.assertRaises(ValueError):
+            mask(self.tracks)
 
 
 class TestUnique(unittest.TestCase):

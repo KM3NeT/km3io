@@ -217,7 +217,7 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
         The range (minimum and maximum) value of rec_stages to take into account.
     stages : list or set, optional
         - list: the order of the rec_stages is respected.
-        - set: the order is irrelevant.
+        - set: a subset of required stages; the order is irrelevant.
 
     Returns
     -------

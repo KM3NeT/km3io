@@ -234,10 +234,12 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
     inputs = (stages, startend, minmax)
 
     if all(v is None for v in inputs):
-        raise ValueError("either stages, startend or minmax must be specified.")
+        raise ValueError(
+            "either stages, startend or minmax must be specified.")
 
     if stages is not None and (startend is not None or minmax is not None):
-        raise ValueError("Please specify either a range or a set of rec stages.")
+        raise ValueError(
+            "Please specify either a range or a set of rec stages.")
 
     if stages is not None and startend is None and minmax is None:
         selected_tracks = tracks[mask(tracks, stages=stages)]
@@ -309,10 +311,12 @@ def mask(tracks, stages=None, startend=None, minmax=None):
     inputs = (stages, startend, minmax)
 
     if all(v is None for v in inputs):
-        raise ValueError("either stages, startend or minmax must be specified.")
+        raise ValueError(
+            "either stages, startend or minmax must be specified.")
 
     if stages is not None and (startend is not None or minmax is not None):
-        raise ValueError("Please specify either a range or a set of rec stages.")
+        raise ValueError(
+            "Please specify either a range or a set of rec stages.")
 
     if stages is not None and startend is None and minmax is None:
         if isinstance(stages, list):
@@ -320,8 +324,7 @@ def mask(tracks, stages=None, startend=None, minmax=None):
             return _mask_explicit_rec_stages(tracks, stages)
         if isinstance(stages, set):
             # order of stages is no longer conserved
-            return _mask_rec_stages_in_range_min_max(tracks,
-                                                     valid_stages=stages)
+            return _mask_rec_stages_in_set(tracks, stages)
 
     if startend is not None and minmax is None and stages is None:
         return _mask_rec_stages_between_start_end(tracks, *startend)
@@ -552,8 +555,7 @@ def best_dusjshower(tracks):
 
 def _mask_rec_stages_in_range_min_max(tracks,
                                       min_stages=None,
-                                      max_stages=None,
-                                      valid_stages=None):
+                                      max_stages=None):
     """Mask tracks where rec_stages are withing the range(min, max).
 
     Parameters
@@ -564,8 +566,7 @@ def _mask_rec_stages_in_range_min_max(tracks,
         minimum range of rec_stages.
     max_stages : int
         maximum range of rec_stages.
-    valid_stages : set, optional
-        set of valid stages.
+
 
     Returns
     -------
@@ -573,21 +574,23 @@ def _mask_rec_stages_in_range_min_max(tracks,
         an awkward1 Array mask where True corresponds to the positions
         where stages were found. False otherwise.
     """
-    if (min_stages is not None) and (max_stages
-                                     is not None) and (valid_stages is None):
-        valid_stages = set(range(min_stages, max_stages))
+    if (min_stages is not None) and (max_stages is not None):
 
-    builder = ak1.ArrayBuilder()
-    if tracks.is_single:
-        _find_in_range_single(tracks.rec_stages, valid_stages, builder)
-        return (builder.snapshot() == 1)[0]
+        builder = ak1.ArrayBuilder()
+        if tracks.is_single:
+            _find_in_range_single(tracks.rec_stages, min_stages, max_stages,
+                                  builder)
+            return (builder.snapshot() == 1)[0]
+        else:
+            _find_in_range(tracks.rec_stages, min_stages, max_stages, builder)
+            return builder.snapshot() == 1
+
     else:
-        _find_in_range(tracks.rec_stages, valid_stages, builder)
-        return builder.snapshot() == 1
+        raise ValueError("please provide min_stages and max_stages.")
 
 
 @nb.jit(nopython=True)
-def _find_in_range(rec_stages, valid_stages, builder):
+def _find_in_range(rec_stages, min_stages, max_stages, builder):
     """Construct an awkward1 array with the same structure as tracks.rec_stages.
 
     When stages are within the range(min, max), the Array is filled with
@@ -603,6 +606,7 @@ def _find_in_range(rec_stages, valid_stages, builder):
         awkward1 Array builder.
 
     """
+    valid_stages = set(range(min_stages, max_stages))
     for s in rec_stages:
         builder.begin_list()
         for i in s:
@@ -622,7 +626,7 @@ def _find_in_range(rec_stages, valid_stages, builder):
 
 
 @nb.jit(nopython=True)
-def _find_in_range_single(rec_stages, valid_stages, builder):
+def _find_in_range_single(rec_stages, min_stages, max_stages, builder):
     """Construct an awkward1 array with the same structure as tracks.rec_stages.
 
     When stages are within the range(min, max), the Array is filled with
@@ -637,7 +641,7 @@ def _find_in_range_single(rec_stages, valid_stages, builder):
     builder : awkward1.highlevel.ArrayBuilder
         awkward1 Array builder.
     """
-
+    valid_stages = set(range(min_stages, max_stages))
     builder.begin_list()
     for s in rec_stages:
         num_stages = len(s)
@@ -647,6 +651,106 @@ def _find_in_range_single(rec_stages, valid_stages, builder):
                 if i in valid_stages:
                     found += 1
             if found == num_stages:
+                builder.append(1)
+            else:
+                builder.append(0)
+        else:
+            builder.append(0)
+    builder.end_list()
+
+
+def _mask_rec_stages_in_set(tracks, stages):
+    """Mask tracks where rec_stages are withing the range(min, max).
+
+    Parameters
+    ----------
+    tracks : km3io.offline.OfflineBranch
+        tracks, or one track, or slice of tracks, or slices of tracks.
+    stages : set
+        set of stages to look for in tracks.rec_stages.
+
+    Returns
+    -------
+    awkward1.Array
+        an awkward1 Array mask where True corresponds to the positions
+        where stages were found. False otherwise.
+    """
+    if isinstance(stages, set):
+
+        builder = ak1.ArrayBuilder()
+        if tracks.is_single:
+            _find_in_set_single(tracks.rec_stages, stages, builder)
+            return (builder.snapshot() == 1)[0]
+        else:
+            _find_in_set(tracks.rec_stages, stages, builder)
+            return builder.snapshot() == 1
+
+    else:
+        raise ValueError("stages must be a set")
+
+
+@nb.jit(nopython=True)
+def _find_in_set(rec_stages, stages, builder):
+    """Construct an awkward1 array with the same structure as tracks.rec_stages.
+
+    When all stages are found in rec_stages, the Array is filled with
+    value 1, otherwise it is filled with value 0.
+
+    Parameters
+    ----------
+    rec_stages : awkward1.Array
+        tracks.rec_stages of MULTILPLE events.
+    stages : set
+        set of stages.
+    builder : awkward1.highlevel.ArrayBuilder
+        awkward1 Array builder.
+
+    """
+    n = len(stages)
+    for s in rec_stages:
+        builder.begin_list()
+        for i in s:
+            num_stages = len(i)
+            if num_stages != 0:
+                found = 0
+                for j in i:
+                    if j in stages:
+                        found += 1
+                if found == n:
+                    builder.append(1)
+                else:
+                    builder.append(0)
+            else:
+                builder.append(0)
+        builder.end_list()
+
+
+@nb.jit(nopython=True)
+def _find_in_set_single(rec_stages, stages, builder):
+    """Construct an awkward1 array with the same structure as tracks.rec_stages.
+
+    When all stages  are found in rec_stages, the Array is filled with
+    value 1, otherwise it is filled with value 0.
+
+    Parameters
+    ----------
+    rec_stages : awkward1.Array
+        tracks.rec_stages of a SINGLE event.
+    stages : set
+        set of stages.
+    builder : awkward1.highlevel.ArrayBuilder
+        awkward1 Array builder.
+    """
+    n = len(stages)
+    builder.begin_list()
+    for s in rec_stages:
+        num_stages = len(s)
+        if num_stages != 0:
+            found = 0
+            for j in s:
+                if j in stages:
+                    found += 1
+            if found == n:
                 builder.append(1)
             else:
                 builder.append(0)

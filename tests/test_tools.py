@@ -9,8 +9,8 @@ from km3net_testdata import data_path
 
 from km3io import OfflineReader
 from km3io.tools import (to_num, cached_property, unfold_indices, unique,
-                         uniquecount, fitinf, count_nested, _find,
-                         mask, best_track, get_w2list_param, get_multiplicity,
+                         uniquecount, fitinf, count_nested, _find, mask,
+                         best_track, get_w2list_param, get_multiplicity,
                          best_jmuon, best_jshower, best_aashower,
                          best_dusjshower)
 
@@ -75,7 +75,7 @@ class TestBestTrackSelection(unittest.TestCase):
 
     def test_best_track_selection_from_multiple_events_with_explicit_stages_in_set(
             self):
-        best = best_track(self.events.tracks, stages={1, 2, 3, 4, 5})
+        best = best_track(self.events.tracks, stages={1, 3, 4, 5})
 
         assert len(best) == 10
 
@@ -85,7 +85,7 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best.rec_stages[3] == [1, 3, 5, 4]
 
         # test with a shorter set of rec_stages
-        best2 = best_track(self.events.tracks, stages={1, 2, 3})
+        best2 = best_track(self.events.tracks, stages={1, 3})
 
         assert len(best2) == 10
 
@@ -153,7 +153,7 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best.rec_stages[0] == [1, 3, 5, 4]
 
         # stages as a set
-        best2 = best_track(self.one_event.tracks, stages={1, 2, 3, 5, 4})
+        best2 = best_track(self.one_event.tracks, stages={1, 3, 4, 5})
 
         assert len(best2) == 1
         assert best2.lik == ak.max(self.one_event.tracks.lik)
@@ -179,7 +179,7 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best.rec_stages[0] == [1, 3, 5, 4]
 
         # test stages with set
-        best2 = best_track(tracks_slice, stages={1, 2, 3, 5, 4})
+        best2 = best_track(tracks_slice, stages={1, 3, 4, 5})
 
         assert len(best2) == 1
 
@@ -215,7 +215,7 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best.rec_stages[0] == [1, 3, 5, 4]
 
         # stages in set
-        best = best_track(tracks_slice, stages={1, 2, 3, 5, 4})
+        best = best_track(tracks_slice, stages={1, 3, 4, 5})
 
         assert len(best) == 5
 
@@ -236,7 +236,9 @@ class TestBestTrackSelection(unittest.TestCase):
 
     def test_best_track_raises_when_too_many_inputs(self):
         with self.assertRaises(ValueError):
-            best_track(self.events.tracks, startend=(1, 4), stages=[1, 3, 5, 4])
+            best_track(self.events.tracks,
+                       startend=(1, 4),
+                       stages=[1, 3, 5, 4])
 
 
 class TestBestJmuon(unittest.TestCase):
@@ -364,7 +366,7 @@ class TestRecStagesMasks(unittest.TestCase):
         assert masks[0][1] == False
 
     def test_mask_with_explicit_rec_stages_in_set_with_multiple_events(self):
-        stages = {1, 2, 3, 4, 5}
+        stages = {1, 3, 4, 5}
         masks = mask(self.tracks, stages=stages)
         tracks = self.tracks[masks]
 

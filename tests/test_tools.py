@@ -6,6 +6,8 @@ import numpy as np
 from pathlib import Path
 
 from km3net_testdata import data_path
+from km3io.definitions import fitparameters as kfit
+
 
 from km3io import OfflineReader
 from km3io.tools import (to_num, cached_property, unfold_indices, unique,
@@ -25,8 +27,8 @@ class TestFitinf(unittest.TestCase):
         self.best_fit = self.best.fitinf
 
     def test_fitinf(self):
-        beta = fitinf('JGANDALF_BETA0_RAD', self.tracks)
-        best_beta = fitinf('JGANDALF_BETA0_RAD', self.best)
+        beta = fitinf(kfit.JGANDALF_BETA0_RAD, self.tracks)
+        best_beta = fitinf(kfit.JGANDALF_BETA0_RAD, self.best)
 
         assert beta[0][0] == self.fit[0][0][0]
         assert beta[0][1] == self.fit[0][1][0]

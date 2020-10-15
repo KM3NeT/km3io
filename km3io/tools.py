@@ -128,8 +128,8 @@ def fitinf(fitparam, tracks):
 
     Parameters
     ----------
-    fitparam : str
-        the fit parameter name according to fitparameters defined in
+    fitparam : int
+        the fit parameter key according to fitparameters defined in
         KM3NeT-Dataformat.
     tracks : km3io.offline.OfflineBranch
         the tracks class. both full tracks branch or a slice of the
@@ -141,7 +141,7 @@ def fitinf(fitparam, tracks):
         awkward array of the values of the fit parameter requested.
     """
     fit = tracks.fitinf
-    index = kfit[fitparam]
+    index = fitparam
     try:
         params = fit[count_nested(fit, axis=2) > index]
         return ak1.Array([i[:, index] for i in params])

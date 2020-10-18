@@ -608,7 +608,6 @@ def _find_in_range(rec_stages, min_stage, max_stage, builder):
         awkward1 Array builder.
 
     """
-    valid_stages = set(range(min_stage, max_stage))
     for s in rec_stages:
         builder.begin_list()
         for i in s:
@@ -616,7 +615,7 @@ def _find_in_range(rec_stages, min_stage, max_stage, builder):
             if num_stages != 0:
                 found = 0
                 for j in i:
-                    if j in valid_stages:
+                    if min_stage <= j <= max_stage:
                         found += 1
                 if found == num_stages:
                     builder.append(1)
@@ -645,14 +644,13 @@ def _find_in_range_single(rec_stages, min_stage, max_stage, builder):
     builder : awkward1.highlevel.ArrayBuilder
         awkward1 Array builder.
     """
-    valid_stages = set(range(min_stage, max_stage))
     builder.begin_list()
     for s in rec_stages:
         num_stages = len(s)
         if num_stages != 0:
             found = 0
             for i in s:
-                if i in valid_stages:
+                if min_stage <= i <= max_stage:
                     found += 1
             if found == num_stages:
                 builder.append(1)

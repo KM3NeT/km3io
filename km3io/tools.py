@@ -487,8 +487,8 @@ def best_jmuon(tracks):
         the longest + highest likelihood track reconstructed with JMUON.
     """
     mask = _mask_rec_stages_in_range_min_max(tracks,
-                                             min_stages=krec.JMUONBEGIN,
-                                             max_stages=krec.JMUONEND)
+                                             min_stage=krec.JMUONBEGIN,
+                                             max_stage=krec.JMUONEND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
@@ -507,8 +507,8 @@ def best_jshower(tracks):
         the longest + highest likelihood track reconstructed with JSHOWER.
     """
     mask = _mask_rec_stages_in_range_min_max(tracks,
-                                             min_stages=krec.JSHOWERBEGIN,
-                                             max_stages=krec.JSHOWEREND)
+                                             min_stage=krec.JSHOWERBEGIN,
+                                             max_stage=krec.JSHOWEREND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
@@ -527,8 +527,8 @@ def best_aashower(tracks):
         the longest + highest likelihood track reconstructed with AASHOWER.
     """
     mask = _mask_rec_stages_in_range_min_max(tracks,
-                                             min_stages=krec.AASHOWERBEGIN,
-                                             max_stages=krec.AASHOWEREND)
+                                             min_stage=krec.AASHOWERBEGIN,
+                                             max_stage=krec.AASHOWEREND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
@@ -547,25 +547,25 @@ def best_dusjshower(tracks):
         the longest + highest likelihood track reconstructed with DUSJSHOWER.
     """
     mask = _mask_rec_stages_in_range_min_max(tracks,
-                                             min_stages=krec.DUSJSHOWERBEGIN,
-                                             max_stages=krec.DUSJSHOWEREND)
+                                             min_stage=krec.DUSJSHOWERBEGIN,
+                                             max_stage=krec.DUSJSHOWEREND)
 
     return _max_lik_track(_longest_tracks(tracks[mask]))
 
 
 def _mask_rec_stages_in_range_min_max(tracks,
-                                      min_stages=None,
-                                      max_stages=None):
+                                      min_stage=None,
+                                      max_stage=None):
     """Mask tracks where rec_stages are withing the range(min, max).
 
     Parameters
     ----------
     tracks : km3io.offline.OfflineBranch
         tracks, or one track, or slice of tracks, or slices of tracks.
-    min_stages : int
-        minimum range of rec_stages.
-    max_stages : int
-        maximum range of rec_stages.
+    min_stage : int
+        minimum value of rec_stages.
+    max_stage : int
+        maximum value of rec_stages.
 
 
     Returns
@@ -574,23 +574,23 @@ def _mask_rec_stages_in_range_min_max(tracks,
         an awkward1 Array mask where True corresponds to the positions
         where stages were found. False otherwise.
     """
-    if (min_stages is not None) and (max_stages is not None):
+    if (min_stage is not None) and (max_stage is not None):
 
         builder = ak1.ArrayBuilder()
         if tracks.is_single:
-            _find_in_range_single(tracks.rec_stages, min_stages, max_stages,
+            _find_in_range_single(tracks.rec_stages, min_stage, max_stage,
                                   builder)
             return (builder.snapshot() == 1)[0]
         else:
-            _find_in_range(tracks.rec_stages, min_stages, max_stages, builder)
+            _find_in_range(tracks.rec_stages, min_stage, max_stage, builder)
             return builder.snapshot() == 1
 
     else:
-        raise ValueError("please provide min_stages and max_stages.")
+        raise ValueError("please provide min_stage and max_stage.")
 
 
 @nb.jit(nopython=True)
-def _find_in_range(rec_stages, min_stages, max_stages, builder):
+def _find_in_range(rec_stages, min_stage, max_stage, builder):
     """Construct an awkward1 array with the same structure as tracks.rec_stages.
 
     When stages are within the range(min, max), the Array is filled with
@@ -600,13 +600,15 @@ def _find_in_range(rec_stages, min_stages, max_stages, builder):
     ----------
     rec_stages : awkward1.Array
         tracks.rec_stages of MULTILPLE events.
-    valid_stages : set
-        set of valid stages.
+    min_stage: int
+        minimum value of rec_stages.
+    max_stage: int
+        minimum value of rec_stages.
     builder : awkward1.highlevel.ArrayBuilder
         awkward1 Array builder.
 
     """
-    valid_stages = set(range(min_stages, max_stages))
+    valid_stages = set(range(min_stage, max_stage))
     for s in rec_stages:
         builder.begin_list()
         for i in s:
@@ -626,7 +628,7 @@ def _find_in_range(rec_stages, min_stages, max_stages, builder):
 
 
 @nb.jit(nopython=True)
-def _find_in_range_single(rec_stages, min_stages, max_stages, builder):
+def _find_in_range_single(rec_stages, min_stage, max_stage, builder):
     """Construct an awkward1 array with the same structure as tracks.rec_stages.
 
     When stages are within the range(min, max), the Array is filled with
@@ -636,12 +638,14 @@ def _find_in_range_single(rec_stages, min_stages, max_stages, builder):
     ----------
     rec_stages : awkward1.Array
         tracks.rec_stages of a SINGLE event.
-    valid_stages : set
-        set of valid stages.
+    min_stage: int
+        minimum value of rec_stages.
+    max_stage: int
+        minimum value of rec_stages.
     builder : awkward1.highlevel.ArrayBuilder
         awkward1 Array builder.
     """
-    valid_stages = set(range(min_stages, max_stages))
+    valid_stages = set(range(min_stage, max_stage))
     builder.begin_list()
     for s in rec_stages:
         num_stages = len(s)

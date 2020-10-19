@@ -39,10 +39,21 @@ lint:
 dependencies:
 	pip install -Ur requirements.txt
 
-.PHONY: yapf
-yapf:
-	yapf -i -r $(PKGNAME)
-	yapf -i -r tests
-	yapf -i setup.py
+.PHONY: black
+black:
+	black km3io
+	black examples
+	black tests
+	black doc/conf.py
+	black setup.py
 
-.PHONY: all clean install install-dev test  test-nocov flake8 pep8 dependencies docstyle
+.PHONY: black-check
+black-check:
+	black --check km3io
+	black --check examples
+	black --check tests
+	black --check doc/conf.py
+	black --check setup.py
+
+
+.PHONY: all clean install install-dev test  test-nocov flake8 pep8 dependencies docstyle black black-check

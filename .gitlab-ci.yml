@@ -22,6 +22,7 @@ stages:
   python3 -m venv venv
   source venv/bin/activate
   pip install -U pip setuptools wheel
+  hash -r
   pip freeze
   make install-dev
   pip freeze

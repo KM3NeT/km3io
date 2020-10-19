@@ -4,13 +4,16 @@
 The km3io setup script.
 
 """
+import os
 from setuptools import setup
 import sys
 
-with open("requirements.txt") as fobj:
-    requirements = [l.strip() for l in fobj.readlines()]
-    if sys.version_info[:2] == (3, 5):
-        requirements.append("llvmlite==0.31.0")
+
+def read_requirements(kind):
+    """Return a list of stripped lines from a file"""
+    with open(os.path.join("requirements", kind + ".txt")) as fobj:
+        return [l.strip() for l in fobj.readlines()]
+
 
 try:
     with open("README.rst") as fh:
@@ -30,8 +33,9 @@ setup(
     platforms="any",
     setup_requires=["setuptools_scm"],
     use_scm_version=True,
-    install_requires=requirements,
-    python_requires=">=3.5",
+    install_requires=read_requirements("install"),
+    extras_require={kind: read_requirements(kind) for kind in ["dev"]},
+    python_requires=">=3.6",
     entry_points={"console_scripts": ["KPrintTree=km3io.utils.kprinttree:main"]},
     classifiers=[
         "Intended Audience :: Developers",

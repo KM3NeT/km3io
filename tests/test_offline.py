@@ -11,10 +11,10 @@ OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
 OFFLINE_USR = OfflineReader(data_path("offline/usr-sample.root"))
 OFFLINE_MC_TRACK_USR = OfflineReader(
     data_path(
-        'offline/mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root'
-    ))
-OFFLINE_NUMUCC = OfflineReader(
-    data_path("offline/numucc.root"))  # with mc data
+        "offline/mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root"
+    )
+)
+OFFLINE_NUMUCC = OfflineReader(data_path("offline/numucc.root"))  # with mc data
 
 
 class TestOfflineReader(unittest.TestCase):
@@ -45,7 +45,7 @@ class TestHeader(unittest.TestCase):
             OFFLINE_FILE.header
 
     def test_missing_key_definitions(self):
-        head = {'a': '1 2 3', 'b': '4', 'c': 'd'}
+        head = {"a": "1 2 3", "b": "4", "c": "d"}
 
         header = Header(head)
 
@@ -53,10 +53,10 @@ class TestHeader(unittest.TestCase):
         assert 2 == header.a.field_1
         assert 3 == header.a.field_2
         assert 4 == header.b
-        assert 'd' == header.c
+        assert "d" == header.c
 
     def test_missing_values(self):
-        head = {'can': '1'}
+        head = {"can": "1"}
 
         header = Header(head)
 
@@ -65,7 +65,7 @@ class TestHeader(unittest.TestCase):
         assert header.can.r is None
 
     def test_additional_values_compared_to_definition(self):
-        head = {'can': '1 2 3 4'}
+        head = {"can": "1 2 3 4"}
 
         header = Header(head)
 
@@ -76,10 +76,10 @@ class TestHeader(unittest.TestCase):
 
     def test_header(self):
         head = {
-            'DAQ': '394',
-            'PDF': '4',
-            'can': '0 1027 888.4',
-            'undefined': '1 2 test 3.4'
+            "DAQ": "394",
+            "PDF": "4",
+            "can": "0 1027 888.4",
+            "undefined": "1 2 test 3.4",
         }
 
         header = Header(head)
@@ -120,12 +120,28 @@ class TestOfflineEvents(unittest.TestCase):
         self.n_hits = [176, 125, 318, 157, 83, 60, 71, 84, 255, 105]
         self.n_tracks = [56, 55, 56, 56, 56, 56, 56, 56, 54, 56]
         self.t_sec = [
-            1567036818, 1567036818, 1567036820, 1567036816, 1567036816,
-            1567036816, 1567036822, 1567036818, 1567036818, 1567036820
+            1567036818,
+            1567036818,
+            1567036820,
+            1567036816,
+            1567036816,
+            1567036816,
+            1567036822,
+            1567036818,
+            1567036818,
+            1567036820,
         ]
         self.t_ns = [
-            200000000, 300000000, 200000000, 500000000, 500000000, 500000000,
-            200000000, 500000000, 500000000, 400000000
+            200000000,
+            300000000,
+            200000000,
+            500000000,
+            500000000,
+            500000000,
+            200000000,
+            500000000,
+            500000000,
+            400000000,
         ]
 
     def test_len(self):
@@ -144,10 +160,10 @@ class TestOfflineEvents(unittest.TestCase):
         self.assertListEqual(self.t_ns, list(self.events.t_ns))
 
     def test_keys(self):
-        assert np.allclose(self.n_hits, self.events['n_hits'])
-        assert np.allclose(self.n_tracks, self.events['n_tracks'])
-        assert np.allclose(self.t_sec, self.events['t_sec'])
-        assert np.allclose(self.t_ns, self.events['t_ns'])
+        assert np.allclose(self.n_hits, self.events["n_hits"])
+        assert np.allclose(self.n_tracks, self.events["n_tracks"])
+        assert np.allclose(self.t_sec, self.events["t_sec"])
+        assert np.allclose(self.t_ns, self.events["t_ns"])
 
     def test_slicing(self):
         s = slice(2, 8, 2)
@@ -168,12 +184,13 @@ class TestOfflineEvents(unittest.TestCase):
 
     def test_index_chaining(self):
         assert np.allclose(self.events[3:5].n_hits, self.events.n_hits[3:5])
-        assert np.allclose(self.events[3:5][0].n_hits,
-                           self.events.n_hits[3:5][0])
-        assert np.allclose(self.events[3:5].hits[1].dom_id[4],
-                           self.events.hits[3:5][1][4].dom_id)
-        assert np.allclose(self.events.hits[3:5][1][4].dom_id,
-                           self.events[3:5][1][4].hits.dom_id)
+        assert np.allclose(self.events[3:5][0].n_hits, self.events.n_hits[3:5][0])
+        assert np.allclose(
+            self.events[3:5].hits[1].dom_id[4], self.events.hits[3:5][1][4].dom_id
+        )
+        assert np.allclose(
+            self.events.hits[3:5][1][4].dom_id, self.events[3:5][1][4].hits.dom_id
+        )
 
     def test_fancy_indexing(self):
         mask = self.events.n_tracks > 55
@@ -206,23 +223,55 @@ class TestOfflineHits(unittest.TestCase):
         self.n_hits = 10
         self.dom_id = {
             0: [
-                806451572, 806451572, 806451572, 806451572, 806455814,
-                806455814, 806455814, 806483369, 806483369, 806483369
+                806451572,
+                806451572,
+                806451572,
+                806451572,
+                806455814,
+                806455814,
+                806455814,
+                806483369,
+                806483369,
+                806483369,
             ],
             5: [
-                806455814, 806487219, 806487219, 806487219, 806487226,
-                808432835, 808432835, 808432835, 808432835, 808432835
-            ]
+                806455814,
+                806487219,
+                806487219,
+                806487219,
+                806487226,
+                808432835,
+                808432835,
+                808432835,
+                808432835,
+                808432835,
+            ],
         }
         self.t = {
             0: [
-                70104010., 70104016., 70104192., 70104123., 70103096.,
-                70103797., 70103796., 70104191., 70104223., 70104181.
+                70104010.0,
+                70104016.0,
+                70104192.0,
+                70104123.0,
+                70103096.0,
+                70103797.0,
+                70103796.0,
+                70104191.0,
+                70104223.0,
+                70104181.0,
             ],
             5: [
-                81861237., 81859608., 81860586., 81861062., 81860357.,
-                81860627., 81860628., 81860625., 81860627., 81860629.
-            ]
+                81861237.0,
+                81859608.0,
+                81860586.0,
+                81861062.0,
+                81860357.0,
+                81860627.0,
+                81860628.0,
+                81860625.0,
+                81860627.0,
+                81860629.0,
+            ],
         }
 
     def test_attributes_available(self):
@@ -241,10 +290,9 @@ class TestOfflineHits(unittest.TestCase):
 
     def test_attributes(self):
         for idx, dom_id in self.dom_id.items():
-            self.assertListEqual(dom_id,
-                                 list(self.hits.dom_id[idx][:len(dom_id)]))
+            self.assertListEqual(dom_id, list(self.hits.dom_id[idx][: len(dom_id)]))
         for idx, t in self.t.items():
-            assert np.allclose(t, self.hits.t[idx][:len(t)])
+            assert np.allclose(t, self.hits.t[idx][: len(t)])
 
     def test_slicing(self):
         s = slice(2, 8, 2)
@@ -258,23 +306,25 @@ class TestOfflineHits(unittest.TestCase):
     def test_slicing_consistency(self):
         for s in [slice(1, 3), slice(2, 7, 3)]:
             for idx in range(3):
-                assert np.allclose(self.hits.dom_id[idx][s],
-                                   self.hits[idx].dom_id[s])
-                assert np.allclose(OFFLINE_FILE.events[idx].hits.dom_id[s],
-                                   self.hits.dom_id[idx][s])
+                assert np.allclose(self.hits.dom_id[idx][s], self.hits[idx].dom_id[s])
+                assert np.allclose(
+                    OFFLINE_FILE.events[idx].hits.dom_id[s], self.hits.dom_id[idx][s]
+                )
 
     def test_index_consistency(self):
         for idx, dom_ids in self.dom_id.items():
-            assert np.allclose(self.hits[idx].dom_id[:self.n_hits],
-                               dom_ids[:self.n_hits])
             assert np.allclose(
-                OFFLINE_FILE.events[idx].hits.dom_id[:self.n_hits],
-                dom_ids[:self.n_hits])
+                self.hits[idx].dom_id[: self.n_hits], dom_ids[: self.n_hits]
+            )
+            assert np.allclose(
+                OFFLINE_FILE.events[idx].hits.dom_id[: self.n_hits],
+                dom_ids[: self.n_hits],
+            )
         for idx, ts in self.t.items():
-            assert np.allclose(self.hits[idx].t[:self.n_hits],
-                               ts[:self.n_hits])
-            assert np.allclose(OFFLINE_FILE.events[idx].hits.t[:self.n_hits],
-                               ts[:self.n_hits])
+            assert np.allclose(self.hits[idx].t[: self.n_hits], ts[: self.n_hits])
+            assert np.allclose(
+                OFFLINE_FILE.events[idx].hits.t[: self.n_hits], ts[: self.n_hits]
+            )
 
     def test_keys(self):
         assert "dom_id" in self.hits.keys()
@@ -294,14 +344,14 @@ class TestOfflineTracks(unittest.TestCase):
     @unittest.skip
     def test_attributes(self):
         for idx, dom_id in self.dom_id.items():
-            self.assertListEqual(dom_id,
-                                 list(self.hits.dom_id[idx][:len(dom_id)]))
+            self.assertListEqual(dom_id, list(self.hits.dom_id[idx][: len(dom_id)]))
         for idx, t in self.t.items():
-            assert np.allclose(t, self.hits.t[idx][:len(t)])
+            assert np.allclose(t, self.hits.t[idx][: len(t)])
 
     def test_item_selection(self):
-        self.assertListEqual(list(self.tracks[0].dir_z[:2]),
-                             [-0.872885221293917, -0.872885221293917])
+        self.assertListEqual(
+            list(self.tracks[0].dir_z[:2]), [-0.872885221293917, -0.872885221293917]
+        )
 
     def test_repr(self):
         assert " 10 " in repr(self.tracks)
@@ -315,24 +365,33 @@ class TestOfflineTracks(unittest.TestCase):
         track_selection_2 = tracks[1:3]
         assert 2 == len(track_selection_2)
         for _slice in [
-                slice(0, 0),
-                slice(0, 1),
-                slice(0, 2),
-                slice(1, 5),
-                slice(3, -2)
+            slice(0, 0),
+            slice(0, 1),
+            slice(0, 2),
+            slice(1, 5),
+            slice(3, -2),
         ]:
-            self.assertListEqual(list(tracks.E[:, 0][_slice]),
-                                 list(tracks[_slice].E[:, 0]))
+            self.assertListEqual(
+                list(tracks.E[:, 0][_slice]), list(tracks[_slice].E[:, 0])
+            )
 
     def test_nested_indexing(self):
-        self.assertAlmostEqual(self.f.events.tracks.fitinf[3:5][1][9][2],
-                               self.f.events[3:5].tracks[1].fitinf[9][2])
-        self.assertAlmostEqual(self.f.events.tracks.fitinf[3:5][1][9][2],
-                               self.f.events[3:5][1][9][2].tracks.fitinf)
-        self.assertAlmostEqual(self.f.events.tracks.fitinf[3:5][1][9][2],
-                               self.f.events[3:5][1].tracks[9][2].fitinf)
-        self.assertAlmostEqual(self.f.events.tracks.fitinf[3:5][1][9][2],
-                               self.f.events[3:5][1].tracks[9].fitinf[2])
+        self.assertAlmostEqual(
+            self.f.events.tracks.fitinf[3:5][1][9][2],
+            self.f.events[3:5].tracks[1].fitinf[9][2],
+        )
+        self.assertAlmostEqual(
+            self.f.events.tracks.fitinf[3:5][1][9][2],
+            self.f.events[3:5][1][9][2].tracks.fitinf,
+        )
+        self.assertAlmostEqual(
+            self.f.events.tracks.fitinf[3:5][1][9][2],
+            self.f.events[3:5][1].tracks[9][2].fitinf,
+        )
+        self.assertAlmostEqual(
+            self.f.events.tracks.fitinf[3:5][1][9][2],
+            self.f.events[3:5][1].tracks[9].fitinf[2],
+        )
 
 
 class TestBranchIndexingMagic(unittest.TestCase):
@@ -341,10 +400,12 @@ class TestBranchIndexingMagic(unittest.TestCase):
 
     def test_foo(self):
         self.assertEqual(318, self.events[2:4].n_hits[0])
-        assert np.allclose(self.events[3].tracks.dir_z[10],
-                           self.events.tracks.dir_z[3, 10])
-        assert np.allclose(self.events[3:6].tracks.pos_y[:, 0],
-                           self.events.tracks.pos_y[3:6, 0])
+        assert np.allclose(
+            self.events[3].tracks.dir_z[10], self.events.tracks.dir_z[3, 10]
+        )
+        assert np.allclose(
+            self.events[3:6].tracks.pos_y[:, 0], self.events.tracks.pos_y[3:6, 0]
+        )
 
         # test selecting with a list
         self.assertEqual(3, len(self.events[[0, 2, 3]]))
@@ -358,29 +419,48 @@ class TestUsr(unittest.TestCase):
         print(self.f.events.usr)
 
     def test_keys_flat(self):
-        self.assertListEqual([
-            'RecoQuality', 'RecoNDF', 'CoC', 'ToT', 'ChargeAbove',
-            'ChargeBelow', 'ChargeRatio', 'DeltaPosZ', 'FirstPartPosZ',
-            'LastPartPosZ', 'NSnapHits', 'NTrigHits', 'NTrigDOMs',
-            'NTrigLines', 'NSpeedVetoHits', 'NGeometryVetoHits',
-            'ClassficationScore'
-        ], self.f.events.usr.keys())
+        self.assertListEqual(
+            [
+                "RecoQuality",
+                "RecoNDF",
+                "CoC",
+                "ToT",
+                "ChargeAbove",
+                "ChargeBelow",
+                "ChargeRatio",
+                "DeltaPosZ",
+                "FirstPartPosZ",
+                "LastPartPosZ",
+                "NSnapHits",
+                "NTrigHits",
+                "NTrigDOMs",
+                "NTrigLines",
+                "NSpeedVetoHits",
+                "NGeometryVetoHits",
+                "ClassficationScore",
+            ],
+            self.f.events.usr.keys(),
+        )
 
     def test_getitem_flat(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
-            self.f.events.usr['CoC'])
+            self.f.events.usr["CoC"],
+        )
         assert np.allclose(
             [37.51967774166617, -10.280346193553832, 13.67595659707355],
-            self.f.events.usr['DeltaPosZ'])
+            self.f.events.usr["DeltaPosZ"],
+        )
 
     def test_attributes_flat(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
-            self.f.events.usr.CoC)
+            self.f.events.usr.CoC,
+        )
         assert np.allclose(
             [37.51967774166617, -10.280346193553832, 13.67595659707355],
-            self.f.events.usr.DeltaPosZ)
+            self.f.events.usr.DeltaPosZ,
+        )
 
 
 class TestMcTrackUsr(unittest.TestCase):
@@ -391,21 +471,25 @@ class TestMcTrackUsr(unittest.TestCase):
         n_tracks = len(self.f.events)
         for i in range(3):
             self.assertListEqual(
-                [b'bx', b'by', b'ichan', b'cc'],
-                self.f.events.mc_tracks.usr_names[i][0].tolist())
+                [b"bx", b"by", b"ichan", b"cc"],
+                self.f.events.mc_tracks.usr_names[i][0].tolist(),
+            )
             self.assertListEqual(
-                [b'energy_lost_in_can'],
-                self.f.events.mc_tracks.usr_names[i][1].tolist())
+                [b"energy_lost_in_can"],
+                self.f.events.mc_tracks.usr_names[i][1].tolist(),
+            )
 
     def test_usr(self):
-        assert np.allclose([0.0487, 0.0588, 3, 2],
-                           self.f.events.mc_tracks.usr[0][0].tolist(),
-                           atol=0.0001)
-        assert np.allclose([0.147, 0.4, 3, 2],
-                           self.f.events.mc_tracks.usr[1][0].tolist(),
-                           atol=0.001)
+        assert np.allclose(
+            [0.0487, 0.0588, 3, 2],
+            self.f.events.mc_tracks.usr[0][0].tolist(),
+            atol=0.0001,
+        )
+        assert np.allclose(
+            [0.147, 0.4, 3, 2], self.f.events.mc_tracks.usr[1][0].tolist(), atol=0.001
+        )
 
 
 class TestNestedMapper(unittest.TestCase):
     def test_nested_mapper(self):
-        self.assertEqual('pos_x', _nested_mapper("trks.pos.x"))
+        self.assertEqual("pos_x", _nested_mapper("trks.pos.x"))

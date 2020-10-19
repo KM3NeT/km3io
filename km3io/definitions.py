@@ -11,6 +11,7 @@ from km3io._definitions.w2list_gseagen import data as w2list_gseagen
 
 class AttrDict(dict):
     """A dictionary which allows access to its key through attributes."""
+
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self

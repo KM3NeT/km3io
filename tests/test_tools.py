@@ -10,11 +10,24 @@ from km3io.definitions import fitparameters as kfit
 
 
 from km3io import OfflineReader
-from km3io.tools import (to_num, cached_property, unfold_indices, unique,
-                         uniquecount, fitinf, count_nested, _find, mask,
-                         best_track, get_w2list_param, get_multiplicity,
-                         best_jmuon, best_jshower, best_aashower,
-                         best_dusjshower)
+from km3io.tools import (
+    to_num,
+    cached_property,
+    unfold_indices,
+    unique,
+    uniquecount,
+    fitinf,
+    count_nested,
+    _find,
+    mask,
+    best_track,
+    get_w2list_param,
+    get_multiplicity,
+    best_jmuon,
+    best_jshower,
+    best_aashower,
+    best_dusjshower,
+)
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
 
@@ -45,7 +58,8 @@ class TestBestTrackSelection(unittest.TestCase):
         self.one_event = OFFLINE_FILE.events[0]
 
     def test_best_track_selection_from_multiple_events_with_explicit_stages_in_list(
-            self):
+        self,
+    ):
         best = best_track(self.events.tracks, stages=[1, 3, 5, 4])
 
         assert len(best) == 10
@@ -76,7 +90,8 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best3.rec_stages[3] is None
 
     def test_best_track_selection_from_multiple_events_with_explicit_stages_in_set(
-            self):
+        self,
+    ):
         best = best_track(self.events.tracks, stages={1, 3, 4, 5})
 
         assert len(best) == 10
@@ -169,8 +184,7 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best3.rec_stages[0] == [1, 3, 5, 4]
 
     def test_best_track_on_slices_one_event(self):
-        tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type ==
-                                             4000]
+        tracks_slice = self.one_event.tracks[self.one_event.tracks.rec_type == 4000]
 
         # test stages with list
         best = best_track(tracks_slice, stages=[1, 3, 5, 4])
@@ -238,9 +252,7 @@ class TestBestTrackSelection(unittest.TestCase):
 
     def test_best_track_raises_when_too_many_inputs(self):
         with self.assertRaises(ValueError):
-            best_track(self.events.tracks,
-                       startend=(1, 4),
-                       stages=[1, 3, 5, 4])
+            best_track(self.events.tracks, startend=(1, 4), stages=[1, 3, 5, 4])
 
 
 class TestBestJmuon(unittest.TestCase):
@@ -312,8 +324,7 @@ class TestBestDusjshower(unittest.TestCase):
 
 class TestGetMultiplicity(unittest.TestCase):
     def test_get_multiplicity(self):
-        multiplicity = get_multiplicity(OFFLINE_FILE.events.tracks,
-                                        [1, 3, 5, 4])
+        multiplicity = get_multiplicity(OFFLINE_FILE.events.tracks, [1, 3, 5, 4])
 
         assert len(multiplicity) == 10
         assert multiplicity[0] == 1
@@ -322,8 +333,7 @@ class TestGetMultiplicity(unittest.TestCase):
         assert multiplicity[3] == 1
 
         # test with no nexisting rec_stages
-        multiplicity2 = get_multiplicity(OFFLINE_FILE.events.tracks,
-                                         [1, 2, 3, 4, 5])
+        multiplicity2 = get_multiplicity(OFFLINE_FILE.events.tracks, [1, 2, 3, 4, 5])
 
         assert len(multiplicity2) == 10
         assert multiplicity2[0] == 0
@@ -343,8 +353,13 @@ class TestCountNested(unittest.TestCase):
 
 class TestRecStagesMasks(unittest.TestCase):
     def setUp(self):
-        self.nested = ak.Array([[[1, 2, 3], [1, 2, 3], [1]], [[0], [1, 2, 3]],
-                                [[0], [0, 1, 3], [0], [1, 2, 3], [1, 2, 3]]])
+        self.nested = ak.Array(
+            [
+                [[1, 2, 3], [1, 2, 3], [1]],
+                [[0], [1, 2, 3]],
+                [[0], [0, 1, 3], [0], [1, 2, 3], [1, 2, 3]],
+            ]
+        )
 
         self.tracks = OFFLINE_FILE.events.tracks
 
@@ -418,8 +433,7 @@ class TestUnique(unittest.TestCase):
         max_range = 100
         for i in range(23):
             low = np.random.randint(0, max_range)
-            high = np.random.randint(low + 1,
-                                     low + 2 + np.random.randint(max_range))
+            high = np.random.randint(low + 1, low + 2 + np.random.randint(max_range))
             n = np.random.randint(max_range)
             arr = np.random.randint(low, high, n).astype(dtype)
             np_reference = np.sort(np.unique(arr))
@@ -496,8 +510,7 @@ class TestUnfoldIndices(unittest.TestCase):
         assert data[indices[0]][indices[1]] == unfold_indices(data, indices)
 
         indices = [slice(1, 9, 2), slice(1, 4), 2]
-        assert data[indices[0]][indices[1]][indices[2]] == unfold_indices(
-            data, indices)
+        assert data[indices[0]][indices[1]][indices[2]] == unfold_indices(data, indices)
 
     def test_unfold_indices_raises_index_error(self):
         data = range(10)

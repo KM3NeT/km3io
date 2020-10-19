@@ -21,7 +21,7 @@ r = ki.OfflineReader(data_path("offline/numucc.root"))
 #####################################################
 # Accessing the file header
 # -------------------------
-# Note that not all file headers are supported, so don't be surprised if 
+# Note that not all file headers are supported, so don't be surprised if
 # nothing is returned when the file header is called (this can happen if your file
 # was produced with old versions of aanet).
 
@@ -119,5 +119,3 @@ print(r.events.n_mc_hits[mask])
 # or:
 
 print(r.events.n_mc_tracks[mask])
-
-

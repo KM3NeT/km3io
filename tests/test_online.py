@@ -6,7 +6,14 @@ import unittest
 
 from km3net_testdata import data_path
 
-from km3io.online import OnlineReader, get_rate, has_udp_trailer, get_udp_max_sequence_number, get_channel_flags, get_number_udp_packets
+from km3io.online import (
+    OnlineReader,
+    get_rate,
+    has_udp_trailer,
+    get_udp_max_sequence_number,
+    get_channel_flags,
+    get_number_udp_packets,
+)
 from km3io.tools import to_num
 
 ONLINE_FILE = data_path("online/km3net_online.root")
@@ -42,12 +49,10 @@ class TestOnlineEvent(unittest.TestCase):
         self.event = OnlineReader(ONLINE_FILE).events[0]
 
     def test_str(self):
-        assert re.match(".*event.*96.*snapshot.*18.*triggered",
-                        str(self.event))
+        assert re.match(".*event.*96.*snapshot.*18.*triggered", str(self.event))
 
     def test_repr(self):
-        assert re.match(".*event.*96.*snapshot.*18.*triggered",
-                        self.event.__repr__())
+        assert re.match(".*event.*96.*snapshot.*18.*triggered", self.event.__repr__())
 
 
 class TestOnlineEventsSnapshotHits(unittest.TestCase):
@@ -74,11 +79,11 @@ class TestOnlineEventsSnapshotHits(unittest.TestCase):
     def test_data_values(self):
         hits = self.events.snapshot_hits
 
-        self.assertListEqual([806451572, 806451572, 806455814],
-                             list(hits.dom_id[0][:3]))
+        self.assertListEqual(
+            [806451572, 806451572, 806455814], list(hits.dom_id[0][:3])
+        )
         self.assertListEqual([10, 13, 0], list(hits.channel_id[0][:3]))
-        self.assertListEqual([30733918, 30733916, 30733256],
-                             list(hits.time[0][:3]))
+        self.assertListEqual([30733918, 30733916, 30733256], list(hits.time[0][:3]))
 
     def test_channel_ids_have_valid_values(self):
         hits = self.events.snapshot_hits
@@ -113,11 +118,11 @@ class TestOnlineEventsTriggeredHits(unittest.TestCase):
     def test_data_values(self):
         hits = self.events.triggered_hits
 
-        self.assertListEqual([806451572, 806451572, 808432835],
-                             list(hits.dom_id[0][:3]))
+        self.assertListEqual(
+            [806451572, 806451572, 808432835], list(hits.dom_id[0][:3])
+        )
         self.assertListEqual([10, 13, 1], list(hits.channel_id[0][:3]))
-        self.assertListEqual([30733918, 30733916, 30733429],
-                             list(hits.time[0][:3]))
+        self.assertListEqual([30733918, 30733916, 30733429], list(hits.time[0][:3]))
         self.assertListEqual([16, 16, 4], list(hits.trigger_mask[0][:3]))
 
     def test_channel_ids_have_valid_values(self):
@@ -174,8 +179,7 @@ class TestSummaryslices(unittest.TestCase):
         assert 3 == len(self.ss.headers)
         self.assertListEqual([44, 44, 44], list(self.ss.headers.detector_id))
         self.assertListEqual([6633, 6633, 6633], list(self.ss.headers.run))
-        self.assertListEqual([126, 127, 128],
-                             list(self.ss.headers.frame_index))
+        self.assertListEqual([126, 127, 128], list(self.ss.headers.frame_index))
         assert 806451572 == self.ss.slices[0].dom_id[0]
 
     def test_slices(self):
@@ -190,7 +194,7 @@ class TestSummaryslices(unittest.TestCase):
             808981510: True,
             808981523: False,
             808981672: False,
-            808974773: False
+            808974773: False,
         }
         for dom_id, fifo_status in dct_fifo_stat.items():
             frame = s[s.dom_id == dom_id]
@@ -209,7 +213,7 @@ class TestSummaryslices(unittest.TestCase):
             808432835: True,
             808435278: True,
             808447180: True,
-            808447186: True
+            808447186: True,
         }
         for dom_id, udp_trailer in dct_udp_trailer.items():
             frame = s[s.dom_id == dom_id]
@@ -249,7 +253,7 @@ class TestSummaryslices(unittest.TestCase):
             808981672: False,
             808981812: True,
             808981864: False,
-            808982018: False
+            808982018: False,
         }
         for dom_id, high_rate_veto in dct_high_rate_veto.items():
             frame = s[s.dom_id == dom_id]
@@ -285,12 +289,13 @@ class TestSummaryslices(unittest.TestCase):
             809524432: 21,
             809526097: 23,
             809544058: 21,
-            809544061: 23
+            809544061: 23,
         }
         for dom_id, max_sequence_number in dct_seq_numbers.items():
             frame = s[s.dom_id == dom_id]
-            assert get_udp_max_sequence_number(
-                frame.dq_status[0]) == max_sequence_number
+            assert (
+                get_udp_max_sequence_number(frame.dq_status[0]) == max_sequence_number
+            )
 
     def test_number_udp_packets(self):
         s = self.ss.slices[0]
@@ -315,7 +320,7 @@ class TestSummaryslices(unittest.TestCase):
             808961655: 20,
             808964815: 20,
             808964852: 28,
-            808969848: 21
+            808969848: 21,
         }
         for dom_id, n_udp_packets in dct_n_packets.items():
             frame = s[s.dom_id == dom_id]
@@ -325,83 +330,351 @@ class TestSummaryslices(unittest.TestCase):
         s = self.ss.slices[0]
         dct_hrv_flags = {
             809524432: [
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
             ],
             809526097: [
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                True, False, False, False, False, False, False, False, True,
-                False, False, False, False
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                True,
+                False,
+                False,
+                False,
+                False,
             ],
             809544058: [
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
             ],
             809544061: [
-                False, True, False, False, False, True, False, False, False,
-                False, False, False, False, False, False, True, False, False,
-                False, False, False, True, False, False, False, False, False,
-                False, False, False, False
-            ]
+                False,
+                True,
+                False,
+                False,
+                False,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+            ],
         }
         for dom_id, hrv_flags in dct_hrv_flags.items():
             frame = s[s.dom_id == dom_id]
-            assert any([
-                a == b
-                for a, b in zip(get_channel_flags(frame.hrv[0]), hrv_flags)
-            ])
+            assert any(
+                [a == b for a, b in zip(get_channel_flags(frame.hrv[0]), hrv_flags)]
+            )
 
     def test_fifo_flags(self):
         s = self.ss.slices[0]
         dct_fifo_flags = {
             808982547: [
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
             ],
             808984711: [
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
             ],
             808996773: [
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
             ],
             808997793: [
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
             ],
             809006037: [
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
             ],
             808981510: [
-                False, False, False, False, False, False, False, False, False,
-                False, False, False, False, False, True, True, False, False,
-                False, True, False, True, True, True, True, True, True, False,
-                False, True, False
-            ]
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                True,
+                True,
+                False,
+                False,
+                False,
+                True,
+                False,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                False,
+                False,
+                True,
+                False,
+            ],
         }
         for dom_id, fifo_flags in dct_fifo_flags.items():
             frame = s[s.dom_id == dom_id]
-            assert any([
-                a == b
-                for a, b in zip(get_channel_flags(frame.fifo[0]), fifo_flags)
-            ])
+            assert any(
+                [a == b for a, b in zip(get_channel_flags(frame.fifo[0]), fifo_flags)]
+            )
 
     def test_str(self):
         print(str(self.ss))
@@ -418,16 +691,13 @@ class TestGetChannelFlags_Issue59(unittest.TestCase):
         Entry = namedtuple("Entry", fieldnames)
 
         with open(
-                data_path(
-                    "online/KM3NeT_00000049_00008456.summaryslice-167941.txt")
+            data_path("online/KM3NeT_00000049_00008456.summaryslice-167941.txt")
         ) as fobj:
-            ref_entries = [
-                Entry(*list(l.strip().split())) for l in fobj.readlines()
-            ]
+            ref_entries = [Entry(*list(l.strip().split())) for l in fobj.readlines()]
 
         r = OnlineReader(
-            data_path(
-                "online/KM3NeT_00000049_00008456.summaryslice-167941.root"))
+            data_path("online/KM3NeT_00000049_00008456.summaryslice-167941.root")
+        )
         summaryslice = r.summaryslices.slices[0]
 
         for ours, ref in zip(summaryslice, ref_entries):

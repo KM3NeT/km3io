@@ -65,7 +65,7 @@ print(channel_ids)
 #####################################################
 # Accessing the mc_hits data
 # --------------------------
-# similarly, you can access mc_hits data in any key of interest by 
+# similarly, you can access mc_hits data in any key of interest by
 # following the same procedure as for hits:
 
 mc_pmt_ids = mc_hits.pmt_id

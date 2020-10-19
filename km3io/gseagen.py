@@ -8,13 +8,15 @@ import numpy as np
 import warnings
 from .rootio import Branch, BranchMapper
 from .tools import cached_property
+
 MAIN_TREE_NAME = "Events"
 
 
 class GSGReader:
     """reader for gSeaGen ROOT files"""
+
     def __init__(self, file_path=None, fobj=None):
-        """ GSGReader class is a gSeaGen ROOT file wrapper
+        """GSGReader class is a gSeaGen ROOT file wrapper
 
         Parameters
         ----------
@@ -26,14 +28,14 @@ class GSGReader:
 
     @cached_property
     def header(self):
-        header_key = 'Header'
+        header_key = "Header"
         if header_key in self._fobj:
             header = {}
             for k, v in self._fobj[header_key].items():
                 v = v.array()[0]
                 if isinstance(v, bytes):
                     try:
-                        v = v.decode('utf-8')
+                        v = v.decode("utf-8")
                     except UnicodeDecodeError:
                         pass
                 header[k.decode("utf-8")] = v

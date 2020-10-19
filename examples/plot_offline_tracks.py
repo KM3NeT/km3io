@@ -64,7 +64,7 @@ print(likelihood)
 #####################################################
 # Accessing the mc_tracks data
 # ----------------------------
-# similarly, you can access mc_tracks data in any key of interest by 
+# similarly, you can access mc_tracks data in any key of interest by
 # following the same procedure as for tracks:
 
 cos_zenith = mc_tracks.dir_z

@@ -6,7 +6,7 @@ import uproot
 from .tools import unfold_indices
 
 # 110 MB based on the size of the largest basket found so far in km3net
-BASKET_CACHE_SIZE = 110 * 1024**2
+BASKET_CACHE_SIZE = 110 * 1024 ** 2
 BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 
@@ -38,16 +38,19 @@ class BranchMapper:
         List of keys to convert to awkward arrays (recommended for
         doubly ragged arrays)
     """
-    def __init__(self,
-                 name,
-                 key,
-                 extra=None,
-                 exclude=None,
-                 update=None,
-                 attrparser=None,
-                 flat=True,
-                 interpretations=None,
-                 toawkward=None):
+
+    def __init__(
+        self,
+        name,
+        key,
+        extra=None,
+        exclude=None,
+        update=None,
+        attrparser=None,
+        flat=True,
+        interpretations=None,
+        toawkward=None,
+    ):
         self.name = name
         self.key = key
 
@@ -62,13 +65,16 @@ class BranchMapper:
 
 class Branch:
     """Branch accessor class"""
-    def __init__(self,
-                 tree,
-                 mapper,
-                 index_chain=None,
-                 subbranchmaps=None,
-                 keymap=None,
-                 awkward_cache=None):
+
+    def __init__(
+        self,
+        tree,
+        mapper,
+        index_chain=None,
+        subbranchmaps=None,
+        keymap=None,
+        awkward_cache=None,
+    ):
         self._tree = tree
         self._mapper = mapper
         self._index_chain = [] if index_chain is None else index_chain
@@ -89,10 +95,12 @@ class Branch:
 
         if subbranchmaps is not None:
             for mapper in subbranchmaps:
-                subbranch = self.__class__(self._tree,
-                                           mapper=mapper,
-                                           index_chain=self._index_chain,
-                                           awkward_cache=self._awkward_cache)
+                subbranch = self.__class__(
+                    self._tree,
+                    mapper=mapper,
+                    index_chain=self._index_chain,
+                    awkward_cache=self._awkward_cache,
+                )
                 self._subbranches.append(subbranch)
         for subbranch in self._subbranches:
             setattr(self, subbranch._mapper.name, subbranch)
@@ -100,12 +108,12 @@ class Branch:
     def _initialise_keys(self):
         """Create the keymap and instance attributes for branch keys"""
         # TODO: this could be a cached property
-        keys = set(k.decode('utf-8')
-                   for k in self._branch.keys()) - set(self._mapper.exclude)
+        keys = set(k.decode("utf-8") for k in self._branch.keys()) - set(
+            self._mapper.exclude
+        )
         self._keymap = {
-            **{self._mapper.attrparser(k): k
-               for k in keys},
-            **self._mapper.extra
+            **{self._mapper.attrparser(k): k for k in keys},
+            **self._mapper.extra,
         }
         self._keymap.update(self._mapper.update)
         for k in self._mapper.update.values():
@@ -129,23 +137,28 @@ class Branch:
     def __getkey__(self, key):
         interpretation = self._mapper.interpretations.get(key)
 
-        if key == 'usr_names':
+        if key == "usr_names":
             # TODO this will be fixed soon in uproot,
             # see https://github.com/scikit-hep/uproot/issues/465
             interpretation = uproot.asgenobj(
                 uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
-                self._branch[self._keymap[key]]._context, 6)
+                self._branch[self._keymap[key]]._context,
+                6,
+            )
 
-        if key == 'usr':
+        if key == "usr":
             # triple jagged array is wrongly parsed in uproot
             interpretation = uproot.asgenobj(
-                uproot.SimpleArray(uproot.STLVector(uproot.asdtype('>f8'))),
-                self._branch[self._keymap[key]]._context, 6)
+                uproot.SimpleArray(uproot.STLVector(uproot.asdtype(">f8"))),
+                self._branch[self._keymap[key]]._context,
+                6,
+            )
 
         out = self._branch[self._keymap[key]].lazyarray(
-            interpretation=interpretation, basketcache=BASKET_CACHE)
+            interpretation=interpretation, basketcache=BASKET_CACHE
+        )
         if self._index_chain is not None and key in self._mapper.toawkward:
-            cache_key = self._mapper.name + '/' + key
+            cache_key = self._mapper.name + "/" + key
             if cache_key not in self._awkward_cache:
                 if len(out) > 20000:  # It will take more than 10 seconds
                     print("Creating cache for '{}'.".format(cache_key))
@@ -164,12 +177,14 @@ class Branch:
         # if item.__class__.__name__ == "ChunkedArray":
         #     item = np.array(item)
 
-        return self.__class__(self._tree,
-                              self._mapper,
-                              index_chain=self._index_chain + [item],
-                              keymap=self._keymap,
-                              subbranchmaps=self._subbranchmaps,
-                              awkward_cache=self._awkward_cache)
+        return self.__class__(
+            self._tree,
+            self._mapper,
+            index_chain=self._index_chain + [item],
+            keymap=self._keymap,
+            subbranchmaps=self._subbranchmaps,
+            awkward_cache=self._awkward_cache,
+        )
 
     def __len__(self):
         if not self._index_chain:
@@ -184,8 +199,12 @@ class Branch:
         else:
             return len(
                 unfold_indices(
-                    self._branch[self._keymap['id']].lazyarray(
-                        basketcache=BASKET_CACHE), self._index_chain))
+                    self._branch[self._keymap["id"]].lazyarray(
+                        basketcache=BASKET_CACHE
+                    ),
+                    self._index_chain,
+                )
+            )
 
     @property
     def is_single(self):
@@ -208,12 +227,18 @@ class Branch:
 
     def __str__(self):
         length = len(self)
-        return "{} ({}) with {} element{}".format(self.__class__.__name__,
-                                                  self._mapper.name, length,
-                                                  's' if length > 1 else '')
+        return "{} ({}) with {} element{}".format(
+            self.__class__.__name__,
+            self._mapper.name,
+            length,
+            "s" if length > 1 else "",
+        )
 
     def __repr__(self):
         length = len(self)
-        return "<{}[{}]: {} element{}>".format(self.__class__.__name__,
-                                               self._mapper.name, length,
-                                               's' if length > 1 else '')
+        return "<{}[{}]: {} element{}>".format(
+            self.__class__.__name__,
+            self._mapper.name,
+            length,
+            "s" if length > 1 else "",
+        )

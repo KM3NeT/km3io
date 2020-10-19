@@ -30,10 +30,11 @@ def print_tree(filename):
 
 def main():
     from docopt import docopt
+
     args = docopt(__doc__)
 
-    print_tree(args['-f'])
+    print_tree(args["-f"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

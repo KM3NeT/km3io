@@ -1,0 +1,4 @@
+Contribute
+==========
+
+.. include:: ../CONTRIBUTING.rst

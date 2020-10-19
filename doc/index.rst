@@ -11,6 +11,7 @@
    :caption: Contents:
 
    examples
+   contribute
    changelog
 
    autoapi/index

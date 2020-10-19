@@ -2,6 +2,10 @@ Unreleased changes
 ------------------
 Version 0
 ---------
+0.17.1 / 2020-10-19
+~~~~~~~~~~~~~~~~~~~
+* Requires ``awkward1>=0.3.1`` from now on (fixes an array-shape mismatch bug)
+
 0.17.0 / 2020-10-13
 ~~~~~~~~~~~~~~~~~~~
 * Final ;) ``km3io.tools.best_track`` implementation which provides

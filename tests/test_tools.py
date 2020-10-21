@@ -39,17 +39,24 @@ class TestFitinf(unittest.TestCase):
         self.best = self.tracks[:, 0]
         self.best_fit = self.best.fitinf
 
-    def test_fitinf(self):
+    def test_fitinf_from_all_events(self):
         beta = fitinf(kfit.JGANDALF_BETA0_RAD, self.tracks)
-        best_beta = fitinf(kfit.JGANDALF_BETA0_RAD, self.best)
 
         assert beta[0][0] == self.fit[0][0][0]
         assert beta[0][1] == self.fit[0][1][0]
         assert beta[0][2] == self.fit[0][2][0]
 
-        assert best_beta[0] == self.best_fit[0][0]
-        assert best_beta[1] == self.best_fit[1][0]
-        assert best_beta[2] == self.best_fit[2][0]
+    def test_fitinf_from_one_event(self):
+        beta = fitinf(kfit.JGANDALF_BETA0_RAD, self.best)
+
+        assert beta[0] == self.best_fit[0][0]
+        assert beta[1] == self.best_fit[1][0]
+        assert beta[2] == self.best_fit[2][0]
+
+    def test_fitinf_from_one_event_and_one_track(self):
+        beta = fitinf(kfit.JGANDALF_BETA0_RAD, self.tracks[0][0])
+
+        assert beta == self.tracks[0][0].fitinf[0]
 
 
 class TestBestTrackSelection(unittest.TestCase):

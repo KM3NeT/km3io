@@ -145,14 +145,22 @@ def fitinf(fitparam, tracks):
     """
     fit = tracks.fitinf
     index = fitparam
-    try:
-        params = fit[count_nested(fit, axis=2) > index]
-        return ak1.Array([i[:, index] for i in params])
-    except ValueError:
-        # This is the case for tracks[:, 0] or any other selection.
+    if tracks.is_single and len(tracks) != 1:
         params = fit[count_nested(fit, axis=1) > index]
-        return params[:, index]
+        out = params[:, index]
 
+    if tracks.is_single and len(tracks) == 1:
+        out = fit[index]
+
+    else:
+        if len(tracks[0]) == 1:  # case of tracks slice with 1 track per event.
+            params = fit[count_nested(fit, axis=1) > index]
+            out = params[:, index]
+        else:
+            params = fit[count_nested(fit, axis=2) > index]
+            out = ak1.Array([i[:, index] for i in params])
+
+    return out
 
 def count_nested(arr, axis=0):
     """Count elements in a nested awkward Array.

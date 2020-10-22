@@ -162,6 +162,7 @@ def fitinf(fitparam, tracks):
 
     return out
 
+
 def count_nested(arr, axis=0):
     """Count elements in a nested awkward Array.
 

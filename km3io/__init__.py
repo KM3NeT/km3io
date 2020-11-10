@@ -8,4 +8,5 @@ warnings.simplefilter(action="ignore", category=FutureWarning)  # uproot3
 
 from .offline import OfflineReader
 from .online import OnlineReader
+from .rawacoustic import RawAcousticReader
 from .gseagen import GSGReader

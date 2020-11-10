@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.io import wavfile
 
 '''
 Layout of the raw acoustic binary data tipe as produced by the Acoustic Data Filter (ADF). 
@@ -71,4 +72,25 @@ class RawAcousticReader():
             timebase[sample_range] = (frame['utc_seconds'] - zero_time) + 16e-9 * frame['16ns_cycles'] + time_axis
 
         return timebase
+    
+    '''
+    Write as wave, with optional gain
+    '''
+    def to_wav(self, filepath, gain_dB = 0.0):
+        pcm = self.pcm
+        if gain_dB != 0.0:
+            pcm *= 10 ** (0.1 * gain_dB)
+        wavfile.write(filepath, int(F_S), pcm)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         

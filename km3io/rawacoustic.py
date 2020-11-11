@@ -52,7 +52,7 @@ class RawAcousticReader():
         return self._data['utc_seconds'], self._data['16ns_cycles']
     
     @property
-    def timebase(self, zero_time = 0.0):
+    def timebase(self):
         '''
         Constructs sequence of times corresponding to each sample.
         For convenience, the time is stored as a double precision float.
@@ -69,7 +69,7 @@ class RawAcousticReader():
     
         for i, frame in enumerate(self._data):
             sample_range = slice(i * FRAME_LENGTH, (i + 1) * FRAME_LENGTH)
-            timebase[sample_range] = (frame['utc_seconds'] - zero_time) + 16e-9 * frame['16ns_cycles'] + time_axis
+            timebase[sample_range] = frame['utc_seconds'] + 16e-9 * frame['16ns_cycles'] + time_axis
 
         return timebase
     

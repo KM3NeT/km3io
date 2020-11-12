@@ -21,7 +21,7 @@ trigger = AttrDict(trigger)
 fitparameters = AttrDict(fitparameters)
 reconstruction = AttrDict(reconstruction)
 w2list_genhen = AttrDict(w2list_genhen)
-w3list_gseagen = AttrDict(w2list_gseagen)
+w2list_gseagen = AttrDict(w2list_gseagen)
 
 trigger_idx = {v: k for k, v in trigger.items()}
 fitparameters_idx = {v: k for k, v in fitparameters.items()}

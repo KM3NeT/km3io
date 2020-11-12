@@ -769,6 +769,16 @@ def is_CC(fobj):
     """Determin if an event (or events) are a result of a Charged Curent interaction (CC)
     or a Neutral Curent interaction (NC).
 
+    According to: https://wiki.km3net.de/index.php/Simulations/The_gSeaGen_code#Physics_event_entries 
+    the interaction types are defined as follow:
+
+        INTER   Interaction type 
+        1       EM
+        2       Weak[CC]
+        3       Weak[NC]
+        4       Weak[CC+NC+interference]
+        5       NucleonDecay 
+
     Parameters
     ----------
     fobj : km3io.offline.OfflineReader
@@ -779,14 +789,16 @@ def is_CC(fobj):
     len_w2lists = ak1.num(w2list, axis=1)
 
     if all(len_w2lists <= 7):  # old nu file have w2list of len 7.
-        usr = fobj.events.mc_tracks.usr_names
-        cc_flag = usr[:, 0][:, 3]
-        out = cc_flag == b"cc"  # not very reliable, found NC files with cc flag!
+        usr_names = fobj.events.mc_tracks.usr_names
+        usr_data = fobj.events.mc_tracks.usr
+        mask_cc_flag = (usr_names[:, 0] == b"cc")
+        inter_ID = usr_data[:, 0][mask_cc_flag]
+        out = ak1.flatten(inter_ID == 2)  # 2 is the interaction ID for CC.
 
     else:
         if "gseagen" in program.lower():
             cc_flag = w2list[:, kw2gsg.W2LIST_GSEAGEN_CC]
-            out = cc_flag > 0
+            out = cc_flag > 0  # to be tested with a newly generated nu file.
         if "genhen" in program.lower():
             cc_flag = w2list[:, kw2gen.W2LIST_GENHEN_CC]
             out = cc_flag > 0

@@ -766,7 +766,7 @@ def _find_in_set_single(rec_stages, stages, builder):
 
 
 def is_cc(fobj):
-    """Determin if an event (or events) are a result of a Charged Curent interaction (CC)
+    """Determin if events are a result of a Charged Curent interaction (CC)
     or a Neutral Curent interaction (NC).
 
     Parameters

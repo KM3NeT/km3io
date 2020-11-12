@@ -781,16 +781,18 @@ def is_CC(fobj):
     if all(len_w2lists <= 7):  # old nu file have w2list of len 7.
         usr = fobj.events.mc_tracks.usr_names
         cc_flag = usr[:, 0][:, 3]
-        out = (cc_flag == b'cc')  # not very reliable, found NC files with cc flag!
+        out = cc_flag == b"cc"  # not very reliable, found NC files with cc flag!
 
     else:
         if "gseagen" in program.lower():
             cc_flag = w2list[:, kw2gsg.W2LIST_GSEAGEN_CC]
-            out = (cc_flag > 0)
+            out = cc_flag > 0
         if "genhen" in program.lower():
             cc_flag = w2list[:, kw2gen.W2LIST_GENHEN_CC]
-            out = (cc_flag > 0)
+            out = cc_flag > 0
         else:
-            raise ValueError(f"simulation program {fobj.header.simul.program} is not implemented.")
+            raise ValueError(
+                f"simulation program {fobj.header.simul.program} is not implemented."
+            )
 
     return out

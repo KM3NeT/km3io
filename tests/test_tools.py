@@ -31,7 +31,9 @@ from km3io.tools import (
 )
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
-GENHEN_OFFLINE_FILE = OfflineReader(data_path("offline/mcv5.1.genhen_anumuNC.sirene.jte.jchain.aashower.sample.root"))
+GENHEN_OFFLINE_FILE = OfflineReader(
+    data_path("offline/mcv5.1.genhen_anumuNC.sirene.jte.jchain.aashower.sample.root")
+)
 GSEAGEN_OFFLINE_FILE = OfflineReader(data_path("offline/numucc.root"))
 
 
@@ -527,6 +529,7 @@ class TestUnfoldIndices(unittest.TestCase):
         indices = [slice(2, 5), 99]
         with self.assertRaises(IndexError):
             unfold_indices(data, indices)
+
 
 class TestIsCC(unittest.TestCase):
     def test_is_CC(self):

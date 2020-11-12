@@ -13,6 +13,7 @@ class TestGSGHeader(unittest.TestCase):
     def setUp(self):
         self.header = GSG_READER.header
 
+    @unittest.skip
     def test_str_byte_type(self):
         assert isinstance(self.header["gSeaGenVer"], str)
         assert isinstance(self.header["GenieVer"], str)
@@ -21,6 +22,7 @@ class TestGSGHeader(unittest.TestCase):
         assert isinstance(self.header["Flux1"], str)
         assert isinstance(self.header["Flux2"], str)
 
+    @unittest.skip
     def test_values(self):
         assert self.header["RunNu"] == 1
         assert self.header["RanSeed"] == 3662074
@@ -55,6 +57,7 @@ class TestGSGHeader(unittest.TestCase):
         assert self.header["NNu"] == 2
         self.assertListEqual(self.header["NuList"].tolist(), [-14, 14])
 
+    @unittest.skip
     def test_unsupported_header(self):
         f = GSGReader(data_path("online/km3net_online.root"))
         with self.assertWarns(UserWarning):

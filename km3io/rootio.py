@@ -34,9 +34,6 @@ class BranchMapper:
         The function to be used to create attribute names. This is only
         needed if unsupported characters are present, like ``.``, which
         would prevent setting valid Python attribute names.
-    toawkward: ``None``, ``list(str)``
-        List of keys to convert to awkward arrays (recommended for
-        doubly ragged arrays)
     """
 
     def __init__(
@@ -49,7 +46,6 @@ class BranchMapper:
         attrparser=None,
         flat=True,
         interpretations=None,
-        toawkward=None,
     ):
         self.name = name
         self.key = key
@@ -60,7 +56,6 @@ class BranchMapper:
         self.attrparser = (lambda x: x) if attrparser is None else attrparser
         self.flat = flat
         self.interpretations = {} if interpretations is None else interpretations
-        self.toawkward = [] if toawkward is None else toawkward
 
 
 class Branch:
@@ -135,32 +130,33 @@ class Branch:
     def __getkey__(self, key):
         interpretation = self._mapper.interpretations.get(key)
 
-        if key == "usr_names":
-            # TODO this will be fixed soon in uproot,
-            # see https://github.com/scikit-hep/uproot/issues/465
-            interpretation = uproot.asgenobj(
-                uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
-                self._branch[self._keymap[key]]._context,
-                6,
-            )
-
-        if key == "usr":
-            # triple jagged array is wrongly parsed in uproot
-            interpretation = uproot.asgenobj(
-                uproot.SimpleArray(uproot.STLVector(uproot.asdtype(">f8"))),
-                self._branch[self._keymap[key]]._context,
-                6,
-            )
-
+        # if key == "usr_names":
+        #     # TODO this will be fixed soon in uproot,
+        #     # see https://github.com/scikit-hep/uproot/issues/465
+        #     import pdb; pdb.set_trace()
+        #     interpretation = uproot.asgenobj(
+        #         uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
+        #         self._branch[self._keymap[key]]._context,
+        #         6,
+        #     )
+        #
+        # if key == "usr":
+        #     # triple jagged array is wrongly parsed in uproot
+        #     interpretation = uproot.asgenobj(
+        #         uproot.SimpleArray(uproot.STLVector(uproot.asdtype(">f8"))),
+        #         self._branch[self._keymap[key]]._context,
+        #         6,
+        #     )
+        #
         out = self._branch[self._keymap[key]].array(
             interpretation=interpretation)
-        if self._index_chain is not None and key in self._mapper.toawkward:
-            cache_key = self._mapper.name + "/" + key
-            if cache_key not in self._awkward_cache:
-                if len(out) > 20000:  # It will take more than 10 seconds
-                    print("Creating cache for '{}'.".format(cache_key))
-                self._awkward_cache[cache_key] = ak.from_iter(out)
-            out = self._awkward_cache[cache_key]
+        # if self._index_chain is not None and key in self._mapper.toawkward:
+        #     cache_key = self._mapper.name + "/" + key
+        #     if cache_key not in self._awkward_cache:
+        #         if len(out) > 20000:  # It will take more than 10 seconds
+        #             print("Creating cache for '{}'.".format(cache_key))
+        #         self._awkward_cache[cache_key] = ak.from_iter(out)
+        #     out = self._awkward_cache[cache_key]
         return unfold_indices(out, self._index_chain)
 
     def __getitem__(self, item):
@@ -196,7 +192,7 @@ class Branch:
         else:
             return len(
                 unfold_indices(
-                    self._branch[self._keymap['id']].array(), self._index_chain))
+                    self._branch[self._keymap['id']].array(), self._index_chain
                 )
             )
 

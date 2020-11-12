@@ -113,7 +113,7 @@ class OnlineReader:
         self._events = None
         self._timeslices = None
         self._summaryslices = None
-        self._uuid = binascii.hexlify(self._fobj._context.uuid).decode("ascii")
+        self._uuid = self._fobj._file.uuid
 
     @property
     def uuid(self):
@@ -342,15 +342,16 @@ class Timeslice:
                 b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].array(
                     basketcache=BASKET_CACHE)[self._idx]
         except KeyError:
-            module_ids = self._superframe[
-                b'vector<KM3NETDAQ::JDAQSuperFrame>.KM3NETDAQ::JDAQModuleIdentifier'].array(
-                    uproot.asjagged(
-                        uproot.astable(uproot.asdtype([("dom_id", ">i4")]))
-                    ),
-                    basketcache=BASKET_CACHE,
-                )[self._idx]
-                .dom_id
-            )
+            raise
+            # module_ids = self._superframe[
+            #     b'vector<KM3NETDAQ::JDAQSuperFrame>.KM3NETDAQ::JDAQModuleIdentifier'].array(
+            #         uproot.asjagged(
+            #             uproot.astable(uproot.asdtype([("dom_id", ">i4")]))
+            #         ),
+            #         basketcache=BASKET_CACHE,
+            #     )[self._idx]
+            #     .dom_id
+            # )
 
         idx = 0
         for module_id, n_hits in zip(module_ids, n_hits):

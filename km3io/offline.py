@@ -44,7 +44,6 @@ SUBBRANCH_MAPS = [
         + ["trks.usr_data", "trks.usr", "trks.fUniqueID", "trks.fBits"],
         attrparser=_nested_mapper,
         flat=False,
-        toawkward=["fitinf", "rec_stages"],
     ),
     BranchMapper(
         name="mc_tracks",
@@ -57,7 +56,6 @@ SUBBRANCH_MAPS = [
             "mc_trks.fBits",
         ],
         attrparser=_nested_mapper,
-        toawkward=["usr", "usr_names"],
         flat=False,
     ),
     BranchMapper(
@@ -131,10 +129,7 @@ class Usr:
             )
             return
 
-        self._usr_names = [
-            n.decode("utf-8")
-            for n in self._branch[self._usr_key + '_names'].array()[0]
-        ]
+        self._usr_names = self._branch[self._usr_key + '_names'].array()[0] 
         self._usr_idx_lookup = {
             name: index for index, name in enumerate(self._usr_names)
         }
@@ -186,7 +181,7 @@ class OfflineReader:
         self._fobj = uproot.open(file_path)
         self._filename = file_path
         self._tree = self._fobj[MAIN_TREE_NAME]
-        self._uuid = binascii.hexlify(self._fobj._context.uuid).decode("ascii")
+        self._uuid = self._fobj._file.uuid
 
     @property
     def uuid(self):
@@ -212,10 +207,7 @@ class OfflineReader:
     def header(self):
         """The file header"""
         if "Head" in self._fobj:
-            header = {}
-            for n, x in self._fobj["Head"]._map_3c_string_2c_string_3e_.items():
-                header[n.decode("utf-8")] = x.decode("utf-8").strip()
-            return Header(header)
+            return Header(self._fobj['Head'].tojson()['map<string,string>'])
         else:
             warnings.warn("Your file header has an unsupported format")
 

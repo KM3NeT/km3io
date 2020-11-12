@@ -531,6 +531,7 @@ class TestUnfoldIndices(unittest.TestCase):
             unfold_indices(data, indices)
 
 
+@unittest.skip
 class TestIsCC(unittest.TestCase):
     def test_is_cc(self):
         NC_file = is_cc(GENHEN_OFFLINE_FILE)

@@ -769,15 +769,15 @@ def is_CC(fobj):
     """Determin if an event (or events) are a result of a Charged Curent interaction (CC)
     or a Neutral Curent interaction (NC).
 
-    According to: https://wiki.km3net.de/index.php/Simulations/The_gSeaGen_code#Physics_event_entries 
+    According to: https://wiki.km3net.de/index.php/Simulations/The_gSeaGen_code#Physics_event_entries
     the interaction types are defined as follow:
 
-        INTER   Interaction type 
+        INTER   Interaction type
         1       EM
         2       Weak[CC]
         3       Weak[NC]
         4       Weak[CC+NC+interference]
-        5       NucleonDecay 
+        5       NucleonDecay
 
     Parameters
     ----------
@@ -791,7 +791,7 @@ def is_CC(fobj):
     if all(len_w2lists <= 7):  # old nu file have w2list of len 7.
         usr_names = fobj.events.mc_tracks.usr_names
         usr_data = fobj.events.mc_tracks.usr
-        mask_cc_flag = (usr_names[:, 0] == b"cc")
+        mask_cc_flag = usr_names[:, 0] == b"cc"
         inter_ID = usr_data[:, 0][mask_cc_flag]
         out = ak1.flatten(inter_ID == 2)  # 2 is the interaction ID for CC.
 

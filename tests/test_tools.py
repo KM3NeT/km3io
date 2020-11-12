@@ -536,5 +536,7 @@ class TestIsCC(unittest.TestCase):
         NC_file = is_CC(GENHEN_OFFLINE_FILE)
         CC_file = is_CC(GSEAGEN_OFFLINE_FILE)
 
-        self.assertFalse(all(NC_file) == True)  # this test fails because the CC flags are not reliable in old files
+        self.assertFalse(
+            all(NC_file) == True
+        )  # this test fails because the CC flags are not reliable in old files
         self.assertTrue(all(CC_file) == True)

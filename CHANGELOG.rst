@@ -2,6 +2,12 @@ Unreleased changes
 ------------------
 Version 0
 ---------
+
+0.18.0 / 2020-11-12
+~~~~~~~~~~~~~~~~~~~
+* A new tool ``km3io.tools.is_cc()`` has been added which can be used to
+  check if the events are of type CC 
+
 0.17.1 / 2020-10-19
 ~~~~~~~~~~~~~~~~~~~
 * Requires ``awkward1>=0.3.1`` from now on (fixes an array-shape mismatch bug)

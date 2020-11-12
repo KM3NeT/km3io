@@ -27,9 +27,12 @@ from km3io.tools import (
     best_jshower,
     best_aashower,
     best_dusjshower,
+    is_CC,
 )
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
+GENHEN_OFFLINE_FILE = OfflineReader(data_path("offline/mcv5.1.genhen_anumuNC.sirene.jte.jchain.aashower.sample.root"))
+GSEAGEN_OFFLINE_FILE = OfflineReader(data_path("offline/numucc.root"))
 
 
 class TestFitinf(unittest.TestCase):
@@ -524,3 +527,11 @@ class TestUnfoldIndices(unittest.TestCase):
         indices = [slice(2, 5), 99]
         with self.assertRaises(IndexError):
             unfold_indices(data, indices)
+
+class TestIsCC(unittest.TestCase):
+    def test_is_CC(self):
+        NC_file = is_CC(GENHEN_OFFLINE_FILE)
+        CC_file = is_CC(GSEAGEN_OFFLINE_FILE)
+
+        # self.assertFalse(all(NC_file) == True)  # this test fails because the CC flags are not reliable in old files
+        self.assertTrue(all(CC_file) == True)

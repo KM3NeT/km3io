@@ -765,24 +765,24 @@ def _find_in_set_single(rec_stages, stages, builder):
     builder.end_list()
 
 
-def is_CC(fobj):
+def is_cc(fobj):
     """Determin if an event (or events) are a result of a Charged Curent interaction (CC)
     or a Neutral Curent interaction (NC).
-
-    According to: https://wiki.km3net.de/index.php/Simulations/The_gSeaGen_code#Physics_event_entries
-    the interaction types are defined as follow:
-
-        INTER   Interaction type
-        1       EM
-        2       Weak[CC]
-        3       Weak[NC]
-        4       Weak[CC+NC+interference]
-        5       NucleonDecay
 
     Parameters
     ----------
     fobj : km3io.offline.OfflineReader
         offline neutrino file object.
+
+    Returns
+    -------
+    awkward1.highlevel.Array
+        a mask where True corresponds to an event resulting from a CC interaction.
+
+    Raises
+    ------
+    ValueError
+        if the simulations program used to generate the neutrino file is neither gseagen nor genhen.
     """
     program = fobj.header.simul.program
     w2list = fobj.events.w2list
@@ -797,14 +797,23 @@ def is_CC(fobj):
 
     else:
         if "gseagen" in program.lower():
+
+            # According to: https://wiki.km3net.de/index.php/Simulations/The_gSeaGen_code#Physics_event_entries
+            # the interaction types are defined as follow:
+
+            # INTER   Interaction type
+            # 1       EM
+            # 2       Weak[CC]
+            # 3       Weak[NC]
+            # 4       Weak[CC+NC+interference]
+            # 5       NucleonDecay
+
             cc_flag = w2list[:, kw2gsg.W2LIST_GSEAGEN_CC]
             out = cc_flag > 0  # to be tested with a newly generated nu file.
         if "genhen" in program.lower():
             cc_flag = w2list[:, kw2gen.W2LIST_GENHEN_CC]
             out = cc_flag > 0
         else:
-            raise ValueError(
-                f"simulation program {fobj.header.simul.program} is not implemented."
-            )
+            raise ValueError(f"simulation program {program} is not implemented.")
 
     return out

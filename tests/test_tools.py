@@ -27,7 +27,7 @@ from km3io.tools import (
     best_jshower,
     best_aashower,
     best_dusjshower,
-    is_CC,
+    is_cc,
 )
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
@@ -532,9 +532,9 @@ class TestUnfoldIndices(unittest.TestCase):
 
 
 class TestIsCC(unittest.TestCase):
-    def test_is_CC(self):
-        NC_file = is_CC(GENHEN_OFFLINE_FILE)
-        CC_file = is_CC(GSEAGEN_OFFLINE_FILE)
+    def test_is_cc(self):
+        NC_file = is_cc(GENHEN_OFFLINE_FILE)
+        CC_file = is_cc(GSEAGEN_OFFLINE_FILE)
 
         self.assertFalse(
             all(NC_file) == True

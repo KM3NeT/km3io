@@ -32,7 +32,7 @@ pip-wheel-metadata
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Unit test / coverage reports
+# Unit test / coverage reports / linters
 htmlcov/
 .tox/
 .coverage
@@ -40,6 +40,7 @@ htmlcov/
 nosetests.xml
 coverage.xml
 .coverage.*
+flycheck_*.py
 
 # Translations
 *.mo

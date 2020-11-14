@@ -181,7 +181,7 @@ class Branch:
 
     def __len__(self):
         if not self._index_chain:
-            return len(self._branch)
+            return self._branch.num_entries
         elif isinstance(self._index_chain[-1], (int, np.int32, np.int64)):
             if len(self._index_chain) == 1:
                 try:

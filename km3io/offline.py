@@ -27,12 +27,6 @@ EVENTS_MAP = BranchMapper(
     key="Evt",
     extra={"t_sec": "t.fSec", "t_ns": "t.fNanoSec"},
     exclude=EXCLUDE_KEYS,
-    update={
-        "n_hits": "hits",
-        "n_mc_hits": "mc_hits",
-        "n_tracks": "trks",
-        "n_mc_tracks": "mc_trks",
-    },
 )
 
 SUBBRANCH_MAPS = [
@@ -41,7 +35,9 @@ SUBBRANCH_MAPS = [
         key="trks",
         extra={},
         exclude=EXCLUDE_KEYS
-        + ["trks.usr_data", "trks.usr", "trks.fUniqueID", "trks.fBits"],
+        + ["trks.usr_data", "trks.usr", "trks.fUniqueID", "trks.fBits",
+           "trks.usr_names"  # TODO: this we might need! uproot4 chokes on empty ones
+           ],
         attrparser=_nested_mapper,
         flat=False,
     ),
@@ -54,6 +50,8 @@ SUBBRANCH_MAPS = [
             "mc_trks.fitinf",
             "mc_trks.fUniqueID",
             "mc_trks.fBits",
+            "mc_trks.comment",
+            "mc_trks"
         ],
         attrparser=_nested_mapper,
         flat=False,

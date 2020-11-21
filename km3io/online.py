@@ -5,9 +5,9 @@ import numpy as np
 
 import numba as nb
 
-TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
-SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
-BASKET_CACHE_SIZE = 110 * 1024**2
+TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
+SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
+BASKET_CACHE_SIZE = 110 * 1024 ** 2
 BASKET_CACHE = uproot.cache.LRUArrayCache(BASKET_CACHE_SIZE)
 
 # Parameters for PMT rate conversions, since the rates in summary slices are
@@ -215,23 +215,35 @@ class SummarySlices:
 
     def _read_summaryslices(self):
         """Reads the summary slices"""
-        tree = self._fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
-        return tree[b'vector<KM3NETDAQ::JDAQSummaryFrame>'].array(
-            uproot.asjagged(uproot.astable(
-                uproot.asdtype([("dom_id", "i4"), ("dq_status", "u4"),
-                                ("hrv", "u4"), ("fifo", "u4"),
-                                ("status3", "u4"), ("status4", "u4")] +
-                               [(c, "u1") for c in self._ch_selector])),
-                            skipbytes=10),
+        tree = self._fobj[b"KM3NET_SUMMARYSLICE"][b"KM3NET_SUMMARYSLICE"]
+        return tree[b"vector<KM3NETDAQ::JDAQSummaryFrame>"].array(
+            uproot.asjagged(
+                uproot.astable(
+                    uproot.asdtype(
+                        [
+                            ("dom_id", "i4"),
+                            ("dq_status", "u4"),
+                            ("hrv", "u4"),
+                            ("fifo", "u4"),
+                            ("status3", "u4"),
+                            ("status4", "u4"),
+                        ]
+                        + [(c, "u1") for c in self._ch_selector]
+                    )
+                ),
+                skipbytes=10,
+            ),
             basketcache=uproot.cache.LRUArrayCache(
-                SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE))
+                SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE
+            ),
+        )
 
     def _read_headers(self):
         """Reads the summary slice headers"""
-        tree = self._fobj[b'KM3NET_SUMMARYSLICE'][b'KM3NET_SUMMARYSLICE']
-        return tree[b'KM3NETDAQ::JDAQSummarysliceHeader'].array(
-            uproot.interpret(tree[b'KM3NETDAQ::JDAQSummarysliceHeader'],
-                             cntvers=True))
+        tree = self._fobj[b"KM3NET_SUMMARYSLICE"][b"KM3NET_SUMMARYSLICE"]
+        return tree[b"KM3NETDAQ::JDAQSummarysliceHeader"].array(
+            uproot.interpret(tree[b"KM3NETDAQ::JDAQSummarysliceHeader"], cntvers=True)
+        )
 
     def __str__(self):
         return "Number of summaryslices: {}".format(len(self.headers))
@@ -264,15 +276,25 @@ class Timeslices:
             superframes = tree[b"vector<KM3NETDAQ::JDAQSuperFrame>"]
             hits_dtype = np.dtype([("pmt", "u1"), ("tdc", "<u4"), ("tot", "u1")])
             hits_buffer = superframes[
-                b'vector<KM3NETDAQ::JDAQSuperFrame>.buffer'].array(
-                    uproot.asjagged(uproot.astable(uproot.asdtype(hits_dtype)),
-                                    skipbytes=6),
-                    basketcache=uproot.cache.LRUArrayCache(
-                        TIMESLICE_FRAME_BASKET_CACHE_SIZE))
-            self._timeslices[stream.decode("ascii")] = (headers, superframes,
-                                                        hits_buffer)
-            setattr(self, stream.decode("ascii"),
-                    TimesliceStream(headers, superframes, hits_buffer))
+                b"vector<KM3NETDAQ::JDAQSuperFrame>.buffer"
+            ].array(
+                uproot.asjagged(
+                    uproot.astable(uproot.asdtype(hits_dtype)), skipbytes=6
+                ),
+                basketcache=uproot.cache.LRUArrayCache(
+                    TIMESLICE_FRAME_BASKET_CACHE_SIZE
+                ),
+            )
+            self._timeslices[stream.decode("ascii")] = (
+                headers,
+                superframes,
+                hits_buffer,
+            )
+            setattr(
+                self,
+                stream.decode("ascii"),
+                TimesliceStream(headers, superframes, hits_buffer),
+            )
 
     def stream(self, stream, idx):
         ts = self._timeslices[stream]
@@ -335,12 +357,12 @@ class Timeslice:
         """Populate a dictionary of frames with the module ID as key"""
         hits_buffer = self._hits_buffer[self._idx]
         n_hits = self._superframe[
-            b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].array(
-                basketcache=BASKET_CACHE)[self._idx]
+            b"vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits"
+        ].array(basketcache=BASKET_CACHE)[self._idx]
         try:
             module_ids = self._superframe[
-                b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].array(
-                    basketcache=BASKET_CACHE)[self._idx]
+                b"vector<KM3NETDAQ::JDAQSuperFrame>.id"
+            ].array(basketcache=BASKET_CACHE)[self._idx]
         except KeyError:
             raise
             # module_ids = self._superframe[
@@ -361,8 +383,10 @@ class Timeslice:
     def __len__(self):
         if self._n_frames is None:
             self._n_frames = len(
-                self._superframe[b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].
-                array(basketcache=BASKET_CACHE)[self._idx])
+                self._superframe[b"vector<KM3NETDAQ::JDAQSuperFrame>.id"].array(
+                    basketcache=BASKET_CACHE
+                )[self._idx]
+            )
         return self._n_frames
 
     def __str__(self):

@@ -13,7 +13,7 @@ MAIN_TREE_NAME = "E"
 EXCLUDE_KEYS = ["AAObject", "t", "fBits", "fUniqueID"]
 
 # 110 MB based on the size of the largest basket found so far in km3net
-BASKET_CACHE_SIZE = 110 * 1024**2
+BASKET_CACHE_SIZE = 110 * 1024 ** 2
 BASKET_CACHE = uproot.cache.LRUArrayCache(BASKET_CACHE_SIZE)
 
 
@@ -46,7 +46,7 @@ class Usr:
             )
             return
 
-        self._usr_names = self._branch[self._usr_key + '_names'].array()[0] 
+        self._usr_names = self._branch[self._usr_key + "_names"].array()[0]
         self._usr_idx_lookup = {
             name: index for index, name in enumerate(self._usr_names)
         }
@@ -86,37 +86,42 @@ class OfflineReader:
     """reader for offline ROOT files"""
 
     event_path = "E/Evt"
-    skip_keys = ['mc_trks', 'trks', 't', 'AAObject']
+    item_name = "OfflineEvent"
+    skip_keys = ["mc_trks", "trks", "t", "AAObject"]
     aliases = {"t_s": "t.fSec", "t_ns": "t.fNanoSec"}
     special_keys = {
-        'hits': {
-            'channel_id': 'hits.channel_id',
-            'dom_id': 'hits.dom_id',
-            'time': 'hits.t',
-            'tot': 'hits.tot',
-            'triggered': 'hits.trig'
+        "hits": {
+            "channel_id": "hits.channel_id",
+            "dom_id": "hits.dom_id",
+            "time": "hits.t",
+            "tot": "hits.tot",
+            "triggered": "hits.trig",
         },
-        'mc_hits': {
-            'pmt_id': 'mc_hits.pmt_id',
-            'time': 'mc_hits.t',
-            'a': 'mc_hits.a',
+        "mc_hits": {
+            "pmt_id": "mc_hits.pmt_id",
+            "time": "mc_hits.t",
+            "a": "mc_hits.a",
         },
-        'trks': {
-            'dir_x': 'trks.dir.x',
-            'dir_y': 'trks.dir.y',
-            'dir_z': 'trks.dir.z',
-            'rec_stages': 'trks.rec_stages',
-            'fitinf': 'trks.fitinf'
+        "trks": {
+            "dir_x": "trks.dir.x",
+            "dir_y": "trks.dir.y",
+            "dir_z": "trks.dir.z",
+            "rec_stages": "trks.rec_stages",
+            "fitinf": "trks.fitinf",
         },
-        'mc_trks': {
-            'dir_x': 'mc_trks.dir.x',
-            'dir_y': 'mc_trks.dir.y',
-            'dir_z': 'mc_trks.dir.z',
+        "mc_trks": {
+            "dir_x": "mc_trks.dir.x",
+            "dir_y": "mc_trks.dir.y",
+            "dir_z": "mc_trks.dir.z",
         },
-
     }
     # TODO: this is fishy
-    special_aliases = {'trks': 'tracks', 'hits': "hits", "mc_hits": "mc_hits", "mc_trks": "mc_tracks"}
+    special_aliases = {
+        "trks": "tracks",
+        "hits": "hits",
+        "mc_hits": "mc_hits",
+        "mc_trks": "mc_tracks",
+    }
 
     def __init__(self, file_path, step_size=2000):
         """OfflineReader class is an offline ROOT file wrapper
@@ -138,7 +143,14 @@ class OfflineReader:
         self._uuid = self._fobj._file.uuid
         self._iterator_index = 0
         self._subbranches = None
-        self._event_ctor = namedtuple("OfflineEvent", set(list(self.keys()) + list(self.aliases.keys()) + list(self.special_aliases[k] for k in self.special_keys)))
+        self._event_ctor = namedtuple(
+            self.item_name,
+            set(
+                list(self.keys())
+                + list(self.aliases.keys())
+                + list(self.special_aliases[k] for k in self.special_keys)
+            ),
+        )
 
     def keys(self):
         if self._subbranches is None:
@@ -168,25 +180,28 @@ class OfflineReader:
 
     def _event_generator(self):
         events = self._fobj[self.event_path]
-        keys = list(set(self.keys()) - set(self.special_keys.keys())) + list(self.aliases.keys())
-        events_it = events.iterate(
-            keys,
-            aliases=self.aliases,
-            step_size=self.step_size)
+        keys = list(set(self.keys()) - set(self.special_keys.keys())) + list(
+            self.aliases.keys()
+        )
+        events_it = events.iterate(keys, aliases=self.aliases, step_size=self.step_size)
         specials = []
-        special_keys = self.special_keys.keys()  # dict-key ordering is an implementation detail
+        special_keys = (
+            self.special_keys.keys()
+        )  # dict-key ordering is an implementation detail
         for key in special_keys:
             specials.append(
                 events[key].iterate(
                     self.special_keys[key].keys(),
                     aliases=self.special_keys[key],
-                    step_size=self.step_size
+                    step_size=self.step_size,
                 )
             )
         for event_set, *special_sets in zip(events_it, *specials):
             for _event, *special_items in zip(event_set, *special_sets):
-                yield self._event_ctor(**{k: _event[k] for k in keys},
-                                       **{k: i for (k, i) in zip(special_keys, special_items)})
+                yield self._event_ctor(
+                    **{k: _event[k] for k in keys},
+                    **{k: i for (k, i) in zip(special_keys, special_items)}
+                )
 
     def __next__(self):
         return next(self._events)
@@ -211,7 +226,7 @@ class OfflineReader:
     def header(self):
         """The file header"""
         if "Head" in self._fobj:
-            return Header(self._fobj['Head'].tojson()['map<string,string>'])
+            return Header(self._fobj["Head"].tojson()["map<string,string>"])
         else:
             warnings.warn("Your file header has an unsupported format")
 

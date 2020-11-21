@@ -34,7 +34,7 @@ class TestOfflineReader(unittest.TestCase):
         assert self.n_events == len(self.r.events)
 
     def test_uuid(self):
-        assert str(self.r.uuid) == 'b192d888-fcc7-11e9-b430-6cf09e86beef'
+        assert str(self.r.uuid) == "b192d888-fcc7-11e9-b430-6cf09e86beef"
 
 
 class TestHeader(unittest.TestCase):
@@ -183,22 +183,32 @@ class TestOfflineEvents(unittest.TestCase):
     @unittest.skip
     def test_slicing_consistency(self):
         for s in [slice(1, 3), slice(2, 7, 3)]:
-            assert np.allclose(self.events[s].n_hits.tolist(), self.events.n_hits[s].tolist())
+            assert np.allclose(
+                self.events[s].n_hits.tolist(), self.events.n_hits[s].tolist()
+            )
 
     @unittest.skip
     def test_index_consistency(self):
         for i in [0, 2, 5]:
-            assert np.allclose(self.events[i].n_hits.tolist(), self.events.n_hits[i].tolist())
+            assert np.allclose(
+                self.events[i].n_hits.tolist(), self.events.n_hits[i].tolist()
+            )
 
     @unittest.skip
     def test_index_chaining(self):
-        assert np.allclose(self.events[3:5].n_hits.tolist(), self.events.n_hits[3:5].tolist())
-        assert np.allclose(self.events[3:5][0].n_hits.tolist(), self.events.n_hits[3:5][0].tolist())
         assert np.allclose(
-            self.events[3:5].hits[1].dom_id[4].tolist(), self.events.hits[3:5][1][4].dom_id.tolist()
+            self.events[3:5].n_hits.tolist(), self.events.n_hits[3:5].tolist()
         )
         assert np.allclose(
-            self.events.hits[3:5][1][4].dom_id.tolist(), self.events[3:5][1][4].hits.dom_id.tolist()
+            self.events[3:5][0].n_hits.tolist(), self.events.n_hits[3:5][0].tolist()
+        )
+        assert np.allclose(
+            self.events[3:5].hits[1].dom_id[4].tolist(),
+            self.events.hits[3:5][1][4].dom_id.tolist(),
+        )
+        assert np.allclose(
+            self.events.hits[3:5][1][4].dom_id.tolist(),
+            self.events[3:5][1][4].hits.dom_id.tolist(),
         )
 
     @unittest.skip
@@ -316,9 +326,12 @@ class TestOfflineHits(unittest.TestCase):
     def test_slicing_consistency(self):
         for s in [slice(1, 3), slice(2, 7, 3)]:
             for idx in range(3):
-                assert np.allclose(self.hits.dom_id[idx][s].tolist(), self.hits[idx].dom_id[s].tolist())
                 assert np.allclose(
-                    OFFLINE_FILE.events[idx].hits.dom_id[s].tolist(), self.hits.dom_id[idx][s].tolist()
+                    self.hits.dom_id[idx][s].tolist(), self.hits[idx].dom_id[s].tolist()
+                )
+                assert np.allclose(
+                    OFFLINE_FILE.events[idx].hits.dom_id[s].tolist(),
+                    self.hits.dom_id[idx][s].tolist(),
                 )
 
     def test_index_consistency(self):
@@ -331,9 +344,12 @@ class TestOfflineHits(unittest.TestCase):
                 dom_ids[: self.n_hits].tolist(),
             )
         for idx, ts in self.t.items():
-            assert np.allclose(self.hits[idx].t[: self.n_hits].tolist(), ts[: self.n_hits].tolist())
             assert np.allclose(
-                OFFLINE_FILE.events[idx].hits.t[: self.n_hits].tolist(), ts[: self.n_hits].tolist()
+                self.hits[idx].t[: self.n_hits].tolist(), ts[: self.n_hits].tolist()
+            )
+            assert np.allclose(
+                OFFLINE_FILE.events[idx].hits.t[: self.n_hits].tolist(),
+                ts[: self.n_hits].tolist(),
             )
 
     def test_keys(self):
@@ -414,7 +430,8 @@ class TestBranchIndexingMagic(unittest.TestCase):
             self.events[3].tracks.dir_z[10], self.events.tracks.dir_z[3, 10]
         )
         assert np.allclose(
-            self.events[3:6].tracks.pos_y[:, 0].tolist(), self.events.tracks.pos_y[3:6, 0].tolist()
+            self.events[3:6].tracks.pos_y[:, 0].tolist(),
+            self.events.tracks.pos_y[3:6, 0].tolist(),
         )
 
         # test selecting with a list

@@ -6,7 +6,7 @@ import uproot4 as uproot
 from .tools import unfold_indices
 
 # 110 MB based on the size of the largest basket found so far in km3net
-BASKET_CACHE_SIZE = 110 * 1024**2
+BASKET_CACHE_SIZE = 110 * 1024 ** 2
 BASKET_CACHE = uproot.cache.LRUArrayCache(BASKET_CACHE_SIZE)
 
 
@@ -148,8 +148,7 @@ class Branch:
         #         6,
         #     )
         #
-        out = self._branch[self._keymap[key]].array(
-            interpretation=interpretation)
+        out = self._branch[self._keymap[key]].array(interpretation=interpretation)
         # if self._index_chain is not None and key in self._mapper.toawkward:
         #     cache_key = self._mapper.name + "/" + key
         #     if cache_key not in self._awkward_cache:
@@ -192,7 +191,7 @@ class Branch:
         else:
             return len(
                 unfold_indices(
-                    self._branch[self._keymap['id']].array(), self._index_chain
+                    self._branch[self._keymap["id"]].array(), self._index_chain
                 )
             )
 

@@ -7,7 +7,7 @@ import awkward1 as ak
 from km3net_testdata import data_path
 
 from km3io import OfflineReader
-from km3io.offline import _nested_mapper, Header
+from km3io.offline import Header
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
 OFFLINE_USR = OfflineReader(data_path("offline/usr-sample.root"))
@@ -498,8 +498,3 @@ class TestMcTrackUsr(unittest.TestCase):
         assert np.allclose(
             [0.147, 0.4, 3, 2], self.f.events.mc_tracks.usr[1][0].tolist(), atol=0.001
         )
-
-
-class TestNestedMapper(unittest.TestCase):
-    def test_nested_mapper(self):
-        self.assertEqual("pos_x", _nested_mapper("trks.pos.x"))

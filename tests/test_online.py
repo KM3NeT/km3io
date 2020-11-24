@@ -26,7 +26,6 @@ class TestOnlineReaderContextManager(unittest.TestCase):
 
 
 class TestUUID(unittest.TestCase):
-    @unittest.skip
     def test_uuid(self):
         assert OnlineReader(ONLINE_FILE).uuid == "00010c85603008c611ea971772f09e86beef"
 
@@ -35,15 +34,12 @@ class TestOnlineEvents(unittest.TestCase):
     def setUp(self):
         self.events = OnlineReader(ONLINE_FILE).events
 
-    @unittest.skip
     def test_index_lookup(self):
         assert 3 == len(self.events)
 
-    @unittest.skip
     def test_str(self):
         assert re.match(".*events.*3", str(self.events))
 
-    @unittest.skip
     def test_repr(self):
         assert re.match(".*events.*3", self.events.__repr__())
 
@@ -52,11 +48,9 @@ class TestOnlineEvent(unittest.TestCase):
     def setUp(self):
         self.event = OnlineReader(ONLINE_FILE).events[0]
 
-    @unittest.skip
     def test_str(self):
         assert re.match(".*event.*96.*snapshot.*18.*triggered", str(self.event))
 
-    @unittest.skip
     def test_repr(self):
         assert re.match(".*event.*96.*snapshot.*18.*triggered", self.event.__repr__())
 
@@ -67,7 +61,6 @@ class TestOnlineEventsSnapshotHits(unittest.TestCase):
         self.lengths = {0: 96, 1: 124, -1: 78}
         self.total_item_count = 298
 
-    @unittest.skip
     def test_reading_snapshot_hits(self):
         hits = self.events.snapshot_hits
 
@@ -76,7 +69,6 @@ class TestOnlineEventsSnapshotHits(unittest.TestCase):
             assert length == len(hits[event_id].channel_id)
             assert length == len(hits[event_id].time)
 
-    @unittest.skip
     def test_total_item_counts(self):
         hits = self.events.snapshot_hits
 
@@ -84,7 +76,6 @@ class TestOnlineEventsSnapshotHits(unittest.TestCase):
         assert self.total_item_count == sum(hits.channel_id.count())
         assert self.total_item_count == sum(hits.time.count())
 
-    @unittest.skip
     def test_data_values(self):
         hits = self.events.snapshot_hits
 
@@ -94,7 +85,6 @@ class TestOnlineEventsSnapshotHits(unittest.TestCase):
         self.assertListEqual([10, 13, 0], list(hits.channel_id[0][:3]))
         self.assertListEqual([30733918, 30733916, 30733256], list(hits.time[0][:3]))
 
-    @unittest.skip
     def test_channel_ids_have_valid_values(self):
         hits = self.events.snapshot_hits
 
@@ -109,7 +99,6 @@ class TestOnlineEventsTriggeredHits(unittest.TestCase):
         self.lengths = {0: 18, 1: 53, -1: 9}
         self.total_item_count = 80
 
-    @unittest.skip
     def test_data_lengths(self):
         hits = self.events.triggered_hits
 
@@ -119,7 +108,6 @@ class TestOnlineEventsTriggeredHits(unittest.TestCase):
             assert length == len(hits[event_id].time)
             assert length == len(hits[event_id].trigger_mask)
 
-    @unittest.skip
     def test_total_item_counts(self):
         hits = self.events.triggered_hits
 
@@ -127,7 +115,6 @@ class TestOnlineEventsTriggeredHits(unittest.TestCase):
         assert self.total_item_count == sum(hits.channel_id.count())
         assert self.total_item_count == sum(hits.time.count())
 
-    @unittest.skip
     def test_data_values(self):
         hits = self.events.triggered_hits
 
@@ -138,7 +125,6 @@ class TestOnlineEventsTriggeredHits(unittest.TestCase):
         self.assertListEqual([30733918, 30733916, 30733429], list(hits.time[0][:3]))
         self.assertListEqual([16, 16, 4], list(hits.trigger_mask[0][:3]))
 
-    @unittest.skip
     def test_channel_ids_have_valid_values(self):
         hits = self.events.triggered_hits
 
@@ -151,7 +137,6 @@ class TestTimeslices(unittest.TestCase):
     def setUp(self):
         self.ts = OnlineReader(ONLINE_FILE).timeslices
 
-    @unittest.skip
     def test_data_lengths(self):
         assert 3 == len(self.ts._timeslices["L1"][0])
         assert 3 == len(self.ts._timeslices["SN"][0])
@@ -160,16 +145,13 @@ class TestTimeslices(unittest.TestCase):
         with self.assertRaises(KeyError):
             assert 0 == len(self.ts._timeslices["L0"][0])
 
-    @unittest.skip
     def test_streams(self):
         self.ts.stream("L1", 0)
         self.ts.stream("SN", 0)
 
-    @unittest.skip
     def test_reading_frames(self):
         assert 8 == len(self.ts.stream("SN", 1).frames[808447186])
 
-    @unittest.skip
     def test_str(self):
         s = str(self.ts)
         assert "L1" in s
@@ -181,7 +163,6 @@ class TestTimeslice(unittest.TestCase):
         self.ts = OnlineReader(ONLINE_FILE).timeslices
         self.n_frames = {"L1": [69, 69, 69], "SN": [64, 66, 68]}
 
-    @unittest.skip
     def test_str(self):
         for stream, n_frames in self.n_frames.items():
             print(stream, n_frames)
@@ -194,7 +175,6 @@ class TestSummaryslices(unittest.TestCase):
     def setUp(self):
         self.ss = OnlineReader(ONLINE_FILE).summaryslices
 
-    @unittest.skip
     def test_headers(self):
         assert 3 == len(self.ss.headers)
         self.assertListEqual([44, 44, 44], list(self.ss.headers.detector_id))
@@ -202,15 +182,12 @@ class TestSummaryslices(unittest.TestCase):
         self.assertListEqual([126, 127, 128], list(self.ss.headers.frame_index))
         assert 806451572 == self.ss.slices[0].dom_id[0]
 
-    @unittest.skip
     def test_slices(self):
         assert 3 == len(self.ss.slices)
 
-    @unittest.skip
     def test_rates(self):
         assert 3 == len(self.ss.rates)
 
-    @unittest.skip
     def test_fifo(self):
         s = self.ss.slices[0]
         dct_fifo_stat = {
@@ -223,7 +200,6 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert any(get_channel_flags(frame.fifo[0])) == fifo_status
 
-    @unittest.skip
     def test_has_udp_trailer(self):
         s = self.ss.slices[0]
         dct_udp_trailer = {
@@ -243,7 +219,6 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert has_udp_trailer(frame.fifo[0]) == udp_trailer
 
-    @unittest.skip
     def test_high_rate_veto(self):
         s = self.ss.slices[0]
         dct_high_rate_veto = {
@@ -284,7 +259,6 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert any(get_channel_flags(frame.hrv[0])) == high_rate_veto
 
-    @unittest.skip
     def test_max_sequence_number(self):
         s = self.ss.slices[0]
         dct_seq_numbers = {
@@ -323,7 +297,6 @@ class TestSummaryslices(unittest.TestCase):
                 get_udp_max_sequence_number(frame.dq_status[0]) == max_sequence_number
             )
 
-    @unittest.skip
     def test_number_udp_packets(self):
         s = self.ss.slices[0]
         dct_n_packets = {
@@ -353,7 +326,6 @@ class TestSummaryslices(unittest.TestCase):
             frame = s[s.dom_id == dom_id]
             assert get_number_udp_packets(frame.dq_status[0]) == n_udp_packets
 
-    @unittest.skip
     def test_hrv_flags(self):
         s = self.ss.slices[0]
         dct_hrv_flags = {
@@ -496,7 +468,6 @@ class TestSummaryslices(unittest.TestCase):
                 [a == b for a, b in zip(get_channel_flags(frame.hrv[0]), hrv_flags)]
             )
 
-    @unittest.skip
     def test_fifo_flags(self):
         s = self.ss.slices[0]
         dct_fifo_flags = {
@@ -705,13 +676,11 @@ class TestSummaryslices(unittest.TestCase):
                 [a == b for a, b in zip(get_channel_flags(frame.fifo[0]), fifo_flags)]
             )
 
-    @unittest.skip
     def test_str(self):
         print(str(self.ss))
 
 
 class TestGetChannelFlags_Issue59(unittest.TestCase):
-    @unittest.skip
     def test_sample_summaryslice_dump(self):
         fieldnames = ["dom_id"]
 

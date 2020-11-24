@@ -2,7 +2,7 @@
 import numba as nb
 import numpy as np
 import awkward1 as ak1
-import uproot4 as uproot
+import uproot3 as uproot
 
 from km3io.definitions import reconstruction as krec
 from km3io.definitions import trigger as ktrg
@@ -12,7 +12,7 @@ from km3io.definitions import w2list_gseagen as kw2gsg
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024 ** 2
-BASKET_CACHE = uproot.cache.LRUArrayCache(BASKET_CACHE_SIZE)
+BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 
 class cached_property:

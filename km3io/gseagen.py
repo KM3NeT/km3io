@@ -3,7 +3,7 @@
 # Filename: gseagen.py
 # Author: Johannes Schumann <jschumann@km3net.de>
 
-import uproot4 as uproot
+import uproot3 as uproot
 import numpy as np
 import warnings
 from .rootio import Branch, BranchMapper

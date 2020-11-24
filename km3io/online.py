@@ -1,6 +1,6 @@
 import binascii
 import os
-import uproot4 as uproot
+import uproot3 as uproot
 import numpy as np
 
 import numba as nb
@@ -8,7 +8,7 @@ import numba as nb
 TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
 BASKET_CACHE_SIZE = 110 * 1024 ** 2
-BASKET_CACHE = uproot.cache.LRUArrayCache(BASKET_CACHE_SIZE)
+BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 # Parameters for PMT rate conversions, since the rates in summary slices are
 # stored as a single byte to save space. The values from 0-255 can be decoded
@@ -113,7 +113,7 @@ class OnlineReader:
         self._events = None
         self._timeslices = None
         self._summaryslices = None
-        self._uuid = self._fobj._file.uuid
+        self._uuid = binascii.hexlify(self._fobj._context.uuid).decode("ascii")
 
     @property
     def uuid(self):
@@ -214,9 +214,9 @@ class SummarySlices:
         return self._rates
 
     def _read_summaryslices(self):
-        """Reads the summary slices"""
+        """Reads a lazyarray of summary slices"""
         tree = self._fobj[b"KM3NET_SUMMARYSLICE"][b"KM3NET_SUMMARYSLICE"]
-        return tree[b"vector<KM3NETDAQ::JDAQSummaryFrame>"].array(
+        return tree[b"vector<KM3NETDAQ::JDAQSummaryFrame>"].lazyarray(
             uproot.asjagged(
                 uproot.astable(
                     uproot.asdtype(
@@ -233,15 +233,15 @@ class SummarySlices:
                 ),
                 skipbytes=10,
             ),
-            basketcache=uproot.cache.LRUArrayCache(
+            basketcache=uproot.cache.ThreadSafeArrayCache(
                 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE
             ),
         )
 
     def _read_headers(self):
-        """Reads the summary slice headers"""
+        """Reads a lazyarray of summary slice headers"""
         tree = self._fobj[b"KM3NET_SUMMARYSLICE"][b"KM3NET_SUMMARYSLICE"]
-        return tree[b"KM3NETDAQ::JDAQSummarysliceHeader"].array(
+        return tree[b"KM3NETDAQ::JDAQSummarysliceHeader"].lazyarray(
             uproot.interpret(tree[b"KM3NETDAQ::JDAQSummarysliceHeader"], cntvers=True)
         )
 
@@ -277,11 +277,11 @@ class Timeslices:
             hits_dtype = np.dtype([("pmt", "u1"), ("tdc", "<u4"), ("tot", "u1")])
             hits_buffer = superframes[
                 b"vector<KM3NETDAQ::JDAQSuperFrame>.buffer"
-            ].array(
+            ].lazyarray(
                 uproot.asjagged(
                     uproot.astable(uproot.asdtype(hits_dtype)), skipbytes=6
                 ),
-                basketcache=uproot.cache.LRUArrayCache(
+                basketcache=uproot.cache.ThreadSafeArrayCache(
                     TIMESLICE_FRAME_BASKET_CACHE_SIZE
                 ),
             )
@@ -311,13 +311,13 @@ class Timeslices:
 
 class TimesliceStream:
     def __init__(self, headers, superframes, hits_buffer):
-        # self.headers = headers.array(
+        # self.headers = headers.lazyarray(
         #     uproot.asjagged(uproot.astable(
         #         uproot.asdtype(
         #             np.dtype([('a', 'i4'), ('b', 'i4'), ('c', 'i4'),
         #                       ('d', 'i4'), ('e', 'i4')]))),
         #                     skipbytes=6),
-        #     basketcache=uproot.cache.LRUArrayCache(
+        #     basketcache=uproot.cache.ThreadSafeArrayCache(
         #         TIMESLICE_FRAME_BASKET_CACHE_SIZE))
         self.headers = headers
         self.superframes = superframes
@@ -325,10 +325,10 @@ class TimesliceStream:
 
     # def frames(self):
     #     n_hits = self._superframe[
-    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].array(
+    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].lazyarray(
     #             basketcache=BASKET_CACHE)[self._idx]
     #     module_ids = self._superframe[
-    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].array(basketcache=BASKET_CACHE)[self._idx]
+    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].lazyarray(basketcache=BASKET_CACHE)[self._idx]
     #     idx = 0
     #     for module_id, n_hits in zip(module_ids, n_hits):
     #         self._frames[module_id] = hits_buffer[idx:idx + n_hits]
@@ -358,22 +358,24 @@ class Timeslice:
         hits_buffer = self._hits_buffer[self._idx]
         n_hits = self._superframe[
             b"vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits"
-        ].array(basketcache=BASKET_CACHE)[self._idx]
+        ].lazyarray(basketcache=BASKET_CACHE)[self._idx]
         try:
             module_ids = self._superframe[
                 b"vector<KM3NETDAQ::JDAQSuperFrame>.id"
-            ].array(basketcache=BASKET_CACHE)[self._idx]
+            ].lazyarray(basketcache=BASKET_CACHE)[self._idx]
         except KeyError:
-            raise
-            # module_ids = self._superframe[
-            #     b'vector<KM3NETDAQ::JDAQSuperFrame>.KM3NETDAQ::JDAQModuleIdentifier'].array(
-            #         uproot.asjagged(
-            #             uproot.astable(uproot.asdtype([("dom_id", ">i4")]))
-            #         ),
-            #         basketcache=BASKET_CACHE,
-            #     )[self._idx]
-            #     .dom_id
-            # )
+            module_ids = (
+                self._superframe[
+                    b"vector<KM3NETDAQ::JDAQSuperFrame>.KM3NETDAQ::JDAQModuleIdentifier"
+                ]
+                .lazyarray(
+                    uproot.asjagged(
+                        uproot.astable(uproot.asdtype([("dom_id", ">i4")]))
+                    ),
+                    basketcache=BASKET_CACHE,
+                )[self._idx]
+                .dom_id
+            )
 
         idx = 0
         for module_id, n_hits in zip(module_ids, n_hits):
@@ -383,7 +385,7 @@ class Timeslice:
     def __len__(self):
         if self._n_frames is None:
             self._n_frames = len(
-                self._superframe[b"vector<KM3NETDAQ::JDAQSuperFrame>.id"].array(
+                self._superframe[b"vector<KM3NETDAQ::JDAQSuperFrame>.id"].lazyarray(
                     basketcache=BASKET_CACHE
                 )[self._idx]
             )

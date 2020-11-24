@@ -87,40 +87,58 @@ class OfflineReader:
 
     event_path = "E/Evt"
     item_name = "OfflineEvent"
-    skip_keys = ["mc_trks", "trks", "t", "AAObject"]
+    skip_keys = ["t", "AAObject"]
     aliases = {"t_s": "t.fSec", "t_ns": "t.fNanoSec"}
-    special_keys = {
+    special_branches = {
         "hits": {
             "channel_id": "hits.channel_id",
             "dom_id": "hits.dom_id",
             "time": "hits.t",
             "tot": "hits.tot",
-            "triggered": "hits.trig",
+            "triggered": "hits.trig",  # non-zero if the hit is a triggered hit
         },
         "mc_hits": {
             "pmt_id": "mc_hits.pmt_id",
-            "time": "mc_hits.t",
-            "a": "mc_hits.a",
+            "time": "mc_hits.t",  # hit time (MC truth)
+            "a": "mc_hits.a",  # hit amplitude (in p.e.)
+            "origin": "mc_hits.origin",  # track id of the track that created this hit
+            "pure_t": "mc_hits.pure_t",  # photon time before pmt simultion
+            "pure_a": "mc_hits.pure_a",  # amplitude before pmt simution,
+            "type": "mc_hits.type",  # particle type or parametrisation used for hit
         },
         "trks": {
+            "id": "trks.id",
+            "pos_x": "trks.pos.x",
+            "pos_y": "trks.pos.y",
+            "pos_z": "trks.pos.z",
             "dir_x": "trks.dir.x",
             "dir_y": "trks.dir.y",
             "dir_z": "trks.dir.z",
+            "t": "trks.t",
+            "E": "trks.E",
+            "len": "trks.len",
+            "lik": "trks.lik",
+            "rec_type": "trks.rec_type",
             "rec_stages": "trks.rec_stages",
             "fitinf": "trks.fitinf",
         },
         "mc_trks": {
+            "id": "mc_trks.id",
+            "pos_x": "mc_trks.pos.x",
+            "pos_y": "mc_trks.pos.y",
+            "pos_z": "mc_trks.pos.z",
             "dir_x": "mc_trks.dir.x",
             "dir_y": "mc_trks.dir.y",
             "dir_z": "mc_trks.dir.z",
+            # "status": "mc_trks.status",  # TODO: check this
+            # "mother_id": "mc_trks.mother_id",  # TODO: check this
+            "type": "mc_trks.type",
+            "hit_ids": "mc_trks.hit_ids",
         },
     }
-    # TODO: this is fishy
     special_aliases = {
-        "trks": "tracks",
-        "hits": "hits",
-        "mc_hits": "mc_hits",
-        "mc_trks": "mc_tracks",
+        "tracks": "trks",
+        "mc_tracks": "mc_trks",
     }
 
     def __init__(self, file_path, step_size=2000):
@@ -142,36 +160,58 @@ class OfflineReader:
         self._filename = file_path
         self._uuid = self._fobj._file.uuid
         self._iterator_index = 0
-        self._subbranches = None
+        self._keys = None
+
+        self._initialise_keys()
+
         self._event_ctor = namedtuple(
             self.item_name,
             set(
                 list(self.keys())
-                + list(self.aliases.keys())
-                + list(self.special_aliases[k] for k in self.special_keys)
+                + list(self.aliases)
+                + list(self.special_branches)
+                + list(self.special_aliases)
             ),
         )
 
+    def _initialise_keys(self):
+        toplevel_keys = set(k.split("/")[0] for k in self._fobj[self.event_path].keys())
+        keys = (toplevel_keys - set(self.skip_keys)).union(
+            list(self.aliases.keys()) + list(self.special_aliases)
+        )
+        self._keys = keys
+
     def keys(self):
-        if self._subbranches is None:
-            subbranches = defaultdict(list)
-            for key in self._fobj[self.event_path].keys():
-                toplevel, *remaining = key.split("/")
-                if remaining:
-                    subbranches[toplevel].append("/".join(remaining))
-                else:
-                    subbranches[toplevel] = []
-            for key in self.skip_keys:
-                del subbranches[key]
-            self._subbranches = subbranches
-        return self._subbranches.keys()
+        """Returns all accessible branch keys, without the skipped ones."""
+        return self._keys
 
     @property
     def events(self):
         return iter(self)
 
+    def _keyfor(self, key):
+        """Return the correct key for a given alias/key"""
+        return self.special_aliases.get(key, key)
+
+    def __getattr__(self, attr):
+        attr = self._keyfor(attr)
+        if attr in self.keys():
+            return self.__getitem__(attr)
+        raise AttributeError(
+            f"'{self.__class__.__name__}' object has no attribute '{attr}'"
+        )
+
     def __getitem__(self, key):
-        return self._fobj[self.event_path][key].array()
+        key = self._keyfor(key)
+        branch = self._fobj[self.event_path]
+        # These are special branches which are nested, like hits/trks/mc_trks
+        # We are explicitly grabbing just a predefined set of subbranches
+        # and also alias them to be backwards compatible (and attribute-accessible)
+        if key in self.special_branches:
+            return branch[key].arrays(
+                self.special_branches[key].keys(), aliases=self.special_branches[key]
+            )
+        return branch[self.aliases.get(key, key)].array()
 
     def __iter__(self):
         self._iterator_index = 0
@@ -180,28 +220,33 @@ class OfflineReader:
 
     def _event_generator(self):
         events = self._fobj[self.event_path]
-        keys = list(set(self.keys()) - set(self.special_keys.keys())) + list(
-            self.aliases.keys()
-        )
+        keys = list(
+            set(self.keys())
+            - set(self.special_branches.keys())
+            - set(self.special_aliases)
+        ) + list(self.aliases.keys())
         events_it = events.iterate(keys, aliases=self.aliases, step_size=self.step_size)
         specials = []
         special_keys = (
-            self.special_keys.keys()
+            self.special_branches.keys()
         )  # dict-key ordering is an implementation detail
         for key in special_keys:
             specials.append(
                 events[key].iterate(
-                    self.special_keys[key].keys(),
-                    aliases=self.special_keys[key],
+                    self.special_branches[key].keys(),
+                    aliases=self.special_branches[key],
                     step_size=self.step_size,
                 )
             )
         for event_set, *special_sets in zip(events_it, *specials):
             for _event, *special_items in zip(event_set, *special_sets):
-                yield self._event_ctor(
+                data = {
                     **{k: _event[k] for k in keys},
-                    **{k: i for (k, i) in zip(special_keys, special_items)}
-                )
+                    **{k: i for (k, i) in zip(special_keys, special_items)},
+                }
+                for tokey, fromkey in self.special_aliases.items():
+                    data[tokey] = data[fromkey]
+                yield self._event_ctor(**data)
 
     def __next__(self):
         return next(self._events)

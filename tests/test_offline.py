@@ -158,6 +158,8 @@ class TestOfflineEvents(unittest.TestCase):
     def test_attributes(self):
         assert self.n_events == len(self.events.det_id)
         self.assertListEqual(self.det_id, list(self.events.det_id))
+        print(self.n_hits)
+        print(self.events.hits)
         self.assertListEqual(self.n_hits, len(self.events.hits))
         self.assertListEqual(self.n_tracks, len(self.events.tracks))
         self.assertListEqual(self.t_sec, list(self.events.t_sec))

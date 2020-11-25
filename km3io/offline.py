@@ -13,22 +13,22 @@ class OfflineReader:
     item_name = "OfflineEvent"
     skip_keys = ["t", "AAObject"]
     aliases = {
-        "t_s": "t.fSec",
+        "t_sec": "t.fSec",
         "t_ns": "t.fNanoSec",
-        "usr": "AAObject/usr",
-        "usr_names": "AAObject/usr_names",
     }
     special_branches = {
         "hits": {
+            "id": "hits.id",
             "channel_id": "hits.channel_id",
             "dom_id": "hits.dom_id",
-            "time": "hits.t",
+            "t": "hits.t",
             "tot": "hits.tot",
-            "triggered": "hits.trig",  # non-zero if the hit is a triggered hit
+            "trig": "hits.trig",  # non-zero if the hit is a triggered hit
         },
         "mc_hits": {
+            "id": "mc_hits.id",
             "pmt_id": "mc_hits.pmt_id",
-            "time": "mc_hits.t",  # hit time (MC truth)
+            "t": "mc_hits.t",  # hit time (MC truth)
             "a": "mc_hits.a",  # hit amplitude (in p.e.)
             "origin": "mc_hits.origin",  # track id of the track that created this hit
             "pure_t": "mc_hits.pure_t",  # photon time before pmt simultion
@@ -91,6 +91,13 @@ class OfflineReader:
         self._iterator_index = 0
         self._keys = None
         self._grouped_counts = {}  # TODO: e.g. {"events": [3, 66, 34]}
+
+        if "E/Evt/AAObject/usr" in self._fobj:
+            if ak.count(f["E/Evt/AAObject/usr"].array()) > 0:
+                self.aliases.update({
+                    "usr": "AAObject/usr",
+                    "usr_names": "AAObject/usr_names",
+                })
 
         self._initialise_keys()
 
@@ -184,10 +191,11 @@ class OfflineReader:
             group_counts[key] = iter(self[key])
         for event_set, *special_sets in zip(events_it, *specials):
             for _event, *special_items in zip(event_set, *special_sets):
-                data = {
-                    **{k: _event[k] for k in keys},
-                    **{k: i for (k, i) in zip(special_keys, special_items)},
-                }
+                data = {}
+                for k in keys:
+                    data[k] = _event[k]
+                for (k, i) in zip(special_keys, special_items):
+                    data[k] = i
                 for tokey, fromkey in self.special_aliases.items():
                     data[tokey] = data[fromkey]
                 for key in group_counts:

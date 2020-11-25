@@ -160,8 +160,8 @@ class TestOfflineEvents(unittest.TestCase):
         self.assertListEqual(self.det_id, list(self.events.det_id))
         print(self.n_hits)
         print(self.events.hits)
-        self.assertListEqual(self.n_hits, len(self.events.hits))
-        self.assertListEqual(self.n_tracks, len(self.events.tracks))
+        self.assertListEqual(self.n_hits, list(self.events.n_hits))
+        self.assertListEqual(self.n_tracks, list(self.events.n_tracks))
         self.assertListEqual(self.t_sec, list(self.events.t_sec))
         self.assertListEqual(self.t_ns, list(self.events.t_ns))
 
@@ -296,13 +296,14 @@ class TestOfflineHits(unittest.TestCase):
             ],
         }
 
-    def test_attributes_available(self):
-        for key in self.hits._keymap.keys():
+    def test_fields_work_as_keys_and_attributes(self):
+        for key in self.hits.fields:
             getattr(self.hits, key)
+            self.hits[key]
 
     def test_channel_ids(self):
-        self.assertTrue(all(c >= 0 for c in self.hits.channel_id.min()))
-        self.assertTrue(all(c < 31 for c in self.hits.channel_id.max()))
+        self.assertTrue(all(c >= 0 for c in ak.min(self.hits.channel_id, axis=1)))
+        self.assertTrue(all(c < 31 for c in ak.max(self.hits.channel_id, axis=1)))
 
     def test_str(self):
         assert str(self.n_hits) in str(self.hits)

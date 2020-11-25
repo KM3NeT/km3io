@@ -1,85 +1,9 @@
-import binascii
-from collections import namedtuple, defaultdict
+from collections import namedtuple
 import uproot4 as uproot
 import warnings
-import numba as nb
-import awkward1 as ak1
 
-from .definitions import mc_header, fitparameters, reconstruction
-from .tools import cached_property, to_num, unfold_indices
-from .rootio import Branch, BranchMapper
-
-MAIN_TREE_NAME = "E"
-EXCLUDE_KEYS = ["AAObject", "t", "fBits", "fUniqueID"]
-
-# 110 MB based on the size of the largest basket found so far in km3net
-BASKET_CACHE_SIZE = 110 * 1024 ** 2
-BASKET_CACHE = uproot.cache.LRUArrayCache(BASKET_CACHE_SIZE)
-
-
-class Usr:
-    """Helper class to access AAObject `usr` stuff (only for events.usr)"""
-
-    def __init__(self, mapper, branch, index_chain=None):
-        self._mapper = mapper
-        self._name = mapper.name
-        self._index_chain = [] if index_chain is None else index_chain
-        self._branch = branch
-        self._usr_names = []
-        self._usr_idx_lookup = {}
-
-        self._usr_key = "usr" if mapper.flat else mapper.key + ".usr"
-
-        self._initialise()
-
-    def _initialise(self):
-        try:
-            self._branch[self._usr_key]
-            # This will raise a KeyError in old aanet files
-            # which has a different strucuter and key (usr_data)
-            # We do not support those (yet)
-        except (KeyError, IndexError):
-            print(
-                "The `usr` fields could not be parsed for the '{}' branch.".format(
-                    self._name
-                )
-            )
-            return
-
-        self._usr_names = self._branch[self._usr_key + "_names"].array()[0]
-        self._usr_idx_lookup = {
-            name: index for index, name in enumerate(self._usr_names)
-        }
-
-        data = self._branch[self._usr_key].array()
-
-        if self._index_chain:
-            data = unfold_indices(data, self._index_chain)
-
-        self._usr_data = data
-
-        for name in self._usr_names:
-            setattr(self, name, self[name])
-
-    def __getitem__(self, item):
-        if self._index_chain:
-            return unfold_indices(self._usr_data, self._index_chain)[
-                :, self._usr_idx_lookup[item]
-            ]
-        else:
-            return self._usr_data[:, self._usr_idx_lookup[item]]
-
-    def keys(self):
-        return self._usr_names
-
-    def __str__(self):
-        entries = []
-        for name in self.keys():
-            entries.append("{}: {}".format(name, self[name]))
-        return "\n".join(entries)
-
-    def __repr__(self):
-        return "<{}[{}]>".format(self.__class__.__name__, self._name)
+from .definitions import mc_header
+from .tools import cached_property
 
 
 class OfflineReader:
@@ -88,7 +12,12 @@ class OfflineReader:
     event_path = "E/Evt"
     item_name = "OfflineEvent"
     skip_keys = ["t", "AAObject"]
-    aliases = {"t_s": "t.fSec", "t_ns": "t.fNanoSec"}
+    aliases = {
+        "t_s": "t.fSec",
+        "t_ns": "t.fNanoSec",
+        "usr": "AAObject/usr",
+        "usr_names": "AAObject/usr_names",
+    }
     special_branches = {
         "hits": {
             "channel_id": "hits.channel_id",

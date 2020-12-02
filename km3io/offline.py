@@ -1,9 +1,11 @@
 from collections import namedtuple
-import uproot4 as uproot
 import warnings
+import uproot4 as uproot
+import numpy as np
+import awkward1 as ak
 
 from .definitions import mc_header
-from .tools import cached_property, to_num
+from .tools import cached_property, to_num, unfold_indices
 
 
 class OfflineReader:
@@ -70,46 +72,69 @@ class OfflineReader:
         "mc_tracks": "mc_trks",
     }
 
-    def __init__(self, file_path, step_size=2000):
+    def __init__(self, f, index_chain=None, step_size=2000, keys=None, aliases=None, event_ctor=None):
         """OfflineReader class is an offline ROOT file wrapper
 
         Parameters
         ----------
-        file_path : path-like object
-            Path to the file of interest. It can be a str or any python
-            path-like object that points to the file.
+        f: str or uproot4.reading.ReadOnlyDirectory (from uproot4.open)
+            Path to the file of interest or uproot4 filedescriptor.
         step_size: int, optional
             Number of events to read into the cache when iterating.
             Choosing higher numbers may improve the speed but also increases
             the memory overhead.
+        index_chain: list, optional
+            Keeps track of index chaining.
+        keys: list or set, optional
+            Branch keys.
+        aliases: dict, optional
+            Branch key aliases.
+        event_ctor: class or namedtuple, optional
+            Event constructor.
 
         """
-        self._fobj = uproot.open(file_path)
-        self.step_size = step_size
-        self._filename = file_path
+        if isinstance(f, str):
+            self._fobj = uproot.open(f)
+            self._filepath = f
+        elif isinstance(f, uproot.reading.ReadOnlyDirectory):
+            self._fobj = f
+            self._filepath = f._file.file_path
+        else:
+            raise TypeError("Unsupported file descriptor.")
+        self._step_size = step_size
         self._uuid = self._fobj._file.uuid
         self._iterator_index = 0
-        self._keys = None
-        self._grouped_counts = {}  # TODO: e.g. {"events": [3, 66, 34]}
+        self._keys = keys
+        self._event_ctor = event_ctor
+        self._index_chain = [] if index_chain is None else index_chain
 
-        if "E/Evt/AAObject/usr" in self._fobj:
-            if ak.count(f["E/Evt/AAObject/usr"].array()) > 0:
-                self.aliases.update({
-                    "usr": "AAObject/usr",
-                    "usr_names": "AAObject/usr_names",
-                })
+        if aliases is not None:
+            self.aliases = aliases
+        else:
+            # Check for usr-awesomeness backward compatibility crap
+            print("Found usr data")
+            if "E/Evt/AAObject/usr" in self._fobj:
+                if ak.count(f["E/Evt/AAObject/usr"].array()) > 0:
+                    self.aliases.update(
+                        {
+                            "usr": "AAObject/usr",
+                            "usr_names": "AAObject/usr_names",
+                        }
+                    )
 
-        self._initialise_keys()
+        if self._keys is None:
+            self._initialise_keys()
 
-        self._event_ctor = namedtuple(
-            self.item_name,
-            set(
-                list(self.keys())
-                + list(self.aliases)
-                + list(self.special_branches)
-                + list(self.special_aliases)
-            ),
-        )
+        if self._event_ctor is None:
+            self._event_ctor = namedtuple(
+                self.item_name,
+                set(
+                    list(self.keys())
+                    + list(self.aliases)
+                    + list(self.special_branches)
+                    + list(self.special_aliases)
+                ),
+            )
 
     def _initialise_keys(self):
         skip_keys = set(self.skip_keys)
@@ -144,9 +169,23 @@ class OfflineReader:
         )
 
     def __getitem__(self, key):
-        if key.startswith("n_"):  # group counts, for e.g. n_events, n_hits etc.
+        # indexing
+        if isinstance(key, (slice, int, np.int32, np.int64)):
+            if not isinstance(key, slice):
+                key = int(key)
+            return self.__class__(
+                self._fobj,
+                index_chain=self._index_chain + [key],
+                step_size=self._step_size,
+                aliases=self.aliases,
+                keys=self.keys(),
+                event_ctor=self._event_ctor
+            )
+
+        if isinstance(key, str) and key.startswith("n_"):  # group counts, for e.g. n_events, n_hits etc.
             key = self._keyfor(key.split("n_")[1])
-            return self._fobj[self.event_path][key].array(uproot.AsDtype(">i4"))
+            arr = self._fobj[self.event_path][key].array(uproot.AsDtype(">i4"))
+            return unfold_indices(arr, self._index_chain)
 
         key = self._keyfor(key)
         branch = self._fobj[self.event_path]
@@ -154,10 +193,13 @@ class OfflineReader:
         # We are explicitly grabbing just a predefined set of subbranches
         # and also alias them to be backwards compatible (and attribute-accessible)
         if key in self.special_branches:
-            return branch[key].arrays(
+            out = branch[key].arrays(
                 self.special_branches[key].keys(), aliases=self.special_branches[key]
             )
-        return branch[self.aliases.get(key, key)].array()
+        else:
+            out = branch[self.aliases.get(key, key)].array()
+
+        return unfold_indices(out, self._index_chain)
 
     def __iter__(self):
         self._iterator_index = 0
@@ -167,13 +209,18 @@ class OfflineReader:
     def _event_generator(self):
         events = self._fobj[self.event_path]
         group_count_keys = set(k for k in self.keys() if k.startswith("n_"))
-        keys = set(list(
-            set(self.keys())
-            - set(self.special_branches.keys())
-            - set(self.special_aliases)
-            - group_count_keys
-        ) + list(self.aliases.keys()))
-        events_it = events.iterate(keys, aliases=self.aliases, step_size=self.step_size)
+        keys = set(
+            list(
+                set(self.keys())
+                - set(self.special_branches.keys())
+                - set(self.special_aliases)
+                - group_count_keys
+            )
+            + list(self.aliases.keys())
+        )
+        events_it = events.iterate(
+            keys, aliases=self.aliases, step_size=self._step_size
+        )
         specials = []
         special_keys = (
             self.special_branches.keys()
@@ -183,7 +230,7 @@ class OfflineReader:
                 events[key].iterate(
                     self.special_branches[key].keys(),
                     aliases=self.special_branches[key],
-                    step_size=self.step_size,
+                    step_size=self._step_size,
                 )
             )
         group_counts = {}
@@ -206,7 +253,29 @@ class OfflineReader:
         return next(self._events)
 
     def __len__(self):
-        return self._fobj[self.event_path].num_entries
+        if not self._index_chain:
+            return self._fobj[self.event_path].num_entries
+        elif isinstance(self._index_chain[-1], (int, np.int32, np.int64)):
+            if len(self._index_chain) == 1:
+                return 1
+                # try:
+                #     return len(self[:])
+                # except IndexError:
+                #     return 1
+            return 1
+        else:
+            # ignore the usual index magic and access `id` directly
+            return len(self._fobj[self.event_path]["id"].array(), self._index_chain)
+
+    def __actual_len__(self):
+        """The raw number of events without any indexing/slicing magic"""
+        return len(self._fobj[self.event_path]["id"].array())
+
+
+    def __repr__(self):
+        length = len(self)
+        actual_length = self.__actual_len__()
+        return f"{self.__class__.__name__} ({length}{'/' + str(actual_length) if length < actual_length else ''} events)"
 
     @property
     def uuid(self):

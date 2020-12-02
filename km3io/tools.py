@@ -30,6 +30,8 @@ class cached_property:
 
 def unfold_indices(obj, indices):
     """Unfolds an index chain and returns the corresponding item"""
+    if not indices:
+        return obj
     original_obj = obj
     for depth, idx in enumerate(indices):
         try:

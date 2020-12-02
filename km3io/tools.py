@@ -2,7 +2,7 @@
 import numba as nb
 import numpy as np
 import awkward1 as ak1
-import uproot
+import uproot3 as uproot
 
 from km3io.definitions import reconstruction as krec
 from km3io.definitions import trigger as ktrg

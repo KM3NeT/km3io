@@ -1,6 +1,6 @@
 import binascii
 import os
-import uproot
+import uproot3 as uproot
 import numpy as np
 
 import numba as nb

@@ -1,5 +1,5 @@
 docopt
 numba>=0.50
 awkward1>=0.3.1
-uproot>=3.11.1
+uproot3>=3.11.1
 setuptools_scm

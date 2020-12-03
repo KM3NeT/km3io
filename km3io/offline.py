@@ -17,6 +17,8 @@ class OfflineReader:
     aliases = {
         "t_sec": "t.fSec",
         "t_ns": "t.fNanoSec",
+        "usr": "AAObject/usr",
+        "usr_names": "AAObject/usr_names",
     }
     special_branches = {
         "hits": {
@@ -65,6 +67,8 @@ class OfflineReader:
             # "mother_id": "mc_trks.mother_id",  # TODO: check this
             "type": "mc_trks.type",
             "hit_ids": "mc_trks.hit_ids",
+            "usr": "mc_trks.usr",
+            "usr_names": "mc_trks.usr_names",
         },
     }
     special_aliases = {
@@ -108,19 +112,19 @@ class OfflineReader:
         self._event_ctor = event_ctor
         self._index_chain = [] if index_chain is None else index_chain
 
-        if aliases is not None:
-            self.aliases = aliases
-        else:
-            # Check for usr-awesomeness backward compatibility crap
-            print("Found usr data")
-            if "E/Evt/AAObject/usr" in self._fobj:
-                if ak.count(f["E/Evt/AAObject/usr"].array()) > 0:
-                    self.aliases.update(
-                        {
-                            "usr": "AAObject/usr",
-                            "usr_names": "AAObject/usr_names",
-                        }
-                    )
+        # if aliases is not None:
+        #     self.aliases = aliases
+        # else:
+        #     # Check for usr-awesomeness backward compatibility crap
+        #     if "E/Evt/AAObject/usr" in self._fobj:
+        #         print("Found usr data")
+        #         if ak.count(f["E/Evt/AAObject/usr"].array()) > 0:
+        #             self.aliases.update(
+        #                 {
+        #                     "usr": "AAObject/usr",
+        #                     "usr_names": "AAObject/usr_names",
+        #                 }
+        #             )
 
         if self._keys is None:
             self._initialise_keys()
@@ -193,8 +197,14 @@ class OfflineReader:
         # We are explicitly grabbing just a predefined set of subbranches
         # and also alias them to be backwards compatible (and attribute-accessible)
         if key in self.special_branches:
+            keys_of_interest = []
+            # some fields are not always available, like `usr_names`
+            for from_key, to_key in self.special_branches[key].keys():
+                if to_key in branch.keys():
+                    keys_of_interest.append(from_key)
+
             out = branch[key].arrays(
-                self.special_branches[key].keys(), aliases=self.special_branches[key]
+                keys_of_interest, aliases=self.special_branches[key]
             )
         else:
             out = branch[self.aliases.get(key, key)].array()

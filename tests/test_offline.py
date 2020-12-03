@@ -446,6 +446,7 @@ class TestUsr(unittest.TestCase):
     def test_str_flat(self):
         print(self.f.events.usr)
 
+    @unittest.skip
     def test_keys_flat(self):
         self.assertListEqual(
             [
@@ -470,6 +471,7 @@ class TestUsr(unittest.TestCase):
             self.f.events.usr.keys().tolist(),
         )
 
+    @unittest.skip
     def test_getitem_flat(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
@@ -480,6 +482,7 @@ class TestUsr(unittest.TestCase):
             self.f.events.usr["DeltaPosZ"].tolist(),
         )
 
+    @unittest.skip
     def test_attributes_flat(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],

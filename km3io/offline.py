@@ -1,8 +1,8 @@
 from collections import namedtuple
 import warnings
-import uproot4 as uproot
+import uproot
 import numpy as np
-import awkward1 as ak
+import awkward as ak
 
 from .definitions import mc_header
 from .tools import cached_property, to_num, unfold_indices
@@ -67,8 +67,8 @@ class OfflineReader:
             # "mother_id": "mc_trks.mother_id",  # TODO: check this
             "type": "mc_trks.type",
             "hit_ids": "mc_trks.hit_ids",
-            "usr": "mc_trks.usr",
-            "usr_names": "mc_trks.usr_names",
+            "usr": "mc_trks.usr",  # TODO: trouble with uproot4
+            "usr_names": "mc_trks.usr_names",  # TODO: trouble with uproot4
         },
     }
     special_aliases = {
@@ -157,6 +157,7 @@ class OfflineReader:
 
     @property
     def events(self):
+        # TODO: deprecate this, since `self` is already the container type
         return iter(self)
 
     def _keyfor(self, key):
@@ -197,14 +198,14 @@ class OfflineReader:
         # We are explicitly grabbing just a predefined set of subbranches
         # and also alias them to be backwards compatible (and attribute-accessible)
         if key in self.special_branches:
-            keys_of_interest = []
+            fields = []
             # some fields are not always available, like `usr_names`
-            for from_key, to_key in self.special_branches[key].keys():
-                if to_key in branch.keys():
-                    keys_of_interest.append(from_key)
-
+            for to_field, from_field in self.special_branches[key].items():
+                if from_field in branch[key].keys():
+                    fields.append(to_field)
+            log.debug(fields)
             out = branch[key].arrays(
-                keys_of_interest, aliases=self.special_branches[key]
+                fields, aliases=self.special_branches[key]
             )
         else:
             out = branch[self.aliases.get(key, key)].array()
@@ -218,7 +219,8 @@ class OfflineReader:
 
     def _event_generator(self):
         events = self._fobj[self.event_path]
-        group_count_keys = set(k for k in self.keys() if k.startswith("n_"))
+        group_count_keys = set(k for k in self.keys() if k.startswith("n_"))  # special keys to make it easy to count subbranch lengths
+        log.debug("group_count_keys: %s", group_count_keys)
         keys = set(
             list(
                 set(self.keys())
@@ -227,7 +229,9 @@ class OfflineReader:
                 - group_count_keys
             )
             + list(self.aliases.keys())
-        )
+        )  # all top-level keys for regular branches
+        log.debug("keys: %s", keys)
+        log.debug("aliases: %s", self.aliases)
         events_it = events.iterate(
             keys, aliases=self.aliases, step_size=self._step_size
         )
@@ -235,7 +239,10 @@ class OfflineReader:
         special_keys = (
             self.special_branches.keys()
         )  # dict-key ordering is an implementation detail
+        log.debug("special_keys: %s", special_keys)
         for key in special_keys:
+            # print(f"adding {key} with keys {self.special_branches[key].keys()} and aliases {self.special_branches[key]}")
+
             specials.append(
                 events[key].iterate(
                     self.special_branches[key].keys(),
@@ -246,6 +253,8 @@ class OfflineReader:
         group_counts = {}
         for key in group_count_keys:
             group_counts[key] = iter(self[key])
+
+        log.debug("group_counts: %s", group_counts)
         for event_set, *special_sets in zip(events_it, *specials):
             for _event, *special_items in zip(event_set, *special_sets):
                 data = {}

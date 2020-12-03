@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-import awkward1 as ak
+import awkward as ak
 import numpy as np
 from pathlib import Path
 

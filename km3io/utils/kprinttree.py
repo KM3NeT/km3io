@@ -14,7 +14,7 @@ Options:
     -h --help    Show this screen.
 
 """
-import uproot4 as uproot
+import uproot
 
 
 def print_tree(filename):

@@ -69,7 +69,6 @@ class TestBestTrackSelection(unittest.TestCase):
         self.events = OFFLINE_FILE.events
         self.one_event = OFFLINE_FILE.events[0]
 
-    @unittest.skip
     def test_best_track_selection_from_multiple_events_with_explicit_stages_in_list(
         self,
     ):
@@ -102,7 +101,6 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best3.rec_stages[2] is None
         assert best3.rec_stages[3] is None
 
-    @unittest.skip
     def test_best_track_selection_from_multiple_events_with_explicit_stages_in_set(
         self,
     ):
@@ -135,7 +133,6 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best3.rec_stages[2].tolist() == [1, 3]
         assert best3.rec_stages[3].tolist() == [1, 3]
 
-    @unittest.skip
     def test_best_track_selection_from_multiple_events_with_start_end(self):
         best = best_track(self.events.tracks, startend=(1, 4))
 
@@ -234,7 +231,6 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best.rec_stages[0][0] == 1
         assert best.rec_stages[0][-1] == 4
 
-    @unittest.skip
     def test_best_track_on_slices_multiple_events(self):
         tracks_slice = self.events.tracks[0:5]
 
@@ -243,7 +239,6 @@ class TestBestTrackSelection(unittest.TestCase):
 
         assert len(best) == 5
 
-        import pdb; pdb.set_trace()
         assert best.lik == ak.max(tracks_slice.lik)
         assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
 
@@ -273,7 +268,6 @@ class TestBestTrackSelection(unittest.TestCase):
 
 
 class TestBestJmuon(unittest.TestCase):
-    @unittest.skip
     def test_best_jmuon(self):
         best = best_jmuon(OFFLINE_FILE.events.tracks)
 

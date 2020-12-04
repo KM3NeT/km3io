@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from collections import namedtuple
 import numba as nb
 import numpy as np
 import awkward as ak
@@ -206,12 +207,14 @@ def get_multiplicity(tracks, rec_stages):
     awkward1.Array
         tracks multiplicty.
     """
-    masked_tracks = tracks[mask(tracks, stages=rec_stages)]
+    masked_tracks = tracks[mask(tracks.rec_stages, sequence=rec_stages)]
 
-    if tracks.is_single:
-        out = count_nested(masked_tracks.rec_stages, axis=0)
-    else:
-        out = count_nested(masked_tracks.rec_stages, axis=1)
+    try:
+        axis = tracks.ndim
+    except AttributeError:
+        axis = 0
+
+    out = count_nested(masked_tracks.rec_stages, axis=axis)
 
     return out
 
@@ -252,15 +255,37 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
         raise ValueError("Please specify either a range or a set of rec stages.")
 
     if stages is not None and startend is None and minmax is None:
-        selected_tracks = tracks[mask(tracks, stages=stages)]
+        if isinstance(stages, list):
+            m1 = mask(tracks.rec_stages, sequence=stages)
+        elif isinstance(stages, set):
+            m1 = mask(tracks.rec_stages, atleast=list(stages))
+        else:
+            raise ValueError("stages must be a list or a set of integers")
 
     if startend is not None and minmax is None and stages is None:
-        selected_tracks = tracks[mask(tracks, startend=startend)]
+        m1 = mask(tracks.rec_stages, startend=startend)
 
     if minmax is not None and startend is None and stages is None:
-        selected_tracks = tracks[mask(tracks, minmax=minmax)]
+        m1 = mask(tracks.rec_stages, minmax=minmax)
 
-    return _max_lik_track(_longest_tracks(selected_tracks))
+    try:
+        axis = tracks.ndim
+    except AttributeError:
+        axis = 0
+
+    tracks = tracks[m1]
+
+    rec_stage_lengths = ak.num(tracks.rec_stages, axis=axis+1)
+    max_rec_stage_length = ak.max(rec_stage_lengths, axis=axis)
+    m2 = rec_stage_lengths == max_rec_stage_length
+    tracks = tracks[m2]
+
+    m3 = ak.argmax(tracks.lik, axis=axis, keepdims=True)
+
+    out = tracks[m3]
+    if isinstance(out, ak.highlevel.Record):
+        return namedtuple("BestTrack", out.fields)(*[getattr(out, a)[0] for a in out.fields])
+    return out
 
 
 def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):
@@ -280,6 +305,11 @@ def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):
     atleast : list(int), optional
         True for entries where at least the provided elements are present.
     """
+    inputs = (sequence, startend, minmax, atleast)
+
+    if all(v is None for v in inputs):
+        raise ValueError("either sequence, startend, minmax or atleast must be specified.")
+
     builder = ak.ArrayBuilder()
     _mask(arr, builder, sequence, startend, minmax, atleast)
     return builder.snapshot()
@@ -334,83 +364,23 @@ def _mask(arr, builder, sequence=None, startend=None, minmax=None, atleast=None)
 
 
 def best_jmuon(tracks):
-    """Select the best JMUON track.
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks, or one track, or slice of tracks, or slices of tracks.
-
-    Returns
-    -------
-    km3io.offline.OfflineBranch
-        the longest + highest likelihood track reconstructed with JMUON.
-    """
-    mask = _mask_rec_stages_in_range_min_max(
-        tracks, min_stage=krec.JMUONBEGIN, max_stage=krec.JMUONEND
-    )
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))
+    """Select the best JMUON track."""
+    return best_track(tracks, minmax=(krec.JMUONBEGIN, krec.JMUONEND))
 
 
 def best_jshower(tracks):
-    """Select the best JSHOWER track.
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks, or one track, or slice of tracks, or slices of tracks.
-
-    Returns
-    -------
-    km3io.offline.OfflineBranch
-        the longest + highest likelihood track reconstructed with JSHOWER.
-    """
-    mask = _mask_rec_stages_in_range_min_max(
-        tracks, min_stage=krec.JSHOWERBEGIN, max_stage=krec.JSHOWEREND
-    )
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))
+    """Select the best JSHOWER track."""
+    return best_track(tracks, minmax=(krec.JSHOWERBEGIN, krec.JSHOWEREND))
 
 
 def best_aashower(tracks):
-    """Select the best AASHOWER track.
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks, or one track, or slice of tracks, or slices of tracks.
-
-    Returns
-    -------
-    km3io.offline.OfflineBranch
-        the longest + highest likelihood track reconstructed with AASHOWER.
-    """
-    mask = _mask_rec_stages_in_range_min_max(
-        tracks, min_stage=krec.AASHOWERBEGIN, max_stage=krec.AASHOWEREND
-    )
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))
+    """Select the best AASHOWER track. """
+    return best_track(tracks, minmax=(krec.AASHOWERBEGIN, krec.AASHOWEREND))
 
 
 def best_dusjshower(tracks):
-    """Select the best DISJSHOWER track.
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks, or one track, or slice of tracks, or slices of tracks.
-
-    Returns
-    -------
-    km3io.offline.OfflineBranch
-        the longest + highest likelihood track reconstructed with DUSJSHOWER.
-    """
-    mask = _mask_rec_stages_in_range_min_max(
-        tracks, min_stage=krec.DUSJSHOWERBEGIN, max_stage=krec.DUSJSHOWEREND
-    )
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))
+    """Select the best DISJSHOWER track."""
+    return best_track(tracks, minmax=(krec.DUSJSHOWERBEGIN, krec.DUSJSHOWEREND))
 
 
 def is_cc(fobj):

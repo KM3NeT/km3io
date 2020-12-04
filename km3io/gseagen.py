@@ -3,7 +3,7 @@
 # Filename: gseagen.py
 # Author: Johannes Schumann <jschumann@km3net.de>
 
-import uproot
+import uproot3
 import numpy as np
 import warnings
 from .rootio import Branch, BranchMapper
@@ -24,7 +24,7 @@ class GSGReader:
             The file handler. It can be a str or any python path-like object
             that points to the file.
         """
-        self._fobj = uproot.open(file_path)
+        self._fobj = uproot3.open(file_path)
 
     @cached_property
     def header(self):

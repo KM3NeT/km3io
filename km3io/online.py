@@ -1,6 +1,6 @@
 import binascii
 import os
-import uproot
+import uproot3
 import numpy as np
 
 import numba as nb
@@ -8,7 +8,7 @@ import numba as nb
 TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
 BASKET_CACHE_SIZE = 110 * 1024 ** 2
-BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
+BASKET_CACHE = uproot3.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 # Parameters for PMT rate conversions, since the rates in summary slices are
 # stored as a single byte to save space. The values from 0-255 can be decoded
@@ -108,7 +108,7 @@ class OnlineReader:
     """Reader for online ROOT files"""
 
     def __init__(self, filename):
-        self._fobj = uproot.open(filename)
+        self._fobj = uproot3.open(filename)
         self._filename = filename
         self._events = None
         self._timeslices = None
@@ -134,12 +134,12 @@ class OnlineReader:
             tree = self._fobj["KM3NET_EVENT"]
 
             headers = tree["KM3NETDAQ::JDAQEventHeader"].array(
-                uproot.interpret(tree["KM3NETDAQ::JDAQEventHeader"], cntvers=True)
+                uproot3.interpret(tree["KM3NETDAQ::JDAQEventHeader"], cntvers=True)
             )
             snapshot_hits = tree["snapshotHits"].array(
-                uproot.asjagged(
-                    uproot.astable(
-                        uproot.asdtype(
+                uproot3.asjagged(
+                    uproot3.astable(
+                        uproot3.asdtype(
                             [
                                 ("dom_id", ">i4"),
                                 ("channel_id", "u1"),
@@ -152,9 +152,9 @@ class OnlineReader:
                 )
             )
             triggered_hits = tree["triggeredHits"].array(
-                uproot.asjagged(
-                    uproot.astable(
-                        uproot.asdtype(
+                uproot3.asjagged(
+                    uproot3.astable(
+                        uproot3.asdtype(
                             [
                                 ("dom_id", ">i4"),
                                 ("channel_id", "u1"),
@@ -217,9 +217,9 @@ class SummarySlices:
         """Reads a lazyarray of summary slices"""
         tree = self._fobj[b"KM3NET_SUMMARYSLICE"][b"KM3NET_SUMMARYSLICE"]
         return tree[b"vector<KM3NETDAQ::JDAQSummaryFrame>"].lazyarray(
-            uproot.asjagged(
-                uproot.astable(
-                    uproot.asdtype(
+            uproot3.asjagged(
+                uproot3.astable(
+                    uproot3.asdtype(
                         [
                             ("dom_id", "i4"),
                             ("dq_status", "u4"),
@@ -233,7 +233,7 @@ class SummarySlices:
                 ),
                 skipbytes=10,
             ),
-            basketcache=uproot.cache.ThreadSafeArrayCache(
+            basketcache=uproot3.cache.ThreadSafeArrayCache(
                 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE
             ),
         )
@@ -242,7 +242,7 @@ class SummarySlices:
         """Reads a lazyarray of summary slice headers"""
         tree = self._fobj[b"KM3NET_SUMMARYSLICE"][b"KM3NET_SUMMARYSLICE"]
         return tree[b"KM3NETDAQ::JDAQSummarysliceHeader"].lazyarray(
-            uproot.interpret(tree[b"KM3NETDAQ::JDAQSummarysliceHeader"], cntvers=True)
+            uproot3.interpret(tree[b"KM3NETDAQ::JDAQSummarysliceHeader"], cntvers=True)
         )
 
     def __str__(self):
@@ -278,10 +278,10 @@ class Timeslices:
             hits_buffer = superframes[
                 b"vector<KM3NETDAQ::JDAQSuperFrame>.buffer"
             ].lazyarray(
-                uproot.asjagged(
-                    uproot.astable(uproot.asdtype(hits_dtype)), skipbytes=6
+                uproot3.asjagged(
+                    uproot3.astable(uproot3.asdtype(hits_dtype)), skipbytes=6
                 ),
-                basketcache=uproot.cache.ThreadSafeArrayCache(
+                basketcache=uproot3.cache.ThreadSafeArrayCache(
                     TIMESLICE_FRAME_BASKET_CACHE_SIZE
                 ),
             )
@@ -312,12 +312,12 @@ class Timeslices:
 class TimesliceStream:
     def __init__(self, headers, superframes, hits_buffer):
         # self.headers = headers.lazyarray(
-        #     uproot.asjagged(uproot.astable(
-        #         uproot.asdtype(
+        #     uproot3.asjagged(uproot3.astable(
+        #         uproot3.asdtype(
         #             np.dtype([('a', 'i4'), ('b', 'i4'), ('c', 'i4'),
         #                       ('d', 'i4'), ('e', 'i4')]))),
         #                     skipbytes=6),
-        #     basketcache=uproot.cache.ThreadSafeArrayCache(
+        #     basketcache=uproot3.cache.ThreadSafeArrayCache(
         #         TIMESLICE_FRAME_BASKET_CACHE_SIZE))
         self.headers = headers
         self.superframes = superframes
@@ -369,8 +369,8 @@ class Timeslice:
                     b"vector<KM3NETDAQ::JDAQSuperFrame>.KM3NETDAQ::JDAQModuleIdentifier"
                 ]
                 .lazyarray(
-                    uproot.asjagged(
-                        uproot.astable(uproot.asdtype([("dom_id", ">i4")]))
+                    uproot3.asjagged(
+                        uproot3.astable(uproot3.asdtype([("dom_id", ">i4")]))
                     ),
                     basketcache=BASKET_CACHE,
                 )[self._idx]

@@ -1,9 +1,8 @@
 import binascii
 from collections import namedtuple
-import uproot
+import uproot3
 import warnings
 import numba as nb
-import awkward1 as ak1
 
 from .definitions import mc_header, fitparameters, reconstruction
 from .tools import cached_property, to_num, unfold_indices
@@ -14,7 +13,7 @@ EXCLUDE_KEYS = ["AAObject", "t", "fBits", "fUniqueID"]
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024 ** 2
-BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
+BASKET_CACHE = uproot3.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 
 def _nested_mapper(key):
@@ -183,7 +182,7 @@ class OfflineReader:
             path-like object that points to the file.
 
         """
-        self._fobj = uproot.open(file_path)
+        self._fobj = uproot3.open(file_path)
         self._filename = file_path
         self._tree = self._fobj[MAIN_TREE_NAME]
         self._uuid = binascii.hexlify(self._fobj._context.uuid).decode("ascii")

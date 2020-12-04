@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 import numpy as np
-import awkward1 as ak
-import uproot
+import awkward as ak
+import uproot3
 
 from .tools import unfold_indices
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024 ** 2
-BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
+BASKET_CACHE = uproot3.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 
 class BranchMapper:
@@ -140,16 +140,16 @@ class Branch:
         if key == "usr_names":
             # TODO this will be fixed soon in uproot,
             # see https://github.com/scikit-hep/uproot/issues/465
-            interpretation = uproot.asgenobj(
-                uproot.SimpleArray(uproot.STLVector(uproot.STLString())),
+            interpretation = uproot3.asgenobj(
+                uproot3.SimpleArray(uproot3.STLVector(uproot3.STLString())),
                 self._branch[self._keymap[key]]._context,
                 6,
             )
 
         if key == "usr":
-            # triple jagged array is wrongly parsed in uproot
-            interpretation = uproot.asgenobj(
-                uproot.SimpleArray(uproot.STLVector(uproot.asdtype(">f8"))),
+            # triple jagged array is wrongly parsed in uproot3
+            interpretation = uproot3.asgenobj(
+                uproot3.SimpleArray(uproot3.STLVector(uproot3.asdtype(">f8"))),
                 self._branch[self._keymap[key]]._context,
                 6,
             )

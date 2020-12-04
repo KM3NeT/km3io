@@ -14,11 +14,11 @@ Options:
     -h --help    Show this screen.
 
 """
-import uproot
+import uproot3
 
 
 def print_tree(filename):
-    f = uproot.open(filename)
+    f = uproot3.open(filename)
     for key in f.keys():
         try:
             print("{:<30} : {:>9} items".format(key.decode(), len(f[key])))

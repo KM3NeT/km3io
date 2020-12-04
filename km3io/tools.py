@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import numba as nb
 import numpy as np
-import awkward1 as ak1
-import uproot
+import awkward as ak
+import uproot3
 
 from km3io.definitions import reconstruction as krec
 from km3io.definitions import trigger as ktrg
@@ -12,7 +12,7 @@ from km3io.definitions import w2list_gseagen as kw2gsg
 
 # 110 MB based on the size of the largest basket found so far in km3net
 BASKET_CACHE_SIZE = 110 * 1024 ** 2
-BASKET_CACHE = uproot.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
+BASKET_CACHE = uproot3.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 
 class cached_property:
@@ -158,7 +158,7 @@ def fitinf(fitparam, tracks):
             out = params[:, index]
         else:
             params = fit[count_nested(fit, axis=2) > index]
-            out = ak1.Array([i[:, index] for i in params])
+            out = ak.Array([i[:, index] for i in params])
 
     return out
 
@@ -181,11 +181,11 @@ def count_nested(arr, axis=0):
         counts of elements found in a nested awkward1 Array.
     """
     if axis == 0:
-        return ak1.num(arr, axis=0)
+        return ak.num(arr, axis=0)
     if axis == 1:
-        return ak1.num(arr, axis=1)
+        return ak.num(arr, axis=1)
     if axis == 2:
-        return ak1.count(arr, axis=2)
+        return ak.count(arr, axis=2)
 
 
 def get_multiplicity(tracks, rec_stages):
@@ -274,7 +274,7 @@ def _longest_tracks(tracks):
         tracks_nesting_level = 1
 
     len_stages = count_nested(tracks.rec_stages, axis=stages_nesting_level)
-    longest = tracks[len_stages == ak1.max(len_stages, axis=tracks_nesting_level)]
+    longest = tracks[len_stages == ak.max(len_stages, axis=tracks_nesting_level)]
 
     return longest
 
@@ -286,7 +286,7 @@ def _max_lik_track(tracks):
     else:
         tracks_nesting_level = 1
 
-    return tracks[tracks.lik == ak1.max(tracks.lik, axis=tracks_nesting_level)]
+    return tracks[tracks.lik == ak.max(tracks.lik, axis=tracks_nesting_level)]
 
 
 def mask(tracks, stages=None, startend=None, minmax=None):
@@ -343,7 +343,7 @@ def mask(tracks, stages=None, startend=None, minmax=None):
 def _mask_rec_stages_between_start_end(tracks, start, end):
     """Mask tracks.rec_stages that start exactly with start and end exactly
     with end. ie [start, a, b ...,z , end]"""
-    builder = ak1.ArrayBuilder()
+    builder = ak.ArrayBuilder()
     if tracks.is_single:
         _find_between_single(tracks.rec_stages, start, end, builder)
         return (builder.snapshot() == 1)[0]
@@ -405,12 +405,12 @@ def _mask_explicit_rec_stages(tracks, stages):
         where stages were found. False otherwise.
     """
 
-    builder = ak1.ArrayBuilder()
+    builder = ak.ArrayBuilder()
     if tracks.is_single:
-        _find_single(tracks.rec_stages, ak1.Array(stages), builder)
+        _find_single(tracks.rec_stages, ak.Array(stages), builder)
         return (builder.snapshot() == 1)[0]
     else:
-        _find(tracks.rec_stages, ak1.Array(stages), builder)
+        _find(tracks.rec_stages, ak.Array(stages), builder)
         return builder.snapshot() == 1
 
 
@@ -581,7 +581,7 @@ def _mask_rec_stages_in_range_min_max(tracks, min_stage=None, max_stage=None):
     """
     if (min_stage is not None) and (max_stage is not None):
 
-        builder = ak1.ArrayBuilder()
+        builder = ak.ArrayBuilder()
         if tracks.is_single:
             _find_in_range_single(tracks.rec_stages, min_stage, max_stage, builder)
             return (builder.snapshot() == 1)[0]
@@ -683,7 +683,7 @@ def _mask_rec_stages_in_set(tracks, stages):
     """
     if isinstance(stages, set):
 
-        builder = ak1.ArrayBuilder()
+        builder = ak.ArrayBuilder()
         if tracks.is_single:
             _find_in_set_single(tracks.rec_stages, stages, builder)
             return (builder.snapshot() == 1)[0]
@@ -786,14 +786,14 @@ def is_cc(fobj):
     """
     program = fobj.header.simul.program
     w2list = fobj.events.w2list
-    len_w2lists = ak1.num(w2list, axis=1)
+    len_w2lists = ak.num(w2list, axis=1)
 
     if all(len_w2lists <= 7):  # old nu file have w2list of len 7.
         usr_names = fobj.events.mc_tracks.usr_names
         usr_data = fobj.events.mc_tracks.usr
         mask_cc_flag = usr_names[:, 0] == b"cc"
         inter_ID = usr_data[:, 0][mask_cc_flag]
-        out = ak1.flatten(inter_ID == 2)  # 2 is the interaction ID for CC.
+        out = ak.flatten(inter_ID == 2)  # 2 is the interaction ID for CC.
 
     else:
         if "gseagen" in program.lower():

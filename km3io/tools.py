@@ -275,7 +275,7 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
 
     tracks = tracks[m1]
 
-    rec_stage_lengths = ak.num(tracks.rec_stages, axis=axis+1)
+    rec_stage_lengths = ak.num(tracks.rec_stages, axis=axis + 1)
     max_rec_stage_length = ak.max(rec_stage_lengths, axis=axis)
     m2 = rec_stage_lengths == max_rec_stage_length
     tracks = tracks[m2]
@@ -284,7 +284,9 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
 
     out = tracks[m3]
     if isinstance(out, ak.highlevel.Record):
-        return namedtuple("BestTrack", out.fields)(*[getattr(out, a)[0] for a in out.fields])
+        return namedtuple("BestTrack", out.fields)(
+            *[getattr(out, a)[0] for a in out.fields]
+        )
     return out
 
 
@@ -308,20 +310,22 @@ def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):
     inputs = (sequence, startend, minmax, atleast)
 
     if all(v is None for v in inputs):
-        raise ValueError("either sequence, startend, minmax or atleast must be specified.")
+        raise ValueError(
+            "either sequence, startend, minmax or atleast must be specified."
+        )
 
     builder = ak.ArrayBuilder()
     _mask(arr, builder, sequence, startend, minmax, atleast)
     return builder.snapshot()
 
-#nb.njit  # TODO: not supported in awkward yet
-#                 see https://github.com/scikit-hep/awkward-1.0/issues/572
+
+# @nb.njit
 def _mask(arr, builder, sequence=None, startend=None, minmax=None, atleast=None):
     if arr.ndim == 2:  # recursion stop
         if startend is not None:
             start, end = startend
             for els in arr:
-                if ak.count(els) > 0 and els[0] == start and els[-1] == end:
+                if len(els) > 0 and els[0] == start and els[-1] == end:
                     builder.boolean(True)
                 else:
                     builder.boolean(False)
@@ -360,7 +364,6 @@ def _mask(arr, builder, sequence=None, startend=None, minmax=None, atleast=None)
         builder.begin_list()
         _mask(subarray, builder, sequence, startend, minmax, atleast)
         builder.end_list()
-
 
 
 def best_jmuon(tracks):

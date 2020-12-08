@@ -183,17 +183,13 @@ class TestOfflineEvents(unittest.TestCase):
 
     def test_index_consistency(self):
         for i in [0, 2, 5]:
-            assert np.allclose(
-                self.events[i].n_hits, self.events.n_hits[i]
-            )
+            assert np.allclose(self.events[i].n_hits, self.events.n_hits[i])
 
     def test_index_chaining(self):
         assert np.allclose(
             self.events[3:5].n_hits.tolist(), self.events.n_hits[3:5].tolist()
         )
-        assert np.allclose(
-            self.events[3:5][0].n_hits, self.events.n_hits[3:5][0]
-        )
+        assert np.allclose(self.events[3:5][0].n_hits, self.events.n_hits[3:5][0])
 
     @unittest.skip
     def test_index_chaining_on_nested_branches_aka_records(self):
@@ -361,7 +357,22 @@ class TestOfflineTracks(unittest.TestCase):
         self.n_events = 10
 
     def test_fields(self):
-        for field in ['id', 'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z', 't', 'E', 'len', 'lik', 'rec_type', 'rec_stages', 'fitinf']:
+        for field in [
+            "id",
+            "pos_x",
+            "pos_y",
+            "pos_z",
+            "dir_x",
+            "dir_y",
+            "dir_z",
+            "t",
+            "E",
+            "len",
+            "lik",
+            "rec_type",
+            "rec_stages",
+            "fitinf",
+        ]:
             getattr(self.tracks, field)
 
     def test_item_selection(self):

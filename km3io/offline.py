@@ -79,7 +79,15 @@ class OfflineReader:
         "mc_tracks": "mc_trks",
     }
 
-    def __init__(self, f, index_chain=None, step_size=2000, keys=None, aliases=None, event_ctor=None):
+    def __init__(
+        self,
+        f,
+        index_chain=None,
+        step_size=2000,
+        keys=None,
+        aliases=None,
+        event_ctor=None,
+    ):
         """OfflineReader class is an offline ROOT file wrapper
 
         Parameters
@@ -187,10 +195,12 @@ class OfflineReader:
                 step_size=self._step_size,
                 aliases=self.aliases,
                 keys=self.keys(),
-                event_ctor=self._event_ctor
+                event_ctor=self._event_ctor,
             )
 
-        if isinstance(key, str) and key.startswith("n_"):  # group counts, for e.g. n_events, n_hits etc.
+        if isinstance(key, str) and key.startswith(
+            "n_"
+        ):  # group counts, for e.g. n_events, n_hits etc.
             key = self._keyfor(key.split("n_")[1])
             arr = self._fobj[self.event_path][key].array(uproot.AsDtype(">i4"))
             return unfold_indices(arr, self._index_chain)
@@ -207,9 +217,7 @@ class OfflineReader:
                 if from_field in branch[key].keys():
                     fields.append(to_field)
             log.debug(fields)
-            out = branch[key].arrays(
-                fields, aliases=self.special_branches[key]
-            )
+            out = branch[key].arrays(fields, aliases=self.special_branches[key])
         else:
             out = branch[self.aliases.get(key, key)].array()
 
@@ -220,9 +228,57 @@ class OfflineReader:
         return self
 
     def _event_generator(self):
-        for i in range(len(self)):
-            yield self[i]
-        return
+        events = self._fobj[self.event_path]
+        group_count_keys = set(
+            k for k in self.keys() if k.startswith("n_")
+        )  # special keys to make it easy to count subbranch lengths
+        log.debug("group_count_keys: %s", group_count_keys)
+        keys = set(
+            list(
+                set(self.keys())
+                - set(self.special_branches.keys())
+                - set(self.special_aliases)
+                - group_count_keys
+            )
+            + list(self.aliases.keys())
+        )  # all top-level keys for regular branches
+        log.debug("keys: %s", keys)
+        log.debug("aliases: %s", self.aliases)
+        events_it = events.iterate(
+            keys, aliases=self.aliases, step_size=self._step_size
+        )
+        specials = []
+        special_keys = (
+            self.special_branches.keys()
+        )  # dict-key ordering is an implementation detail
+        log.debug("special_keys: %s", special_keys)
+        for key in special_keys:
+            # print(f"adding {key} with keys {self.special_branches[key].keys()} and aliases {self.special_branches[key]}")
+
+            specials.append(
+                events[key].iterate(
+                    self.special_branches[key].keys(),
+                    aliases=self.special_branches[key],
+                    step_size=self._step_size,
+                )
+            )
+        group_counts = {}
+        for key in group_count_keys:
+            group_counts[key] = iter(self[key])
+
+        log.debug("group_counts: %s", group_counts)
+        for event_set, *special_sets in zip(events_it, *specials):
+            for _event, *special_items in zip(event_set, *special_sets):
+                data = {}
+                for k in keys:
+                    data[k] = _event[k]
+                for (k, i) in zip(special_keys, special_items):
+                    data[k] = i
+                for tokey, fromkey in self.special_aliases.items():
+                    data[tokey] = data[fromkey]
+                for key in group_counts:
+                    data[key] = next(group_counts[key])
+                yield self._event_ctor(**data)
 
     def __next__(self):
         return next(self._events)
@@ -245,7 +301,6 @@ class OfflineReader:
     def __actual_len__(self):
         """The raw number of events without any indexing/slicing magic"""
         return len(self._fobj[self.event_path]["id"].array())
-
 
     def __repr__(self):
         length = len(self)

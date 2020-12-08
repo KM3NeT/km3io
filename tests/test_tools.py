@@ -230,7 +230,6 @@ class TestBestTrackSelection(unittest.TestCase):
 
         assert len(best) == 5
 
-        import pdb; pdb.set_trace()
         assert best.lik == ak.max(tracks_slice.lik)
         assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
 
@@ -417,6 +416,27 @@ class TestRecStagesMasks(unittest.TestCase):
     def test_mask_raises_when_no_inputs(self):
         with self.assertRaises(ValueError):
             mask(self.tracks)
+
+
+class TestMask(unittest.TestCase):
+    def test_minmax_2dim_mask(self):
+        arr = ak.Array([[1, 2, 3, 4], [3, 4, 5], [1, 2, 5]])
+        m = mask(arr, minmax=(1, 4))
+        self.assertListEqual(m.tolist(), [True, False, False])
+
+    def test_minmax_3dim_mask(self):
+        arr = ak.Array([[[1, 2, 3, 4], [3, 4, 5], [1, 2, 5]], [[1, 2, 3]]])
+        m = mask(arr, minmax=(1, 4))
+        self.assertListEqual(m.tolist(), [[True, False, False], [True]])
+
+    def test_minmax_4dim_mask(self):
+        arr = ak.Array(
+            [[[[1, 2, 3, 4], [3, 4, 5], [1, 2, 5]], [[1, 2, 3]]], [[[1, 9], [3, 3]]]]
+        )
+        m = mask(arr, minmax=(1, 4))
+        self.assertListEqual(
+            m.tolist(), [[[True, False, False], [True]], [[False, True]]]
+        )
 
 
 class TestUnique(unittest.TestCase):

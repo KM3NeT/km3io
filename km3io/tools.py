@@ -323,6 +323,12 @@ def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):
     return builder.snapshot()
 
 
+def mask_alt(arr, start, end):
+    nonempty = ak.num(arr, axis=-1) > 0
+    mask = (arr.mask[nonempty][..., 0] == start) & (arr.mask[nonempty][..., -1])
+    return ak.fill_none(mask, False)
+
+
 @nb.njit
 def _mask3d(arr, builder, sequence=None, startend=None, minmax=None, atleast=None):
     for subarray in arr:

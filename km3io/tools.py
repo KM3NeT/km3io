@@ -325,7 +325,7 @@ def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):
 
 def mask_alt(arr, start, end):
     nonempty = ak.num(arr, axis=-1) > 0
-    mask = (arr.mask[nonempty][..., 0] == start) & (arr.mask[nonempty][..., -1])
+    mask = ((arr.mask[nonempty][..., 0] == start) & (arr.mask[nonempty][..., -1] == end))
     return ak.fill_none(mask, False)
 
 

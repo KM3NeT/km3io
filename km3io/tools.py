@@ -288,7 +288,7 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
         return namedtuple("BestTrack", out.fields)(
             *[getattr(out, a)[0] for a in out.fields]
         )
-    return m3, out
+    return out
 
 
 def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):

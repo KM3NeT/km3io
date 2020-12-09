@@ -10,8 +10,8 @@ GSG_READER = GSGReader(data_path("gseagen/gseagen.root"))
 
 
 class TestGSGHeader(unittest.TestCase):
-    def setUp(self):
-        self.header = GSG_READER.header
+    # def setUp(self):
+    #     self.header = GSG_READER.header
 
     @unittest.skip
     def test_str_byte_type(self):

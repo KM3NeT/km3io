@@ -494,3 +494,20 @@ def is_cc(fobj):
             raise ValueError(f"simulation program {program} is not implemented.")
 
     return out
+
+
+def usr(objects, field):
+    """Return the usr-data for a given field.
+
+    Parameters
+    ----------
+    objects : awkward.Array
+      Events, tracks, hits or whatever objects which have usr and usr_names
+      fields (e.g. OfflineReader().events).
+    """
+    if len(unique(ak.num(objects.usr_names))) > 1:
+        # let's do it the hard way
+        return ak.flatten(objects.usr[objects.usr_names == field])
+    available_fields = objects.usr_names[0].tolist()
+    idx = available_fields.index(field)
+    return objects.usr[:, idx]

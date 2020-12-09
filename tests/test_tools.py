@@ -429,7 +429,6 @@ class TestMask(unittest.TestCase):
         m = mask(arr, minmax=(1, 4))
         self.assertListEqual(m.tolist(), [[True, False, False], [True]])
 
-    @unittest.skip
     def test_minmax_4dim_mask(self):
         arr = ak.Array(
             [[[[1, 2, 3, 4], [3, 4, 5], [1, 2, 5]], [[1, 2, 3]]], [[[1, 9], [3, 3]]]]

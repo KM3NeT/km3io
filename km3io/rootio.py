@@ -10,6 +10,7 @@ import logging
 
 log = logging.getLogger("km3io.rootio")
 
+
 class EventReader:
     """reader for offline ROOT files"""
 
@@ -129,7 +130,9 @@ class EventReader:
         # indexing
         # TODO: maybe just propagate everything to awkward and let it deal
         # with the type?
-        if isinstance(key, (slice, int, np.int32, np.int64, list, np.ndarray, ak.Array)):
+        if isinstance(
+            key, (slice, int, np.int32, np.int64, list, np.ndarray, ak.Array)
+        ):
             if isinstance(key, (int, np.int32, np.int64)):
                 key = int(key)
             return self.__class__(
@@ -239,7 +242,11 @@ class EventReader:
             return 1
         else:
             # ignore the usual index magic and access `id` directly
-            return len(unfold_indices(self._fobj[self.event_path]["id"].array(), self._index_chain))
+            return len(
+                unfold_indices(
+                    self._fobj[self.event_path]["id"].array(), self._index_chain
+                )
+            )
 
     def __actual_len__(self):
         """The raw number of events without any indexing/slicing magic"""

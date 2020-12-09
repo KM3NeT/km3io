@@ -439,6 +439,7 @@ class TestBranchIndexingMagic(unittest.TestCase):
         # test selecting with a list
         self.assertEqual(3, len(self.events[ak.Array([0, 2, 3])]))
 
+
 class TestUsr(unittest.TestCase):
     def setUp(self):
         self.f = OFFLINE_USR

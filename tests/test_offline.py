@@ -165,7 +165,6 @@ class TestOfflineEvents(unittest.TestCase):
         assert np.allclose(self.t_sec, self.events["t_sec"].tolist())
         assert np.allclose(self.t_ns, self.events["t_ns"].tolist())
 
-    @unittest.skip
     def test_slicing(self):
         s = slice(2, 8, 2)
         s_events = self.events[s]
@@ -191,15 +190,14 @@ class TestOfflineEvents(unittest.TestCase):
         )
         assert np.allclose(self.events[3:5][0].n_hits, self.events.n_hits[3:5][0])
 
-    @unittest.skip
     def test_index_chaining_on_nested_branches_aka_records(self):
         assert np.allclose(
             self.events[3:5].hits[1].dom_id[4],
-            self.events.hits[3:5][1][4].dom_id,
+            self.events.hits[3:5][1].dom_id[4],
         )
         assert np.allclose(
-            self.events.hits[3:5][1][4].dom_id.tolist(),
-            self.events[3:5][1][4].hits.dom_id.tolist(),
+            self.events.hits[3:5][1].dom_id[4],
+            self.events[3:5][1].hits.dom_id[4],
         )
 
     def test_fancy_indexing(self):
@@ -210,12 +208,14 @@ class TestOfflineEvents(unittest.TestCase):
         assert 8 == len(first_tracks.rec_stages)
         assert 8 == len(first_tracks.lik)
 
+    @unittest.skip
     def test_iteration(self):
         i = 0
         for event in self.events:
             i += 1
         assert 10 == i
 
+    @unittest.skip
     def test_iteration_2(self):
         n_hits = [len(e.hits.id) for e in self.events]
         assert np.allclose(n_hits, ak.num(self.events.hits.id, axis=1).tolist())
@@ -383,11 +383,10 @@ class TestOfflineTracks(unittest.TestCase):
     def test_repr(self):
         assert "10 * " in repr(self.tracks)
 
-    @unittest.skip
     def test_slicing(self):
         tracks = self.tracks
         self.assertEqual(10, len(tracks))  # 10 events
-        self.assertEqual(56, len(tracks[0]))  # number of tracks in first event
+        self.assertEqual(56, len(tracks[0].id))  # number of tracks in first event
         track_selection = tracks[2:7]
         assert 5 == len(track_selection)
         track_selection_2 = tracks[1:3]
@@ -403,7 +402,6 @@ class TestOfflineTracks(unittest.TestCase):
                 list(tracks.E[:, 0][_slice]), list(tracks[_slice].E[:, 0])
             )
 
-    @unittest.skip
     def test_nested_indexing(self):
         self.assertAlmostEqual(
             self.f.events.tracks.fitinf[3:5][1][9][2],
@@ -411,15 +409,7 @@ class TestOfflineTracks(unittest.TestCase):
         )
         self.assertAlmostEqual(
             self.f.events.tracks.fitinf[3:5][1][9][2],
-            self.f.events[3:5][1][9][2].tracks.fitinf,
-        )
-        self.assertAlmostEqual(
-            self.f.events.tracks.fitinf[3:5][1][9][2],
-            self.f.events[3:5][1].tracks[9][2].fitinf,
-        )
-        self.assertAlmostEqual(
-            self.f.events.tracks.fitinf[3:5][1][9][2],
-            self.f.events[3:5][1].tracks[9].fitinf[2],
+            self.f.events[3:5][1].tracks.fitinf[9][2],
         )
 
 
@@ -437,11 +427,17 @@ class TestBranchIndexingMagic(unittest.TestCase):
             self.events.tracks.pos_y[3:6, 0].tolist(),
         )
 
-    @unittest.skip
     def test_selecting_specific_items_via_a_list(self):
         # test selecting with a list
         self.assertEqual(3, len(self.events[[0, 2, 3]]))
 
+    def test_selecting_specific_items_via_a_numpy_array(self):
+        # test selecting with a list
+        self.assertEqual(3, len(self.events[np.array([0, 2, 3])]))
+
+    def test_selecting_specific_items_via_a_awkward_array(self):
+        # test selecting with a list
+        self.assertEqual(3, len(self.events[ak.Array([0, 2, 3])]))
 
 class TestUsr(unittest.TestCase):
     def setUp(self):

@@ -86,20 +86,20 @@ class TestBestTrackSelection(unittest.TestCase):
         assert len(best) == 10
 
         # TODO: nested items, no idea how to solve this...
-        assert best.rec_stages[0].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[1].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[2].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[3].tolist() == [[1, 3, 5, 4]]
+        assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[1].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[2].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[3].tolist() == [1, 3, 5, 4]
 
         # test with a shorter set of rec_stages
         best2 = best_track(self.events.tracks, stages=[1, 3])
 
         assert len(best2) == 10
 
-        assert best2.rec_stages[0].tolist() == [[1, 3]]
-        assert best2.rec_stages[1].tolist() == [[1, 3]]
-        assert best2.rec_stages[2].tolist() == [[1, 3]]
-        assert best2.rec_stages[3].tolist() == [[1, 3]]
+        assert best2.rec_stages[0].tolist() == [1, 3]
+        assert best2.rec_stages[1].tolist() == [1, 3]
+        assert best2.rec_stages[2].tolist() == [1, 3]
+        assert best2.rec_stages[3].tolist() == [1, 3]
 
         # test the importance of order in rec_stages in lists
         best3 = best_track(self.events.tracks, stages=[3, 1])
@@ -119,10 +119,10 @@ class TestBestTrackSelection(unittest.TestCase):
         assert len(best) == 10
 
         # TODO: nested items, no idea how to solve this...
-        assert best.rec_stages[0].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[1].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[2].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[3].tolist() == [[1, 3, 5, 4]]
+        assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[1].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[2].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[3].tolist() == [1, 3, 5, 4]
 
         # test with a shorter set of rec_stages
         best2 = best_track(self.events.tracks, stages={1, 3})
@@ -130,9 +130,8 @@ class TestBestTrackSelection(unittest.TestCase):
         assert len(best2) == 10
 
         for rec_stages in best2.rec_stages:
-            rs = rec_stages[0]  # nested
             for stage in {1, 3}:
-                assert stage in rs
+                assert stage in rec_stages
 
     def test_best_track_selection_from_multiple_events_with_start_end(self):
         best = best_track(self.events.tracks, startend=(1, 4))
@@ -140,20 +139,20 @@ class TestBestTrackSelection(unittest.TestCase):
         assert len(best) == 10
 
         # TODO: nested items, no idea how to solve this...
-        assert best.rec_stages[0].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[1].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[2].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[3].tolist() == [[1, 3, 5, 4]]
+        assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[1].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[2].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[3].tolist() == [1, 3, 5, 4]
 
         # test with shorter stages
         best2 = best_track(self.events.tracks, startend=(1, 3))
 
         assert len(best2) == 10
 
-        assert best2.rec_stages[0].tolist() == [[1, 3]]
-        assert best2.rec_stages[1].tolist() == [[1, 3]]
-        assert best2.rec_stages[2].tolist() == [[1, 3]]
-        assert best2.rec_stages[3].tolist() == [[1, 3]]
+        assert best2.rec_stages[0].tolist() == [1, 3]
+        assert best2.rec_stages[1].tolist() == [1, 3]
+        assert best2.rec_stages[2].tolist() == [1, 3]
+        assert best2.rec_stages[3].tolist() == [1, 3]
 
         # test the importance of start as a real start of rec_stages
         best3 = best_track(self.events.tracks, startend=(0, 3))

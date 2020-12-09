@@ -3,28 +3,15 @@
 # Filename: gseagen.py
 # Author: Johannes Schumann <jschumann@km3net.de>
 
-import uproot3
-import numpy as np
 import warnings
-from .rootio import Branch, BranchMapper
+from .rootio import EventReader
 from .tools import cached_property
 
-MAIN_TREE_NAME = "Events"
 
-
-class GSGReader:
+class GSGReader(EventReader):
     """reader for gSeaGen ROOT files"""
-
-    def __init__(self, file_path=None, fobj=None):
-        """GSGReader class is a gSeaGen ROOT file wrapper
-
-        Parameters
-        ----------
-        file_path : file path or file-like object
-            The file handler. It can be a str or any python path-like object
-            that points to the file.
-        """
-        self._fobj = uproot3.open(file_path)
+    event_path = "Events"
+    skip_keys = ["Header"]
 
     @cached_property
     def header(self):
@@ -42,7 +29,3 @@ class GSGReader:
             return header
         else:
             warnings.warn("Your file header has an unsupported format")
-
-    @cached_property
-    def events(self):
-        return Branch(self._fobj, BranchMapper(name="Events", key="Events"))

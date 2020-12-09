@@ -276,7 +276,7 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
 
     tracks = tracks[m1]
 
-    rec_stage_lengths = ak.num(tracks.rec_stages, axis=axis + 1)
+    rec_stage_lengths = ak.num(tracks.rec_stages, axis=-1)
     max_rec_stage_length = ak.max(rec_stage_lengths, axis=axis)
     m2 = rec_stage_lengths == max_rec_stage_length
     tracks = tracks[m2]

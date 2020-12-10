@@ -16,10 +16,10 @@ class EventReader:
 
     event_path = None
     item_name = "Event"
-    skip_keys = []
-    aliases = {}
-    special_branches = {}
-    special_aliases = {}
+    skip_keys = []  # ignore these subbranches, even if they exist
+    aliases = {}  # top level aliases -> {fromkey: tokey}
+    nested_branches = {}
+    nested_aliases = {}
 
     def __init__(
         self,
@@ -30,7 +30,7 @@ class EventReader:
         aliases=None,
         event_ctor=None,
     ):
-        """OfflineReader class is an offline ROOT file wrapper
+        """EventReader base class
 
         Parameters
         ----------
@@ -88,8 +88,8 @@ class EventReader:
                 set(
                     list(self.keys())
                     + list(self.aliases)
-                    + list(self.special_branches)
-                    + list(self.special_aliases)
+                    + list(self.nested_branches)
+                    + list(self.nested_aliases)
                 ),
             )
 
@@ -97,9 +97,9 @@ class EventReader:
         skip_keys = set(self.skip_keys)
         toplevel_keys = set(k.split("/")[0] for k in self._fobj[self.event_path].keys())
         keys = (toplevel_keys - skip_keys).union(
-            list(self.aliases.keys()) + list(self.special_aliases)
+            list(self.aliases.keys()) + list(self.nested_aliases)
         )
-        for key in list(self.special_branches) + list(self.special_aliases):
+        for key in list(self.nested_branches) + list(self.nested_aliases):
             keys.add("n_" + key)
         # self._grouped_branches = {k for k in toplevel_keys - skip_keys if isinstance(self._fobj[self.event_path][k].interpretation, uproot.AsGrouped)}
         self._keys = keys
@@ -115,7 +115,7 @@ class EventReader:
 
     def _keyfor(self, key):
         """Return the correct key for a given alias/key"""
-        return self.special_aliases.get(key, key)
+        return self.nested_aliases.get(key, key)
 
     def __getattr__(self, attr):
         attr = self._keyfor(attr)
@@ -154,15 +154,15 @@ class EventReader:
         # These are special branches which are nested, like hits/trks/mc_trks
         # We are explicitly grabbing just a predefined set of subbranches
         # and also alias them to be backwards compatible (and attribute-accessible)
-        if key in self.special_branches:
+        if key in self.nested_branches:
             fields = []
             # some fields are not always available, like `usr_names`
-            for to_field, from_field in self.special_branches[key].items():
+            for to_field, from_field in self.nested_branches[key].items():
                 if from_field in branch[key].keys():
                     fields.append(to_field)
             log.debug(fields)
-            # out = branch[key].arrays(fields, aliases=self.special_branches[key])
-            return Branch(branch[key], fields, self.special_branches[key], self._index_chain)
+            # out = branch[key].arrays(fields, aliases=self.nested_branches[key])
+            return Branch(branch[key], fields, self.nested_branches[key], self._index_chain)
         else:
             return unfold_indices(branch[self.aliases.get(key, key)].array(), self._index_chain)
 
@@ -174,13 +174,13 @@ class EventReader:
         events = self._fobj[self.event_path]
         group_count_keys = set(
             k for k in self.keys() if k.startswith("n_")
-        )  # special keys to make it easy to count subbranch lengths
+        )  # extra keys to make it easy to count subbranch lengths
         log.debug("group_count_keys: %s", group_count_keys)
         keys = set(
             list(
                 set(self.keys())
-                - set(self.special_branches.keys())
-                - set(self.special_aliases)
+                - set(self.nested_branches.keys())
+                - set(self.nested_aliases)
                 - group_count_keys
             )
             + list(self.aliases.keys())
@@ -191,18 +191,18 @@ class EventReader:
         events_it = events.iterate(
             keys, aliases=self.aliases, step_size=self._step_size
         )
-        specials = []
-        special_keys = (
-            self.special_branches.keys()
+        nested = []
+        nested_keys = (
+            self.nested_branches.keys()
         )  # dict-key ordering is an implementation detail
-        log.debug("special_keys: %s", special_keys)
-        for key in special_keys:
-            # print(f"adding {key} with keys {self.special_branches[key].keys()} and aliases {self.special_branches[key]}")
+        log.debug("nested_keys: %s", nested_keys)
+        for key in nested_keys:
+            # print(f"adding {key} with keys {self.nested_branches[key].keys()} and aliases {self.nested_branches[key]}")
 
-            specials.append(
+            nested.append(
                 events[key].iterate(
-                    self.special_branches[key].keys(),
-                    aliases=self.special_branches[key],
+                    self.nested_branches[key].keys(),
+                    aliases=self.nested_branches[key],
                     step_size=self._step_size,
                 )
             )
@@ -211,14 +211,14 @@ class EventReader:
             group_counts[key] = iter(self[key])
 
         log.debug("group_counts: %s", group_counts)
-        for event_set, *special_sets in zip(events_it, *specials):
-            for _event, *special_items in zip(event_set, *special_sets):
+        for event_set, *nested_sets in zip(events_it, *nested):
+            for _event, *nested_items in zip(event_set, *nested_sets):
                 data = {}
                 for k in keys:
                     data[k] = _event[k]
-                for (k, i) in zip(special_keys, special_items):
+                for (k, i) in zip(nested_keys, nested_items):
                     data[k] = i
-                for tokey, fromkey in self.special_aliases.items():
+                for tokey, fromkey in self.nested_aliases.items():
                     data[tokey] = data[fromkey]
                 for key in group_counts:
                     data[key] = next(group_counts[key])

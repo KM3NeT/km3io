@@ -24,7 +24,7 @@ class OfflineReader(EventReader):
         "usr": "AAObject/usr",
         "usr_names": "AAObject/usr_names",
     }
-    special_branches = {
+    nested_branches = {
         "hits": {
             "id": "hits.id",
             "channel_id": "hits.channel_id",
@@ -78,7 +78,7 @@ class OfflineReader(EventReader):
             "usr_names": "mc_trks.usr_names",  # TODO: trouble with uproot4
         },
     }
-    special_aliases = {
+    nested_aliases = {
         "tracks": "trks",
         "mc_tracks": "mc_trks",
     }

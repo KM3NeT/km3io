@@ -68,6 +68,7 @@ class OfflineReader(EventReader):
             "dir_y": "mc_trks.dir.y",
             "dir_z": "mc_trks.dir.z",
             "E": "mc_trks.E",
+            "t": "mc_trks.t",
             # "status": "mc_trks.status",  # TODO: check this
             # "mother_id": "mc_trks.mother_id",  # TODO: check this
             "type": "mc_trks.type",

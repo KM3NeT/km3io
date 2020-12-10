@@ -143,10 +143,8 @@ class EventReader:
                 keys=self.keys(),
                 event_ctor=self._event_ctor,
             )
-
-        if isinstance(key, str) and key.startswith(
-            "n_"
-        ):  # group counts, for e.g. n_events, n_hits etc.
+        # group counts, for e.g. n_events, n_hits etc.
+        if isinstance(key, str) and key.startswith("n_"):
             key = self._keyfor(key.split("n_")[1])
             arr = self._fobj[self.event_path][key].array(uproot.AsDtype(">i4"))
             return unfold_indices(arr, self._index_chain)
@@ -163,11 +161,10 @@ class EventReader:
                 if from_field in branch[key].keys():
                     fields.append(to_field)
             log.debug(fields)
-            out = branch[key].arrays(fields, aliases=self.special_branches[key])
+            # out = branch[key].arrays(fields, aliases=self.special_branches[key])
+            return Branch(branch[key], fields, self.special_branches[key], self._index_chain)
         else:
-            out = branch[self.aliases.get(key, key)].array()
-
-        return unfold_indices(out, self._index_chain)
+            return unfold_indices(branch[self.aliases.get(key, key)].array(), self._index_chain)
 
     def __iter__(self):
         self._events = self._event_generator()
@@ -269,3 +266,52 @@ class EventReader:
 
     def __exit__(self, *args):
         self.close()
+
+
+class Branch:
+    """Helper class for nested branches likes tracks/hits"""
+    def __init__(self, branch, fields, aliases, index_chain):
+        self._branch = branch
+        self.fields = fields
+        self._aliases = aliases
+        self._index_chain = index_chain
+
+    def __getattr__(self, attr):
+        if attr not in self._aliases:
+            raise AttributeError(f"No field named {attr}. Available fields: {self.fields}")
+        return unfold_indices(self._branch[self._aliases[attr]].array(), self._index_chain)
+
+    def __getitem__(self, key):
+        return self.__class__(self._branch, self.fields, self._aliases, self._index_chain + [key])
+
+    def __len__(self):
+        if not self._index_chain:
+            return self._branch.num_entries
+        elif isinstance(self._index_chain[-1], (int, np.int32, np.int64)):
+            if len(self._index_chain) == 1:
+                return 1
+                # try:
+                #     return len(self[:])
+                # except IndexError:
+                #     return 1
+            return 1
+        else:
+            # ignore the usual index magic and access `id` directly
+            return len(self.id)
+
+    def __actual_len__(self):
+        """The raw number of events without any indexing/slicing magic"""
+        return len(self._branch[self._aliases["id"]].array())
+
+    def __repr__(self):
+        length = len(self)
+        actual_length = self.__actual_len__()
+        return f"{self.__class__.__name__} ({length}{'/' + str(actual_length) if length < actual_length else ''} {self._branch.name})"
+
+    @property
+    def ndim(self):
+        if not self._index_chain:
+            return 2
+        elif any(isinstance(i, (int, np.int32, np.int64)) for i in self._index_chain):
+            return 1
+        return 2

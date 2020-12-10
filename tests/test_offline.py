@@ -381,7 +381,7 @@ class TestOfflineTracks(unittest.TestCase):
         )
 
     def test_repr(self):
-        assert "10 * " in repr(self.tracks)
+        assert "10" in repr(self.tracks)
 
     def test_slicing(self):
         tracks = self.tracks

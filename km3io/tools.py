@@ -209,12 +209,7 @@ def get_multiplicity(tracks, rec_stages):
     """
     masked_tracks = tracks[mask(tracks.rec_stages, sequence=rec_stages)]
 
-    try:
-        axis = tracks.ndim
-    except AttributeError:
-        axis = 0
-
-    out = count_nested(masked_tracks.rec_stages, axis=axis)
+    out = count_nested(masked_tracks.rec_stages, axis=tracks.ndim - 1)
 
     return out
 
@@ -269,10 +264,8 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
     if minmax is not None:
         m1 = mask(tracks.rec_stages, minmax=minmax)
 
-    try:
-        axis = tracks.ndim
-    except AttributeError:
-        axis = 0
+    original_ndim = tracks.ndim
+    axis = 1 if original_ndim == 2 else 0
 
     tracks = tracks[m1]
 
@@ -284,10 +277,8 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
     m3 = ak.argmax(tracks.lik, axis=axis, keepdims=True)
 
     out = tracks[m3]
-    if isinstance(out, ak.highlevel.Record):
-        return namedtuple("BestTrack", out.fields)(
-            *[getattr(out, a)[0] for a in out.fields]
-        )
+    if original_ndim == 1:
+        return out[0]
     return out[:, 0]
 
 

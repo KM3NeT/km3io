@@ -187,6 +187,7 @@ class EventReader:
         )  # all top-level keys for regular branches
         log.debug("keys: %s", keys)
         log.debug("aliases: %s", self.aliases)
+        # check for valid keys, e.g. `usr` is not always there and raises recursion error!
         events_it = events.iterate(
             keys, aliases=self.aliases, step_size=self._step_size
         )

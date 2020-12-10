@@ -279,7 +279,24 @@ class Branch:
     def __getattr__(self, attr):
         if attr not in self._aliases:
             raise AttributeError(f"No field named {attr}. Available fields: {self.fields}")
-        return unfold_indices(self._branch[self._aliases[attr]].array(), self._index_chain)
+        key = self._aliases[attr]
+
+        if self._index_chain:
+            idx0 = self._index_chain[0]
+            if isinstance(idx0, (int, np.int32, np.int64)):
+                # optimise single-element and slice lookups
+                start = idx0
+                stop = idx0 + 1
+                arr = ak.flatten(self._branch[key].array(entry_start=start, entry_stop=stop))
+                return unfold_indices(arr, self._index_chain[1:])
+            if isinstance(idx0, slice):
+                if idx0.step is None or idx0.step == 1:
+                    start = idx0.start
+                    stop = idx0.stop
+                    arr = self._branch[key].array(entry_start=start, entry_stop=stop)
+                    return unfold_indices(arr, self._index_chain[1:])
+
+        return unfold_indices(self._branch[key].array(), self._index_chain)
 
     def __getitem__(self, key):
         return self.__class__(self._branch, self.fields, self._aliases, self._index_chain + [key])

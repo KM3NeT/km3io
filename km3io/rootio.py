@@ -28,6 +28,7 @@ class EventReader:
         step_size=2000,
         keys=None,
         aliases=None,
+        nested_branches=None,
         event_ctor=None,
     ):
         """EventReader base class
@@ -64,6 +65,11 @@ class EventReader:
         self._keys = keys
         self._event_ctor = event_ctor
         self._index_chain = [] if index_chain is None else index_chain
+
+        if aliases is not None:
+            self.aliases = aliases
+        if nested_branches is not None:
+            self.nested_branches = nested_branches
 
         if self._keys is None:
             self._initialise_keys()
@@ -141,6 +147,7 @@ class EventReader:
                 index_chain=self._index_chain + [key],
                 step_size=self._step_size,
                 aliases=self.aliases,
+                nested_branches=self.nested_branches,
                 keys=self.keys(),
                 event_ctor=self._event_ctor,
             )

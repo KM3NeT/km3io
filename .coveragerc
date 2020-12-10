@@ -17,3 +17,5 @@ exclude_lines =
     if self.debug:
     if settings.DEBUG
     def __repr__
+    @njit
+    @nb.njit

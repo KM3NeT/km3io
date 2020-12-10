@@ -95,13 +95,28 @@ class EventReader:
 
     def _initialise_keys(self):
         skip_keys = set(self.skip_keys)
-        toplevel_keys = set(k.split("/")[0] for k in self._fobj[self.event_path].keys())
+        all_keys  = set(self._fobj[self.event_path].keys())
+        toplevel_keys = set(k.split("/")[0] for k in all_keys)
+        valid_aliases = {}
+        for fromkey, tokey in self.aliases.items():
+            if tokey in all_keys:
+                valid_aliases[fromkey] = tokey
+        self.aliases = valid_aliases
         keys = (toplevel_keys - skip_keys).union(
-            list(self.aliases.keys()) + list(self.nested_aliases)
+            list(valid_aliases) + list(self.nested_aliases)
         )
         for key in list(self.nested_branches) + list(self.nested_aliases):
             keys.add("n_" + key)
         # self._grouped_branches = {k for k in toplevel_keys - skip_keys if isinstance(self._fobj[self.event_path][k].interpretation, uproot.AsGrouped)}
+        valid_nested_branches = {}
+        for nested_key, aliases in self.nested_branches.items():
+            if nested_key in toplevel_keys:
+                valid_nested_branches[nested_key] = {}
+                subbranch_keys = self._fobj[self.event_path][nested_key].keys()
+                for fromkey, tokey in aliases.items():
+                    if tokey in subbranch_keys:
+                        valid_nested_branches[nested_key][fromkey] = tokey
+        self.nested_branches = valid_nested_branches
         self._keys = keys
 
     def keys(self):
@@ -187,7 +202,6 @@ class EventReader:
         )  # all top-level keys for regular branches
         log.debug("keys: %s", keys)
         log.debug("aliases: %s", self.aliases)
-        # check for valid keys, e.g. `usr` is not always there and raises recursion error!
         events_it = events.iterate(
             keys, aliases=self.aliases, step_size=self._step_size
         )
@@ -197,8 +211,6 @@ class EventReader:
         )  # dict-key ordering is an implementation detail
         log.debug("nested_keys: %s", nested_keys)
         for key in nested_keys:
-            # print(f"adding {key} with keys {self.nested_branches[key].keys()} and aliases {self.nested_branches[key]}")
-
             nested.append(
                 events[key].iterate(
                     self.nested_branches[key].keys(),

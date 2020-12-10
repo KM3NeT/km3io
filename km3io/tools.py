@@ -264,7 +264,10 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
     if minmax is not None:
         m1 = mask(tracks.rec_stages, minmax=minmax)
 
-    original_ndim = tracks.ndim
+    try:
+        original_ndim = tracks.ndim
+    except AttributeError:
+        original_ndim = 1
     axis = 1 if original_ndim == 2 else 0
 
     tracks = tracks[m1]
@@ -278,6 +281,8 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
 
     out = tracks[m3]
     if original_ndim == 1:
+        if isinstance(out, ak.Record):
+            return out[:, 0]
         return out[0]
     return out[:, 0]
 

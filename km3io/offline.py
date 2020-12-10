@@ -19,8 +19,8 @@ class OfflineReader(EventReader):
     item_name = "OfflineEvent"
     skip_keys = ["t", "AAObject"]
     aliases = {
-        "t_sec": "t.fSec",
-        "t_ns": "t.fNanoSec",
+        "t_sec": "t/t.fSec",
+        "t_ns": "t/t.fNanoSec",
         "usr": "AAObject/usr",
         "usr_names": "AAObject/usr_names",
     }

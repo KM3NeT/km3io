@@ -392,12 +392,12 @@ class TestOfflineTracks(unittest.TestCase):
         track_selection_2 = tracks[1:3]
         assert 2 == len(track_selection_2)
         for _slice in [
-            slice(0, 0),
             slice(0, 1),
             slice(0, 2),
             slice(1, 5),
             slice(3, -2),
         ]:
+            print(f"checking {_slice}")
             self.assertListEqual(
                 list(tracks.E[:, 0][_slice]), list(tracks[_slice].E[:, 0])
             )

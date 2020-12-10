@@ -26,7 +26,7 @@ class GSGReader(EventReader):
                         v = v.decode("utf-8")
                     except UnicodeDecodeError:
                         pass
-                header[k.decode("utf-8")] = v
+                header[k] = v
             return header
         else:
             warnings.warn("Your file header has an unsupported format")

@@ -34,19 +34,19 @@ class EventReader:
 
         Parameters
         ----------
-        f: str or uproot4.reading.ReadOnlyDirectory (from uproot4.open)
+        f : str or uproot4.reading.ReadOnlyDirectory (from uproot4.open)
             Path to the file of interest or uproot4 filedescriptor.
-        step_size: int, optional
+        step_size : int, optional
             Number of events to read into the cache when iterating.
             Choosing higher numbers may improve the speed but also increases
             the memory overhead.
-        index_chain: list, optional
+        index_chain : list, optional
             Keeps track of index chaining.
-        keys: list or set, optional
+        keys : list or set, optional
             Branch keys.
-        aliases: dict, optional
+        aliases : dict, optional
             Branch key aliases.
-        event_ctor: class or namedtuple, optional
+        event_ctor : class or namedtuple, optional
             Event constructor.
 
         """
@@ -64,20 +64,6 @@ class EventReader:
         self._keys = keys
         self._event_ctor = event_ctor
         self._index_chain = [] if index_chain is None else index_chain
-
-        # if aliases is not None:
-        #     self.aliases = aliases
-        # else:
-        #     # Check for usr-awesomeness backward compatibility crap
-        #     if "E/Evt/AAObject/usr" in self._fobj:
-        #         print("Found usr data")
-        #         if ak.count(f["E/Evt/AAObject/usr"].array()) > 0:
-        #             self.aliases.update(
-        #                 {
-        #                     "usr": "AAObject/usr",
-        #                     "usr_names": "AAObject/usr_names",
-        #                 }
-        #             )
 
         if self._keys is None:
             self._initialise_keys()
@@ -176,7 +162,6 @@ class EventReader:
                 if from_field in branch[key].keys():
                     fields.append(to_field)
             log.debug(fields)
-            # out = branch[key].arrays(fields, aliases=self.nested_branches[key])
             return Branch(branch[key], fields, self.nested_branches[key], self._index_chain)
         else:
             return unfold_indices(branch[self.aliases.get(key, key)].array(), self._index_chain)
@@ -244,6 +229,7 @@ class EventReader:
             return self._fobj[self.event_path].num_entries
         elif isinstance(self._index_chain[-1], (int, np.int32, np.int64)):
             if len(self._index_chain) == 1:
+                # TODO: not sure why this is needed at all, it's too late...
                 return 1
                 # try:
                 #     return len(self[:])

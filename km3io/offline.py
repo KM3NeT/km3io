@@ -69,9 +69,10 @@ class OfflineReader(EventReader):
             "dir_z": "mc_trks.dir.z",
             "E": "mc_trks.E",
             "t": "mc_trks.t",
+            "len": "mc_trks.len",
             # "status": "mc_trks.status",  # TODO: check this
             # "mother_id": "mc_trks.mother_id",  # TODO: check this
-            "type": "mc_trks.type",
+            "pdgid": "mc_trks.type",
             "hit_ids": "mc_trks.hit_ids",
             "usr": "mc_trks.usr",  # TODO: trouble with uproot4
             "usr_names": "mc_trks.usr_names",  # TODO: trouble with uproot4

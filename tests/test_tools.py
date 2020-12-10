@@ -549,69 +549,20 @@ class TestIsCC(unittest.TestCase):
 
 
 class TestUsr(unittest.TestCase):
-    def setUp(self):
-        self.f = OFFLINE_USR
 
-    def test_str_flat(self):
-        print(self.f.events.usr)
-
-    def test_keys_flat(self):
-        self.assertListEqual(
-            [
-                "RecoQuality",
-                "RecoNDF",
-                "CoC",
-                "ToT",
-                "ChargeAbove",
-                "ChargeBelow",
-                "ChargeRatio",
-                "DeltaPosZ",
-                "FirstPartPosZ",
-                "LastPartPosZ",
-                "NSnapHits",
-                "NTrigHits",
-                "NTrigDOMs",
-                "NTrigLines",
-                "NSpeedVetoHits",
-                "NGeometryVetoHits",
-                "ClassficationScore",
-            ],
-            self.f.events.usr_names[0].tolist(),
-        )
-
-    def test_getitem_flat(self):
+    def test_event_usr(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],
-            usr(self.f.events, "CoC").tolist(),
+            usr(OFFLINE_USR.events, "CoC").tolist(),
         )
         assert np.allclose(
             [37.51967774166617, -10.280346193553832, 13.67595659707355],
-            usr(self.f.events, "DeltaPosZ").tolist(),
+            usr(OFFLINE_USR.events, "DeltaPosZ").tolist(),
         )
 
-
-class TestMcTrackUsr(unittest.TestCase):
-    def setUp(self):
-        self.f = OFFLINE_MC_TRACK_USR
-
-    def test_usr_names(self):
-        n_tracks = len(self.f.events)
-        for i in range(3):
-            self.assertListEqual(
-                ["bx", "by", "ichan", "cc"],
-                self.f.events.mc_tracks.usr_names[i][0].tolist(),
-            )
-            self.assertListEqual(
-                ["energy_lost_in_can"],
-                self.f.events.mc_tracks.usr_names[i][1].tolist(),
-            )
-
-    def test_usr(self):
+    def test_mc_tracks_usr(self):
         assert np.allclose(
-            [0.0487, 0.0588, 3, 2],
-            self.f.events.mc_tracks.usr[0][0].tolist(),
+            [0.0487],
+            usr(OFFLINE_MC_TRACK_USR.mc_tracks[0], "bx").tolist(),
             atol=0.0001,
-        )
-        assert np.allclose(
-            [0.147, 0.4, 3, 2], self.f.events.mc_tracks.usr[1][0].tolist(), atol=0.001
         )

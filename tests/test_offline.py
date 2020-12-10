@@ -8,6 +8,7 @@ from km3net_testdata import data_path
 
 from km3io import OfflineReader
 from km3io.offline import Header
+from km3io.tools import usr
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
 OFFLINE_USR = OfflineReader(data_path("offline/usr-sample.root"))
@@ -208,14 +209,12 @@ class TestOfflineEvents(unittest.TestCase):
         assert 8 == len(first_tracks.rec_stages)
         assert 8 == len(first_tracks.lik)
 
-    @unittest.skip
     def test_iteration(self):
         i = 0
         for event in self.events:
             i += 1
         assert 10 == i
 
-    @unittest.skip
     def test_iteration_2(self):
         n_hits = [len(e.hits.id) for e in self.events]
         assert np.allclose(n_hits, ak.num(self.events.hits.id, axis=1).tolist())
@@ -444,11 +443,9 @@ class TestUsr(unittest.TestCase):
     def setUp(self):
         self.f = OFFLINE_USR
 
-    @unittest.skip
     def test_str_flat(self):
         print(self.f.events.usr)
 
-    @unittest.skip
     def test_keys_flat(self):
         self.assertListEqual(
             [
@@ -470,29 +467,7 @@ class TestUsr(unittest.TestCase):
                 "NGeometryVetoHits",
                 "ClassficationScore",
             ],
-            self.f.events.usr.keys().tolist(),
-        )
-
-    @unittest.skip
-    def test_getitem_flat(self):
-        assert np.allclose(
-            [118.6302815337638, 44.33580521344907, 99.93916717621543],
-            self.f.events.usr["CoC"].tolist(),
-        )
-        assert np.allclose(
-            [37.51967774166617, -10.280346193553832, 13.67595659707355],
-            self.f.events.usr["DeltaPosZ"].tolist(),
-        )
-
-    @unittest.skip
-    def test_attributes_flat(self):
-        assert np.allclose(
-            [118.6302815337638, 44.33580521344907, 99.93916717621543],
-            self.f.events.usr.CoC.tolist(),
-        )
-        assert np.allclose(
-            [37.51967774166617, -10.280346193553832, 13.67595659707355],
-            self.f.events.usr.DeltaPosZ.tolist(),
+            self.f.events.usr_names[0].tolist(),
         )
 
 

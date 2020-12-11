@@ -11,15 +11,15 @@ from .tools import cached_property
 class GSGReader(EventReader):
     """reader for gSeaGen ROOT files"""
 
+    header_key = "Header"
     event_path = "Events"
-    skip_keys = ["Header"]
+    skip_keys = [header_key]
 
     @cached_property
     def header(self):
-        header_key = "Header"
-        if header_key in self._fobj:
+        if self.header_key in self._fobj:
             header = {}
-            for k, v in self._fobj[header_key].items():
+            for k, v in self._fobj[self.header_key].items():
                 v = v.array()[0]
                 if isinstance(v, bytes):
                     try:

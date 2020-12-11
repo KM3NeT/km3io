@@ -61,12 +61,6 @@ class TestGSGHeader(unittest.TestCase):
         assert self.header["NNu"] == 2
         self.assertListEqual(self.header["NuList"].tolist(), [-14, 14])
 
-    @unittest.skip
-    def test_unsupported_header(self):
-        f = GSGReader(data_path("online/km3net_online.root"))
-        with self.assertWarns(UserWarning):
-            f.header
-
 
 class TestGSGEvents(unittest.TestCase):
     def setUp(self):

@@ -446,37 +446,35 @@ def is_cc(fobj):
     w2list = fobj.events.w2list
     len_w2lists = ak.num(w2list, axis=1)
 
+    # According to: https://wiki.km3net.de/index.php/Simulations/The_gSeaGen_code#Physics_event_entries
+    # the interaction types are defined as follow:
+
+    # INTER   Interaction type
+    # 1       EM
+    # 2       Weak[CC]
+    # 3       Weak[NC]
+    # 4       Weak[CC+NC+interference]
+    # 5       NucleonDecay
+
+
     if all(len_w2lists <= 7):  # old nu file have w2list of len 7.
-        usr_names = fobj.events.mc_tracks.usr_names
-        usr_data = fobj.events.mc_tracks.usr
-        mask_cc_flag = usr_names[:, 0] == b"cc"
-        inter_ID = usr_data[:, 0][mask_cc_flag]
-        out = ak.flatten(inter_ID == 2)  # 2 is the interaction ID for CC.
+        # Checking the `cc` value in usr of the first mc_tracks,
+        # which are the primary neutrinos and carry the event property.
+        # This has been changed in 2020 to be a property in the w2list.
+        # See https://git.km3net.de/common/km3net-dataformat/-/issues/23
+        return usr(fobj.events.mc_tracks[:, 0], "cc") == 2
 
     else:
+        # TODO: to be tested with a newly generated files with th eupdated
+        # w2list definitionn.
         if "gseagen" in program.lower():
-
-            # According to: https://wiki.km3net.de/index.php/Simulations/The_gSeaGen_code#Physics_event_entries
-            # the interaction types are defined as follow:
-
-            # INTER   Interaction type
-            # 1       EM
-            # 2       Weak[CC]
-            # 3       Weak[NC]
-            # 4       Weak[CC+NC+interference]
-            # 5       NucleonDecay
-
-            cc_flag = w2list[:, kw2gsg.W2LIST_GSEAGEN_CC]
-            out = cc_flag > 0  # to be tested with a newly generated nu file.
+            return w2list[:, kw2gen.W2LIST_GSEAGEN_CC] == 2
         if "genhen" in program.lower():
-            cc_flag = w2list[:, kw2gen.W2LIST_GENHEN_CC]
-            out = cc_flag > 0
+            return w2list[:, kw2gen.W2LIST_GENHEN_CC] == 2
         else:
             raise NotImplementedError(
                 f"don't know how to determine the CC-ness of {program} files."
             )
-
-    return out
 
 
 def usr(objects, field):

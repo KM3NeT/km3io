@@ -235,6 +235,10 @@ class TestOfflineEvents(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             [e.id for e in self.events[2:8][2:4]]
 
+    def test_iteration_over_subbranches_raises(self):
+        with self.assertRaises(NotImplementedError):
+            [t for t in self.events[0].tracks]
+
     def test_str(self):
         assert str(self.n_events) in str(self.events)
 

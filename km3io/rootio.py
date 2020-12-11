@@ -354,6 +354,13 @@ class Branch:
 
         return unfold_indices(self._branch[key].array(), self._index_chain)
 
+    def __iter__(self):
+        raise NotImplementedError(
+            "iterating over a nested branch is not supported nor recommended. "
+            "If you really feel you need to do it, open an issue in "
+            "https://git.km3net.de/km3py/km3io"
+        )
+
     def __getitem__(self, key):
         return self.__class__(
             self._branch, self.fields, self._aliases, self._index_chain + [key]

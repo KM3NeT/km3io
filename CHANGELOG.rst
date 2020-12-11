@@ -3,6 +3,10 @@ Unreleased changes
 Version 0
 ---------
 
+0.19.1 / 2020-12-11
+~~~~~~~~~~~~~~~~~~~
+* Minor hotfixes and cosmetics
+
 0.19.0 / 2020-12-11
 ~~~~~~~~~~~~~~~~~~~
 * Major update, coming closer to v1.0

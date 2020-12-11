@@ -111,6 +111,10 @@ class EventReader:
         self.nested_branches = valid_nested_branches
         self._keys = keys
 
+    def __dir__(self):
+        """Tab completion in IPython"""
+        return list(self.keys()) + ["header"]
+
     def keys(self):
         """Returns all accessible branch keys, without the skipped ones."""
         return self._keys
@@ -319,6 +323,10 @@ class Branch:
         self.fields = fields
         self._aliases = aliases
         self._index_chain = index_chain
+
+    def __dir__(self):
+        """Tab completion in IPython"""
+        return list(self.fields)
 
     def __getattr__(self, attr):
         if attr not in self._aliases:

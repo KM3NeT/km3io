@@ -363,12 +363,11 @@ class Branch:
         if not self._index_chain:
             return self._branch.num_entries
         elif isinstance(self._index_chain[-1], (int, np.int32, np.int64)):
-            if len(self._index_chain) == 1:
-                return 1
-                # try:
-                #     return len(self[:])
-                # except IndexError:
-                #     return 1
+            # we stick to the convention and return the 1 for a single subbranch
+            # if len(self._index_chain) == 1:
+            #     # single "event" is selected
+            #     # return len(self.id)
+            #     return 1
             return 1
         else:
             # ignore the usual index magic and access `id` directly

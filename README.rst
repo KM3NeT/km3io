@@ -43,169 +43,133 @@ If you have a question about km3io, please proceed as follows:
 - Haven't you found an answer to your question in the documentation, post a git issue with your question showing us an example of what you have tried first, and what you would like to do.
 - Have you noticed a bug, please post it in a git issue, we appreciate your contribution.
 
-Tutorial
-========
-
-**Table of contents:**
-
-* `Introduction <#introduction>`__
-
-  * `Overview of online files <#overview-of-online-files>`__
-
-  * `Overview of offline files <#overview-of-offline-files>`__
-
-* `Online files reader <#online-files-reader>`__
-
-  * `Reading Events <#reading-events>`__
-
-  * `Reading SummarySlices <#reading-summaryslices>`__
-
-  * `Reading Timeslices <#reading-timeslices>`__
-
-* `Offline files reader <#offline-file-reader>`__
-
-  * `reading events data <#reading-events-data>`__
-
-  * `reading usr data of events <#reading-usr-data-of-events>`__
-
-  * `reading hits data <#reading-hits-data>`__
-
-  * `reading tracks data <#reading-tracks-data>`__
-
-  * `reading mc hits data <#reading-mc-hits-data>`__
-
-  * `reading mc tracks data <#reading-mc-tracks-data>`__
-
-
 
 Introduction
 ------------
 
-Most of km3net data is stored in root files. These root files are either created with `Jpp <https://git.km3net.de/common/jpp>`__ or `aanet <https://git.km3net.de/common/aanet>`__ software. A root file created with 
-`Jpp <https://git.km3net.de/common/jpp>`__ is often referred to as "a Jpp root file". Similarly, a root file created with `aanet <https://git.km3net.de/common/aanet>`__ is often referred to as "an aanet file". In km3io, an aanet root file will always be reffered to as an ``offline file``, while a Jpp ROOT file will always be referred to as a ``online file``.
+Most of km3net data is stored in root files. These root files are created using the `KM3NeT Dataformat library <https://git.km3net.de/common/km3net-dataformat>`__
+A ROOT file created with
+`Jpp <https://git.km3net.de/common/jpp>`__ is an "online" file and all other software usually produces "offline" files.
 
-km3io is a Python package that provides a set of classes (``OnlineReader`` and ``OfflineReader``) to read both online ROOT files and offline ROOT files without any dependency to aanet, Jpp or ROOT.
+km3io is a Python package that provides a set of classes: ``OnlineReader``, ``OfflineReader`` and a special class to read gSeaGen files. All of these ROOT files can be read installing any other software like Jpp, aanet or ROOT.
 
-Data in km3io is often returned as a "lazyarray", a "jagged lazyarray" or a `Numpy <https://docs.scipy.org/doc/numpy>`__ array. A lazyarray is an array-like object that reads data on demand! In a lazyarray, only the first and the last chunks of data are read in memory. A lazyarray can be used with all Numpy's universal `functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`__. Here is how a lazyarray looks like:
+Data in km3io is returned as ``awkward.Array`` which is an advance Numpy-like container type to store
+contiguous data for high performance computations.
+Such an ``awkward.Array`` supports any level of nested arrays and records which can have different lengths, in contrast to Numpy where everything has to be rectangular.
+
+The example is shown below shows the array which contains the ``dir_z`` values
+of each track of the first 4 events. The type ``4 * var * float64`` means that
+it has 4 subarrays with variable lengths of type ``float64``:
 
 .. code-block:: python3
 
-    # <ChunkedArray [5971 5971 5971 ... 5971 5971 5971] at 0x7fb2341ad810>
+    >>> import km3io
+    >>> from km3net_testdata import data_path
+    >>> f = km3io.OfflineReader(data_path("offline/numucc.root"))
+    >>> f[:4].tracks.dir_z
+    <Array [[0.213, 0.213, ... 0.229, 0.323]] type='4 * var * float64'>
 
+The same concept applies to everything, including ``hits``, ``mc_hits``,
+``mc_tracks``, ``t_sec`` etc.
 
-A jagged array, is a 2+ dimentional array with different arrays lengths. In other words, a jagged array is an array of arrays of different sizes. So a jagged lazyarray is simply a jagged array of lazyarrays with different sizes. Here is how a jagged lazyarray looks like:
+Offline files reader
+--------------------
 
+In general an offline file has two methods to fetch data: the header and the events. Let's start with the header.
+
+Reading the file header
+"""""""""""""""""""""""
+
+To read an offline file start with opening it with an OfflineReader:
 
 .. code-block:: python3
 
-    # <JaggedArray [[102 102 102 ... 11517 11518 11518] [] [101 101 102 ... 11518 11518 11518] ... [101 101 102 ... 11516 11516 11517] [] [101 101 101 ... 11517 11517 11518]] at 0x7f74b0ef8810>
+  >>> import km3io
+  >>> from km3net_testdata import data_path
+  >>> f = km3io.OfflineReader(data_path("offline/numucc.root"))
+
+Calling the header can be done with:
+
+.. code-block:: python3
+
+  >>> f.header
+  <km3io.offline.Header at 0x7fcd81025990>
+
+and provides lazy access. In offline files the header is unique and can be printed
+
+.. code-block:: python3
+
+  >>> print(f.header)
+  MC Header:
+  DAQ(livetime=394)
+  PDF(i1=4, i2=58)
+  can(zmin=0, zmax=1027, r=888.4)
+  can_user: can_user(field_0=0.0, field_1=1027.0, field_2=888.4)
+  coord_origin(x=0, y=0, z=0)
+  cut_in(Emin=0, Emax=0, cosTmin=0, cosTmax=0)
+  cut_nu(Emin=100, Emax=100000000.0, cosTmin=-1, cosTmax=1)
+  cut_primary(Emin=0, Emax=0, cosTmin=0, cosTmax=0)
+  cut_seamuon(Emin=0, Emax=0, cosTmin=0, cosTmax=0)
+  decay: decay(field_0='doesnt', field_1='happen')
+  detector: NOT
+  drawing: Volume
+  genhencut(gDir=2000, Emin=0)
+  genvol(zmin=0, zmax=1027, r=888.4, volume=2649000000.0, numberOfEvents=100000)
+  kcut: 2
+  livetime(numberOfSeconds=0, errorOfSeconds=0)
+  model(interaction=1, muon=2, scattering=0, numberOfEnergyBins=1, field_4=12)
+  ngen: 100000.0
+  norma(primaryFlux=0, numberOfPrimaries=0)
+  nuflux: nuflux(field_0=0, field_1=3, field_2=0, field_3=0.5, field_4=0.0, field_5=1.0, field_6=3.0)
+  physics(program='GENHEN', version='7.2-220514', date=181116, time=1138)
+  seed(program='GENHEN', level=3, iseed=305765867, field_3=0, field_4=0)
+  simul(program='JSirene', version=11012, date='11/17/18', time=7)
+  sourcemode: diffuse
+  spectrum(alpha=-1.4)
+  start_run(run_id=1)
+  target: isoscalar
+  usedetfile: false
+  xlat_user: 0.63297
+  xparam: OFF
+  zed_user: zed_user(field_0=0.0, field_1=3450.0)
+
+To read the values in the header one can call them directly:
+
+.. code-block:: python3
+
+  >>> f.header.DAQ.livetime
+  394
+  >>> f.header.cut_nu.Emin
+  100
+  >>> f.header.genvol.numberOfEvents
+  100000
 
 
-Overview of Online files
-""""""""""""""""""""""""
-Online files are written by the DataWriter (part of Jpp) and contain events, timeslices and summary slices.
+Reading events
+""""""""""""""
 
+To start reading events call the events method on the file:
 
-Overview of offline files
-"""""""""""""""""""""""""
+.. code-block:: python3
 
-Offline files contain data about events, hits and tracks. Based on aanet version 2.0.0 documentation, the following tables show the definitions, the types and the units of the branches founds in the events, hits and tracks trees. A description of the file header are also displayed.
+  >>> f
+  OfflineReader (10 events)
+  >>> f.keys()
+  {'comment', 'det_id', 'flags', 'frame_index', 'hits', 'id', 'index',
+  'mc_hits', 'mc_id', 'mc_run_id', 'mc_t', 'mc_tracks', 'mc_trks',
+  'n_hits', 'n_mc_hits', 'n_mc_tracks', 'n_mc_trks', 'n_tracks',
+  'n_trks', 'overlays', 'run_id', 't_ns', 't_sec', 'tracks',
+  'trigger_counter', 'trigger_mask', 'trks', 'usr', 'usr_names',
+  'w', 'w2list', 'w3list'}
 
-.. csv-table:: events keys definitions and units
-   :header: "type", "name", "definition"
-   :widths: 20, 20, 80
+Like the online reader lazy access is used. Using <TAB> completion gives an overview of available data. Alternatively the method `keys` can be used on events and it's data members containing a structure to see what is available for reading.
 
-    "int", "id", "offline event identifier"
-    "int", "det_id", "detector identifier from DAQ"
-    "int", "mc_id", "identifier of the MC event (as found in ascii or antcc file)"
-    "int", "run_id", "DAQ run identifier"
-    "int", "mc_run_id", "MC run identifier"
-    "int", "frame_index", "from the raw data"
-    "ULong64_t", "trigger_mask", "trigger mask from raw data (i.e. the trigger bits)"
-    "ULong64_t", "trigger_counter", "trigger counter"
-    "unsigned int", "overlays", "number of overlaying triggered events"
-    "TTimeStamp", "t", "UTC time of the start of the timeslice the event came from"
-    "vec Hit", "hits", "list of hits"
-    "vec Trk", "trks", "list of reconstructed tracks (can be several because of prefits,showers, etc)"
-    "vec double", "w", "MC: Weights w[0]=w1 & w[1]=w2 &  w[2]]=w3"
-    "vec double", "w2list", "MC: factors that make up w[1]=w2"
-    "vec double", "w3list", "MC: atmospheric flux information"
-    "double", "mc_t", "MC: time of the mc event"
-    "vec Hit", "mc_hits", "MC: list of MC truth hits"
-    "vec Trk", "mc_trks", "MC: list of MC truth tracks"
-    "string", "comment", "user can use this as he/she likes"
-    "int", "index", "user can use this as he/she likes"
+Reading the reconstructed values like energy and direction of an event can be done with:
 
+.. code-block:: python3
 
-.. csv-table:: hits keys definitions and units
-   :header: "type", "name", "definition"
-   :widths: 20, 20, 80
-
-    "int", "id", "hit id"
-    "int", "dom_id", "module identifier from the data (unique in the detector)"
-    "unsigned int", "channel_id", "PMT channel id {0,1, .., 31} local to module"
-    "unsigned int", "tdc", "hit tdc (=time in ns)"
-    "unsigned int", "tot", "tot value as stored in raw data (int for pyroot)"
-    "int", "trig", "non-zero if the hit is a trigger hit"
-    "int", "pmt_id", "global PMT identifier as found in evt files"
-    "double", "t", "hit time (from calibration or MC truth)"
-    "double", "a", "hit amplitude (in p.e.)"
-    "vec", "pos", "hit position"
-    "vec", "dir", "hit direction i.e. direction of the PMT"
-    "double", "pure_t", "photon time before pmt simultion (MC only)"
-    "double", "pure_a", "amptitude before pmt simution (MC only)"
-    "int", "type", "particle type or parametrisation used for hit (mc only)"
-    "int", "origin", "track id of the track that created this hit"
-    "unsigned", "pattern_flags", "some number that you can use to flag the hit"
-
-
-.. csv-table:: tracks keys definitions and units
-   :header: "type", "name", "definition"
-   :widths: 20, 20, 80
-
-    "int", "id", "track identifier"
-    "vec", "pos", "position of the track at time t"
-    "vec", "dir", "track direction"
-    "double", "t", "track time (when particle is at pos)"
-    "double", "E", "Energy (either MC truth or reconstructed)"
-    "double", "len", "length if applicable"
-    "double", "lik", "likelihood or lambda value (for aafit: lambda)"
-    "int", "type", "MC: particle type in PDG encoding"
-    "int", "rec_type", "identifyer for the overall fitting algorithm/chain/strategy"
-    "vec int", "rec_stages", "list of identifyers of succesfull fitting stages resulting in this track"
-    "int", "status", "MC status code"
-    "int", "mother_id", "MC id of the parent particle"
-    "vec double", "fitinf", "place to store additional fit info for jgandalf see FitParameters.csv"
-    "vec int", "hit_ids", "list of associated hit-ids (corresponds to Hit::id)"
-    "vec double", "error_matrix", "(5x5) error covariance matrix (stored as linear vector)"
-    "string", "comment", "user comment"
-
-
-.. csv-table:: offline file header definitions
-   :header: "name", "definition"
-   :widths: 40, 80
-
-    "DAQ", "livetime"
-    "cut_primary cut_seamuon cut_in cut_nu", "Emin Emax cosTmin cosTmax"
-    "generator physics simul", "program version date time"
-    "seed", "program level iseed"
-    "PM1_type_area", "type area TTS"
-    "PDF", "i1 i2"
-    "model", "interaction muon scattering numberOfEnergyBins"
-    "can", "zmin zmax r"
-    "genvol", "zmin zmax r volume numberOfEvents"
-    "merge", "time gain"
-    "coord_origin", "x y z"
-    "translate", "x y z"
-    "genhencut", "gDir Emin"
-    "k40", "rate time"
-    "norma", "primaryFlux numberOfPrimaries"
-    "livetime", "numberOfSeconds errorOfSeconds"
-    "flux", "type key file_1 file_2"
-    "spectrum", "alpha"
-    "fixedcan", "xcenter ycenter zmin zmax radius"
-    "start_run", "run_id"
-
+  >>> f.events.tracks.E
+  <Array [[117, 117, 0, 0, 0, ... 0, 0, 0, 0, 0]] type='10 * var * float64'>
 
 Online files reader
 -------------------
@@ -332,105 +296,3 @@ channel, time and ToT:
 
 
 
-Offline files reader
---------------------
-
-In general an offline file has two methods to fetch data: the header and the events. Let's start with the header.
-
-Reading the file header
-"""""""""""""""""""""""
-
-To read an offline file start with opening it with an OfflineReader:
-
-.. code-block:: python3
-
-  import km3io
-  f = km3io.OfflineReader("mcv5.0.gsg_elec-CC_1-500GeV.sirene.jte.jchain.jsh.aanet.1.root")
-
-Calling the header can be done with:
-
-.. code-block:: python3
-
-  >>> f.header
-  <km3io.offline.Header at 0x7fcd81025990>
-
-and provides lazy access. In offline files the header is unique and can be printed
-
-.. code-block:: python3
-
-  >>> print(f.header)
-  MC Header:
-  DAQ(livetime=35.5)
-  XSecFile: /project/antares/public_student_software/genie/v3.00.02-hedis/Generator/genie_xsec/gSeaGen/G18_02a_00_000/gxspl-seawater.xml
-  coord_origin(x=457.8, y=574.3, z=0)
-  cut_nu(Emin=1, Emax=500, cosTmin=-1, cosTmax=1)
-  drawing: surface
-  fixedcan(xcenter=457.8, ycenter=574.3, zmin=0, zmax=475.6, radius=308.2)
-  genvol(zmin=0, zmax=475.6, r=308.2, volume=148000000.0, numberOfEvents=1000000.0)
-  simul(program='gSeaGen', version='dev', date=200616, time=223726)
-  simul_1: simul_1(field_0='GENIE', field_1='3.0.2', field_2=200616, field_3=223726)
-  simul_2: simul_2(field_0='GENIE_REWEIGHT', field_1='1.0.0', field_2=200616, field_3=223726)
-  simul_3: simul_3(field_0='JSirene', field_1='13.0.0-alpha.5-113-gaa686a6a-D', field_2='06/17/20', field_3=0)
-  spectrum(alpha=-3)
-  start_run(run_id=1)
-  tgen: 31556900.0
-
-An overview of the values in a the header are given in the `Overview of offline files <#overview-of-offline-files>`__.
-To read the values in the header one can call them directly:
-
-.. code-block:: python3
-
-  >>> f.header.DAQ.livetime
-  35.5
-  >>> f.header.cut_nu.Emin 
-  1
-  >>> f.header.genvol.numberOfEvents
-  1000000.0
-
-
-Reading events
-""""""""""""""
-
-To start reading events call the events method on the file:
-
-.. code-block:: python3
-
-  >>> f.events
-  <OfflineBranch[events]: 355 elements>
-
-Like the online reader lazy access is used. Using <TAB> completion gives an overview of available data. Alternatively the method `keys` can be used on events and it's data members containing a structure to see what is available for reading. 
-
-.. code-block:: python3
-
-  >>> f.events.keys()
-  dict_keys(['w2list', 'frame_index', 'overlays', 'comment', 'id', 'w', 'run_id', 'mc_t', 'mc_run_id', 'det_id', 'w3list', 'trigger_mask', 'mc_id', 'flags', 'trigger_counter', 'index', 't_sec', 't_ns', 'n_hits', 'n_mc_hits', 'n_tracks', 'n_mc_tracks'])
-  >>> f.events.tracks.keys()
-  dict_keys(['mother_id', 'status', 'lik', 'error_matrix', 'dir_z', 'len', 'rec_type', 'id', 't', 'dir_x', 'rec_stages', 'dir_y', 'fitinf', 'pos_z', 'hit_ids', 'comment', 'type', 'any', 'E', 'pos_y', 'usr_names', 'pos_x'])
-
-Reading the reconstructed values like energy and direction of an event can be done with:
-
-.. code-block:: python3
-
-  >>> f.events.tracks.E
-  <ChunkedArray [[3.8892237665736844 0.0 0.0 ... 0.0 0.0 0.0] [2.2293441683824318 5.203533524801224 6.083598278897039 ... 0.0 0.0 0.0] [3.044857858677666 3.787165776302862 4.5667729757360656 ... 0.0 0.0 0.0] ... [2.205652079790387 2.120769181474425 1.813066579943641 ... 0.0 0.0 0.0] [2.1000775068170343 3.939512272391431 3.697537355163539 ... 0.0 0.0 0.0] [4.213600763523154 1.7412855636388889 1.6657605276356036 ... 0.0 0.0 0.0]] at 0x7fcd5acb0950>
-  >>> f.events.tracks.E[12]
-  array([ 4.19391543, 15.3079374 , 10.47125863, ...,  0.        ,
-          0.        ,  0.        ])
-  >>> f.events.tracks.dir_z
-  <ChunkedArray [[0.7855203887479368 0.7855203887479368 0.7855203887479368 ... -0.5680647731737454 1.0 1.0] [0.9759269228630431 0.2677622006758061 -0.06664626796127045 ... -2.3205103555187022e-08 1.0 1.0] [-0.12332041078454238 0.09537382569575953 0.09345521875272474 ... -0.6631226836266504 -0.6631226836266504 -0.6631226836266504] ... [-0.1396584943602339 -0.08400681020109765 -0.014562067998281832 ... 1.0 1.0 1.0] [0.011997491147399564 -0.08496327394947281 -0.12675279061755318 ... 0.12053665899140412 1.0 1.0] [0.6548114607791208 0.8115427935470209 0.9043563059276946 ... 1.0 1.0 1.0]] at 0x7fcd73746410>
-  >>> f.events.tracks.dir_z[12]
-  array([ 2.39745910e-01,  3.45008838e-01,  4.81870447e-01,  4.55139657e-01, ..., 
-  -2.32051036e-08,  1.00000000e+00])
-
-Since reconstruction stages can be done multiple times and events can have multiple reconstructions, the vectors of reconstructed values can have variable length. Other data members like the header are always the same size. The definitions of data members can be found in the `definitions <https://git.km3net.de/km3py/km3io/-/tree/master/km3io/definitions>`__ folder. The definitions contain fit parameters, header information, reconstruction information, generator output and can be expaneded to include more.
-
-To use the definitions imagine the following: the user wants to read out the MC value of the Bjorken-Y of event 12 that was generated with gSeaGen. This can be found in the `gSeaGen definitions <https://git.km3net.de/km3py/km3io/-/blob/master/km3io/definitions/w2list_gseagen.py>`__:  `"W2LIST_GSEAGEN_BY": 8,`
-
-This value is saved into `w2list`, so if an event is generated with gSeaGen the value can be fetched like:
-
-.. code-block:: python3
-
-  >>> f.events.w2list[12][8]
-  0.393755
-
-Note that w2list can also contain other values if the event is generated with another generator.

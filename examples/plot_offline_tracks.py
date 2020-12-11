@@ -25,12 +25,12 @@ f.mc_tracks
 # tracks will only return how many sub-branches (corresponding to
 # events) were found.
 
-print(tracks)
+print(f.tracks)
 
 #####################################################
 # same for mc hits
 
-print(mc_tracks)
+print(f.mc_tracks)
 
 #####################################################
 # Accessing the tracks/mc_tracks keys

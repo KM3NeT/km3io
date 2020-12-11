@@ -299,7 +299,11 @@ class EventReader:
     def __repr__(self):
         length = len(self)
         actual_length = self.__actual_len__()
-        return f"{self.__class__.__name__} ({length}{'/' + str(actual_length) if length < actual_length else ''} events)"
+        return (
+            f"<{self.__class__.__name__} "
+            f"[{length}{'/' + str(actual_length) if length < actual_length else ''}]"
+            f" path='{self.event_path}'>"
+        )
 
     @property
     def uuid(self):
@@ -387,7 +391,11 @@ class Branch:
     def __repr__(self):
         length = len(self)
         actual_length = self.__actual_len__()
-        return f"{self.__class__.__name__} ({length}{'/' + str(actual_length) if length < actual_length else ''} {self._branch.name})"
+        return (
+            f"<{self.__class__.__name__} "
+            f"[{length}{'/' + str(actual_length) if length < actual_length else ''}]"
+            f" path='{self._branch.name}'>"
+        )
 
     @property
     def ndim(self):

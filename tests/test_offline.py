@@ -219,6 +219,22 @@ class TestOfflineEvents(unittest.TestCase):
         n_hits = [len(e.hits.id) for e in self.events]
         assert np.allclose(n_hits, ak.num(self.events.hits.id, axis=1).tolist())
 
+    def test_iteration_over_slices(self):
+        ids = [e.id for e in self.events[2:5]]
+        self.assertListEqual([3, 4, 5], ids)
+
+    def test_iteration_over_slices_raises_when_stepsize_not_supported(self):
+        with self.assertRaises(NotImplementedError):
+            [e.id for e in self.events[2:8:2]]
+
+    def test_iteration_over_slices_raises_when_single_item(self):
+        with self.assertRaises(NotImplementedError):
+            [e.id for e in self.events[0]]
+
+    def test_iteration_over_slices_raises_when_multiple_slices(self):
+        with self.assertRaises(NotImplementedError):
+            [e.id for e in self.events[2:8][2:4]]
+
     def test_str(self):
         assert str(self.n_events) in str(self.events)
 

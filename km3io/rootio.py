@@ -173,11 +173,34 @@ class EventReader:
         else:
             return unfold_indices(branch[self.aliases.get(key, key)].array(), self._index_chain)
 
-    def __iter__(self):
-        self._events = self._event_generator()
+    def __iter__(self, chunkwise=False):
+        self._events = self._event_generator(chunkwise=chunkwise)
         return self
 
-    def _event_generator(self):
+    def _get_iterator_limits(self):
+        """Determines start and stop, used for event iteration"""
+        if len(self._index_chain) > 1:
+            raise NotImplementedError("iteration is currently not supported with nested slices")
+        if self._index_chain:
+            s = self._index_chain[0]
+            if not isinstance(s, slice):
+                raise NotImplementedError("iteration is only supported with slices")
+            if s.step is None or s.step == 1:
+                start = s.start
+                stop = s.stop
+            else:
+                raise NotImplementedError("iteration is only supported with single steps")
+        else:
+            start = None
+            stop = None
+        return start, stop
+
+    def _event_generator(self, chunkwise=False):
+        start, stop = self._get_iterator_limits()
+
+        if chunkwise:
+            raise NotImplementedError("iterating over chunks is not implemented yet")
+
         events = self._fobj[self.event_path]
         group_count_keys = set(
             k for k in self.keys() if k.startswith("n_")
@@ -195,7 +218,7 @@ class EventReader:
         log.debug("keys: %s", keys)
         log.debug("aliases: %s", self.aliases)
         events_it = events.iterate(
-            keys, aliases=self.aliases, step_size=self._step_size
+            keys, aliases=self.aliases, step_size=self._step_size, entry_start=start, entry_stop=stop
         )
         nested = []
         nested_keys = (
@@ -208,6 +231,8 @@ class EventReader:
                     self.nested_branches[key].keys(),
                     aliases=self.nested_branches[key],
                     step_size=self._step_size,
+                    entry_start=start,
+                    entry_stop=stop
                 )
             )
         group_counts = {}

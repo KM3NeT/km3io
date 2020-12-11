@@ -25,24 +25,24 @@ f.mc_tracks
 # tracks will only return how many sub-branches (corresponding to
 # events) were found.
 
-print(f.tracks)
+f.tracks
 
 #####################################################
 # same for mc hits
 
-print(f.mc_tracks)
+f.mc_tracks
 
 #####################################################
 # Accessing the tracks/mc_tracks keys
 # -----------------------------------
 # to explore the reconstructed tracks fields:
 
-print(f.tracks.fields)
+f.tracks.fields
 
 #####################################################
 # the same for MC tracks
 
-print(f.mc_tracks.fields)
+f.mc_tracks.fields
 
 #####################################################
 # Accessing tracks data
@@ -50,9 +50,17 @@ print(f.mc_tracks.fields)
 # each field will return a nested `awkward.Array` and load everything into
 # memory, so be careful if you are working with larger files.
 
-print(f.tracks.E)
-print(f.tracks.dir_z)
-print(f.tracks.lik)
+f.tracks.E
+
+######################################################
+# The z direction of all reconstructed tracks
+
+f.tracks.dir_z
+
+######################################################
+# The likelihoods
+
+f.tracks.lik
 
 
 #####################################################
@@ -60,22 +68,42 @@ print(f.tracks.lik)
 # The following will access all tracks and their fields
 # of the third event (0 is the first):
 
-print(f[2].tracks)
-print(f[2].tracks.dir_z)
+f[2].tracks
+
+######################################################
+# The z direction of all tracks in the third event:
+
+f[2].tracks.dir_z
 
 
 #####################################################
 # while here, we select the first 3 events. Notice that all fields will return
 # nested arrays, as we have seem above where all events were selected.
 
-print(f[:3])
-print(f[:3].tracks)
-print(f[:3].tracks.dir_z)
+f[:3]
+
+######################################################
+# All tracks for the first three events
+
+f[:3].tracks
+
+######################################################
+# The z directions of all tracks of the first three events
+
+f[:3].tracks.dir_z
 
 #####################################################
 # or events from 3 and 5 (again, 0 indexing):
 
 
-print(f[2:5])
-print(f[2:5].tracks)
-print(f[2:5].tracks.dir_z)
+f[2:5]
+
+######################################################
+# the tracks of those events
+
+f[2:5].tracks
+
+######################################################
+# and just the z directions of those
+
+f[2:5].tracks.dir_z

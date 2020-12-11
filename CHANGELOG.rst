@@ -3,6 +3,12 @@ Unreleased changes
 Version 0
 ---------
 
+0.19.0 / 2020-12-11
+~~~~~~~~~~~~~~~~~~~
+* Major update, coming closer to v1.0
+* Now everything but the online-file access is based on uproot4 and awkward1
+* Contact us if you encounter any problem after upgrading!
+
 0.18.1 / 2020-12-04
 ~~~~~~~~~~~~~~~~~~~
 * Fixed imports due to the rename of uproot to uproot3, uproot4 to uproot,

@@ -3,6 +3,13 @@ Unreleased changes
 Version 0
 ---------
 
+0.18.1 / 2020-12-04
+~~~~~~~~~~~~~~~~~~~
+* Fixed imports due to the rename of uproot to uproot3, uproot4 to uproot,
+  awkward to awkward0 and awkward1 to awkward
+* Notice: the ``best_track*()`` functions are currently broken due to changes in
+  awkward which has not been fixed yet
+
 0.18.0 / 2020-11-12
 ~~~~~~~~~~~~~~~~~~~
 * A new tool ``km3io.tools.is_cc()`` has been added which can be used to

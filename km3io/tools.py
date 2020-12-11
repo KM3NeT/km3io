@@ -472,7 +472,9 @@ def is_cc(fobj):
             cc_flag = w2list[:, kw2gen.W2LIST_GENHEN_CC]
             out = cc_flag > 0
         else:
-            raise NotImplementedError(f"don't know how to determine the CCness of {program} files.")
+            raise NotImplementedError(
+                f"don't know how to determine the CC-ness of {program} files."
+            )
 
     return out
 

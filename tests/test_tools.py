@@ -109,10 +109,10 @@ class TestBestTrackSelection(unittest.TestCase):
 
         assert len(best) == 10
 
-        assert best.rec_stages[0].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[1].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[2].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[3].tolist() == [[1, 3, 5, 4]]
+        assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[1].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[2].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[3].tolist() == [1, 3, 5, 4]
 
         # test with a shorter set of rec_stages
         best2 = best_track(self.events.tracks, stages={1, 3})
@@ -128,20 +128,20 @@ class TestBestTrackSelection(unittest.TestCase):
 
         assert len(best) == 10
 
-        assert best.rec_stages[0].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[1].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[2].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[3].tolist() == [[1, 3, 5, 4]]
+        assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[1].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[2].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[3].tolist() == [1, 3, 5, 4]
 
         # test with shorter stages
         best2 = best_track(self.events.tracks, startend=(1, 3))
 
         assert len(best2) == 10
 
-        assert best2.rec_stages[0].tolist() == [[1, 3]]
-        assert best2.rec_stages[1].tolist() == [[1, 3]]
-        assert best2.rec_stages[2].tolist() == [[1, 3]]
-        assert best2.rec_stages[3].tolist() == [[1, 3]]
+        assert best2.rec_stages[0].tolist() == [1, 3]
+        assert best2.rec_stages[1].tolist() == [1, 3]
+        assert best2.rec_stages[2].tolist() == [1, 3]
+        assert best2.rec_stages[3].tolist() == [1, 3]
 
         # test the importance of start as a real start of rec_stages
         best3 = best_track(self.events.tracks, startend=(0, 3))
@@ -288,10 +288,10 @@ class TestBestJmuon(unittest.TestCase):
 
         assert len(best) == 10
 
-        assert best.rec_stages[0].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[1].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[2].tolist() == [[1, 3, 5, 4]]
-        assert best.rec_stages[3].tolist() == [[1, 3, 5, 4]]
+        assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[1].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[2].tolist() == [1, 3, 5, 4]
+        assert best.rec_stages[3].tolist() == [1, 3, 5, 4]
 
         assert best.lik[0] == ak.max(OFFLINE_FILE.events.tracks.lik[0])
         assert best.lik[1] == ak.max(OFFLINE_FILE.events.tracks.lik[1])

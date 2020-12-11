@@ -87,7 +87,7 @@ class EventReader:
 
     def _initialise_keys(self):
         skip_keys = set(self.skip_keys)
-        all_keys  = set(self._fobj[self.event_path].keys())
+        all_keys = set(self._fobj[self.event_path].keys())
         toplevel_keys = set(k.split("/")[0] for k in all_keys)
         valid_aliases = {}
         for fromkey, tokey in self.aliases.items():
@@ -169,9 +169,13 @@ class EventReader:
                 if from_field in branch[key].keys():
                     fields.append(to_field)
             log.debug(fields)
-            return Branch(branch[key], fields, self.nested_branches[key], self._index_chain)
+            return Branch(
+                branch[key], fields, self.nested_branches[key], self._index_chain
+            )
         else:
-            return unfold_indices(branch[self.aliases.get(key, key)].array(), self._index_chain)
+            return unfold_indices(
+                branch[self.aliases.get(key, key)].array(), self._index_chain
+            )
 
     def __iter__(self, chunkwise=False):
         self._events = self._event_generator(chunkwise=chunkwise)
@@ -180,7 +184,9 @@ class EventReader:
     def _get_iterator_limits(self):
         """Determines start and stop, used for event iteration"""
         if len(self._index_chain) > 1:
-            raise NotImplementedError("iteration is currently not supported with nested slices")
+            raise NotImplementedError(
+                "iteration is currently not supported with nested slices"
+            )
         if self._index_chain:
             s = self._index_chain[0]
             if not isinstance(s, slice):
@@ -189,7 +195,9 @@ class EventReader:
                 start = s.start
                 stop = s.stop
             else:
-                raise NotImplementedError("iteration is only supported with single steps")
+                raise NotImplementedError(
+                    "iteration is only supported with single steps"
+                )
         else:
             start = None
             stop = None
@@ -218,7 +226,11 @@ class EventReader:
         log.debug("keys: %s", keys)
         log.debug("aliases: %s", self.aliases)
         events_it = events.iterate(
-            keys, aliases=self.aliases, step_size=self._step_size, entry_start=start, entry_stop=stop
+            keys,
+            aliases=self.aliases,
+            step_size=self._step_size,
+            entry_start=start,
+            entry_stop=stop,
         )
         nested = []
         nested_keys = (
@@ -232,7 +244,7 @@ class EventReader:
                     aliases=self.nested_branches[key],
                     step_size=self._step_size,
                     entry_start=start,
-                    entry_stop=stop
+                    entry_stop=stop,
                 )
             )
         group_counts = {}
@@ -301,6 +313,7 @@ class EventReader:
 
 class Branch:
     """Helper class for nested branches likes tracks/hits"""
+
     def __init__(self, branch, fields, aliases, index_chain):
         self._branch = branch
         self.fields = fields
@@ -309,7 +322,9 @@ class Branch:
 
     def __getattr__(self, attr):
         if attr not in self._aliases:
-            raise AttributeError(f"No field named {attr}. Available fields: {self.fields}")
+            raise AttributeError(
+                f"No field named {attr}. Available fields: {self.fields}"
+            )
         key = self._aliases[attr]
 
         if self._index_chain:
@@ -318,7 +333,9 @@ class Branch:
                 # optimise single-element and slice lookups
                 start = idx0
                 stop = idx0 + 1
-                arr = ak.flatten(self._branch[key].array(entry_start=start, entry_stop=stop))
+                arr = ak.flatten(
+                    self._branch[key].array(entry_start=start, entry_stop=stop)
+                )
                 return unfold_indices(arr, self._index_chain[1:])
             if isinstance(idx0, slice):
                 if idx0.step is None or idx0.step == 1:
@@ -330,7 +347,9 @@ class Branch:
         return unfold_indices(self._branch[key].array(), self._index_chain)
 
     def __getitem__(self, key):
-        return self.__class__(self._branch, self.fields, self._aliases, self._index_chain + [key])
+        return self.__class__(
+            self._branch, self.fields, self._aliases, self._index_chain + [key]
+        )
 
     def __len__(self):
         if not self._index_chain:

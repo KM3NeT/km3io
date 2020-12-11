@@ -549,7 +549,6 @@ class TestIsCC(unittest.TestCase):
 
 
 class TestUsr(unittest.TestCase):
-
     def test_event_usr(self):
         assert np.allclose(
             [118.6302815337638, 44.33580521344907, 99.93916717621543],

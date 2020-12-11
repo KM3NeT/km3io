@@ -116,12 +116,14 @@ class TestGSGEvents(unittest.TestCase):
         self.assertListEqual(event.Id_tr.tolist(), [4, 5, 10, 11, 12])
         self.assertListEqual(event.Pdg_tr.tolist(), [22, -13, 2112, -211, 111])
         [
-            self.assertAlmostEqual(x, y) for x, y in zip(
-                event.E_tr,
-                [0.00618, 4.88912206, 2.33667201, 1.0022909, 1.17186997])
+            self.assertAlmostEqual(x, y)
+            for x, y in zip(
+                event.E_tr, [0.00618, 4.88912206, 2.33667201, 1.0022909, 1.17186997]
+            )
         ]
         [
-            self.assertAlmostEqual(x, y) for x, y in zip(
+            self.assertAlmostEqual(x, y)
+            for x, y in zip(
                 event.Vx_tr,
                 [
                     -337.67895799,
@@ -133,7 +135,8 @@ class TestGSGEvents(unittest.TestCase):
             )
         ]
         [
-            self.assertAlmostEqual(x, y) for x, y in zip(
+            self.assertAlmostEqual(x, y)
+            for x, y in zip(
                 event.Vy_tr,
                 [
                     -203.90999969,
@@ -145,36 +148,31 @@ class TestGSGEvents(unittest.TestCase):
             )
         ]
         [
-            self.assertAlmostEqual(x, y) for x, y in zip(
+            self.assertAlmostEqual(x, y)
+            for x, y in zip(
                 event.Vz_tr,
-                [
-                    416.08845294, 416.08845294, 416.08845294, 416.08845294,
-                    416.08845294
-                ],
+                [416.08845294, 416.08845294, 416.08845294, 416.08845294, 416.08845294],
             )
         ]
         [
-            self.assertAlmostEqual(x, y) for x, y in zip(
+            self.assertAlmostEqual(x, y)
+            for x, y in zip(
                 event.Dx_tr,
-                [
-                    0.06766196, -0.63563065, -0.70627586, -0.76364544,
-                    -0.80562216
-                ],
+                [0.06766196, -0.63563065, -0.70627586, -0.76364544, -0.80562216],
             )
         ]
         [
-            self.assertAlmostEqual(x, y) for x, y in zip(
+            self.assertAlmostEqual(x, y)
+            for x, y in zip(
                 event.Dy_tr,
                 [0.33938809, -0.4846643, 0.50569058, -0.04136113, 0.10913917],
             )
         ]
         [
-            self.assertAlmostEqual(x, y) for x, y in zip(
+            self.assertAlmostEqual(x, y)
+            for x, y in zip(
                 event.Dz_tr,
-                [
-                    -0.93820978, -0.6008945, -0.49543056, -0.64430963,
-                    -0.58228994
-                ],
+                [-0.93820978, -0.6008945, -0.49543056, -0.64430963, -0.58228994],
             )
         ]
         [self.assertAlmostEqual(x, y) for x, y in zip(event.T_tr, 5 * [0.0])]

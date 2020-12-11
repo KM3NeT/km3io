@@ -50,7 +50,6 @@ class TestFitinf(unittest.TestCase):
         self.best = self.tracks[:, 0]
         self.best_fit = self.best.fitinf
 
-    @unittest.skip
     def test_fitinf_from_all_events(self):
         beta = fitinf(kfit.JGANDALF_BETA0_RAD, self.tracks)
 
@@ -58,19 +57,12 @@ class TestFitinf(unittest.TestCase):
         assert beta[0][1] == self.fit[0][1][0]
         assert beta[0][2] == self.fit[0][2][0]
 
-    @unittest.skip
     def test_fitinf_from_one_event(self):
         beta = fitinf(kfit.JGANDALF_BETA0_RAD, self.best)
 
         assert beta[0] == self.best_fit[0][0]
         assert beta[1] == self.best_fit[1][0]
         assert beta[2] == self.best_fit[2][0]
-
-    @unittest.skip
-    def test_fitinf_from_one_event_and_one_track(self):
-        beta = fitinf(kfit.JGANDALF_BETA0_RAD, self.tracks[0][0])
-
-        assert beta == self.tracks[0][0].fitinf[0]
 
 
 class TestBestTrackSelection(unittest.TestCase):
@@ -85,7 +77,6 @@ class TestBestTrackSelection(unittest.TestCase):
 
         assert len(best) == 10
 
-        # TODO: nested items, no idea how to solve this...
         assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
         assert best.rec_stages[1].tolist() == [1, 3, 5, 4]
         assert best.rec_stages[2].tolist() == [1, 3, 5, 4]
@@ -118,7 +109,6 @@ class TestBestTrackSelection(unittest.TestCase):
 
         assert len(best) == 10
 
-        # TODO: nested items, no idea how to solve this...
         assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
         assert best.rec_stages[1].tolist() == [1, 3, 5, 4]
         assert best.rec_stages[2].tolist() == [1, 3, 5, 4]
@@ -138,7 +128,6 @@ class TestBestTrackSelection(unittest.TestCase):
 
         assert len(best) == 10
 
-        # TODO: nested items, no idea how to solve this...
         assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
         assert best.rec_stages[1].tolist() == [1, 3, 5, 4]
         assert best.rec_stages[2].tolist() == [1, 3, 5, 4]
@@ -208,52 +197,81 @@ class TestBestTrackSelection(unittest.TestCase):
         assert best2.lik == ak.max(tracks_slice.lik)
         assert best2.rec_stages.tolist() == [1, 3, 5, 4]
 
-    @unittest.skip
     def test_best_track_on_slices_with_start_end_one_event(self):
         tracks_slice = self.one_event.tracks[0:5]
         best = best_track(tracks_slice, startend=(1, 4))
 
-        assert len(best.lik) == 1
         assert best.lik == ak.max(tracks_slice.lik)
-        assert best.rec_stages[0][0] == 1
-        assert best.rec_stages[0][-1] == 4
+        assert best.rec_stages[0] == 1
+        assert best.rec_stages[-1] == 4
 
-    @unittest.skip
     def test_best_track_on_slices_with_explicit_rec_stages_one_event(self):
         tracks_slice = self.one_event.tracks[0:5]
         best = best_track(tracks_slice, stages=[1, 3, 5, 4])
 
         assert best.lik == ak.max(tracks_slice.lik)
-        assert best.rec_stages[0][0] == 1
-        assert best.rec_stages[0][-1] == 4
+        assert best.rec_stages[0] == 1
+        assert best.rec_stages[-1] == 4
 
-    @unittest.skip
     def test_best_track_on_slices_multiple_events(self):
-        tracks_slice = self.events.tracks[0:5]
+        tracks_slice = self.events[0:5].tracks
 
         # stages in list
         best = best_track(tracks_slice, stages=[1, 3, 5, 4])
 
         assert len(best) == 5
 
-        assert best.lik == ak.max(tracks_slice.lik)
-        assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
+        assert np.allclose(
+            best.lik.tolist(),
+            [
+                294.6407542676734,
+                96.75133289411137,
+                560.2775306614813,
+                278.2872951665753,
+                99.59098153341449,
+            ],
+        )
+        for i in range(len(best)):
+            assert best.rec_stages[i].tolist() == [1, 3, 5, 4]
 
         # stages in set
-        best = best_track(tracks_slice, stages={1, 3, 4, 5})
+        best = best_track(tracks_slice, stages={3, 4, 5})
 
         assert len(best) == 5
 
-        assert best.lik == ak.max(tracks_slice.lik)
-        assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
+        assert np.allclose(
+            best.lik.tolist(),
+            [
+                294.6407542676734,
+                96.75133289411137,
+                560.2775306614813,
+                278.2872951665753,
+                99.59098153341449,
+            ],
+        )
+        for i in range(len(best)):
+            assert best.rec_stages[i].tolist() == [1, 3, 5, 4]
 
         # using start and end
-        best = best_track(tracks_slice, startend=(1, 4))
+        start, end = (1, 4)
+        best = best_track(tracks_slice, startend=(start, end))
 
         assert len(best) == 5
 
-        assert best.lik == ak.max(tracks_slice.lik)
-        assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
+        assert np.allclose(
+            best.lik.tolist(),
+            [
+                294.6407542676734,
+                96.75133289411137,
+                560.2775306614813,
+                278.2872951665753,
+                99.59098153341449,
+            ],
+        )
+        for i in range(len(best)):
+            rs = best.rec_stages[i].tolist()
+            assert rs[0] == start
+            assert rs[-1] == end
 
     def test_best_track_raises_when_unknown_stages(self):
         with self.assertRaises(ValueError):
@@ -265,7 +283,6 @@ class TestBestTrackSelection(unittest.TestCase):
 
 
 class TestBestJmuon(unittest.TestCase):
-    @unittest.skip
     def test_best_jmuon(self):
         best = best_jmuon(OFFLINE_FILE.events.tracks)
 
@@ -537,7 +554,6 @@ class TestUnfoldIndices(unittest.TestCase):
 
 
 class TestIsCC(unittest.TestCase):
-    @unittest.skip
     def test_is_cc(self):
         NC_file = is_cc(GENHEN_OFFLINE_FILE)
         CC_file = is_cc(GSEAGEN_OFFLINE_FILE)

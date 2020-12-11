@@ -134,34 +134,19 @@ def fitinf(fitparam, tracks):
     ----------
     fitparam : int
         the fit parameter key according to fitparameters defined in
-        KM3NeT-Dataformat.
-    tracks : km3io.offline.OfflineBranch
-        the tracks class. both full tracks branch or a slice of the
-        tracks branch (example tracks[:, 0]) work.
+        KM3NeT-Dataformat (see km3io.definitions.fitparameters).
+    tracks : ak.Array or km3io.rootio.Branch
+        reconstructed tracks with .fitinf attribute
 
     Returns
     -------
     awkward1.Array
-        awkward array of the values of the fit parameter requested.
+        awkward array of the values of the fit parameter requested. Missing
+        values are set to NaN.
     """
     fit = tracks.fitinf
-    index = fitparam
-    if tracks.is_single and len(tracks) != 1:
-        params = fit[count_nested(fit, axis=1) > index]
-        out = params[:, index]
-
-    if tracks.is_single and len(tracks) == 1:
-        out = fit[index]
-
-    else:
-        if len(tracks[0]) == 1:  # case of tracks slice with 1 track per event.
-            params = fit[count_nested(fit, axis=1) > index]
-            out = params[:, index]
-        else:
-            params = fit[count_nested(fit, axis=2) > index]
-            out = ak.Array([i[:, index] for i in params])
-
-    return out
+    nonempty = ak.num(fit, axis=-1) > 0
+    return ak.fill_none(fit.mask[nonempty][..., 0], np.nan)
 
 
 def count_nested(arr, axis=0):
@@ -487,7 +472,7 @@ def is_cc(fobj):
             cc_flag = w2list[:, kw2gen.W2LIST_GENHEN_CC]
             out = cc_flag > 0
         else:
-            raise ValueError(f"simulation program {program} is not implemented.")
+            raise NotImplementedError(f"don't know how to determine the CCness of {program} files.")
 
     return out
 

@@ -18,19 +18,12 @@ r = ki.OfflineReader(data_path("offline/usr-sample.root"))
 
 
 #####################################################
-# Accessing the usr data:
+# Accessing the usr fields:
 
-usr = r.events.usr
-print(usr)
-
-
-#####################################################
-# to access data of a specific key, you can either do:
-
-print(usr.DeltaPosZ)
+print(r.events.usr_names.tolist())
 
 
 #####################################################
-# or
+# to access data of a specific key:
 
-print(usr["RecoQuality"])
+print(ki.tools.usr(r.events, "DeltaPosZ"))

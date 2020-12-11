@@ -1,6 +1,8 @@
 import os
 import re
 import unittest
+import inspect
+import awkward as ak
 
 from km3net_testdata import data_path
 
@@ -8,18 +10,22 @@ from km3io.gseagen import GSGReader
 
 GSG_READER = GSGReader(data_path("gseagen/gseagen.root"))
 
+AWKWARD_STR_CLASSES = [
+    s[1] for s in inspect.getmembers(ak.behaviors.string, inspect.isclass)
+]
+
 
 class TestGSGHeader(unittest.TestCase):
     def setUp(self):
         self.header = GSG_READER.header
 
     def test_str_byte_type(self):
-        assert isinstance(self.header["gSeaGenVer"], str)
-        assert isinstance(self.header["GenieVer"], str)
-        assert isinstance(self.header["gSeaGenVer"], str)
-        assert isinstance(self.header["InpXSecFile"], str)
-        assert isinstance(self.header["Flux1"], str)
-        assert isinstance(self.header["Flux2"], str)
+        assert type(self.header["gSeaGenVer"]) in AWKWARD_STR_CLASSES
+        assert type(self.header["GenieVer"]) in AWKWARD_STR_CLASSES
+        assert type(self.header["gSeaGenVer"]) in AWKWARD_STR_CLASSES
+        assert type(self.header["InpXSecFile"]) in AWKWARD_STR_CLASSES
+        assert type(self.header["Flux1"]) in AWKWARD_STR_CLASSES
+        assert type(self.header["Flux2"]) in AWKWARD_STR_CLASSES
 
     def test_values(self):
         assert self.header["RunNu"] == 1
@@ -54,11 +60,6 @@ class TestGSGHeader(unittest.TestCase):
         assert not self.header["PropMode"]
         assert self.header["NNu"] == 2
         self.assertListEqual(self.header["NuList"].tolist(), [-14, 14])
-
-    def test_unsupported_header(self):
-        f = GSGReader(data_path("online/km3net_online.root"))
-        with self.assertWarns(UserWarning):
-            f.header
 
 
 class TestGSGEvents(unittest.TestCase):

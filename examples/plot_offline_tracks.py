@@ -2,8 +2,7 @@
 Reading Offline tracks
 ======================
 
-The following example shows how to access tracks data in an offline ROOT file, which is
-written by aanet software.
+The following example shows how to access tracks data in an offline ROOT file.
 
 Note: the offline files used here were intentionaly reduced to 10 events.
 """
@@ -11,107 +10,100 @@ import km3io as ki
 from km3net_testdata import data_path
 
 #####################################################
-# To access offline tracks/mc_tracks data:
+# We open the file using the
 
-mc_tracks = ki.OfflineReader(data_path("offline/numucc.root")).events.mc_tracks
-tracks = ki.OfflineReader(data_path("offline/km3net_offline.root")).events.tracks
-
+f = ki.OfflineReader(data_path("offline/numucc.root"))
 
 #####################################################
-# Note that not all data is loaded in memory, so printing
-# tracks will only return how many elements (events) were found in
-# the tracks branch of the file.
+# To access offline tracks/mc_tracks data:
 
-print(tracks)
+f.tracks
+f.mc_tracks
+
+#####################################################
+# Note that no data is loaded in memory at this point, so printing
+# tracks will only return how many sub-branches (corresponding to
+# events) were found.
+
+f.tracks
 
 #####################################################
 # same for mc hits
 
-print(mc_tracks)
+f.mc_tracks
 
 #####################################################
 # Accessing the tracks/mc_tracks keys
 # -----------------------------------
-# to explore the tracks keys:
+# to explore the reconstructed tracks fields:
 
-keys = tracks.keys()
-print(keys)
+f.tracks.fields
 
 #####################################################
-# to explore the mc_tracks keys:
+# the same for MC tracks
 
-mc_keys = mc_tracks.keys()
-print(mc_keys)
+f.mc_tracks.fields
 
 #####################################################
 # Accessing tracks data
 # ---------------------
-# to access data in `E` (tracks energy):
+# each field will return a nested `awkward.Array` and load everything into
+# memory, so be careful if you are working with larger files.
 
-E = tracks.E
-print(E)
+f.tracks.E
 
-#####################################################
-# to access the likelihood:
+######################################################
+# The z direction of all reconstructed tracks
 
-likelihood = tracks.lik
-print(likelihood)
+f.tracks.dir_z
 
-#####################################################
-# That's it! you can access any key of your interest in the tracks
-# keys in the exact same way.
+######################################################
+# The likelihoods
 
-#####################################################
-# Accessing the mc_tracks data
-# ----------------------------
-# similarly, you can access mc_tracks data in any key of interest by
-# following the same procedure as for tracks:
-
-cos_zenith = mc_tracks.dir_z
-print(cos_zenith)
+f.tracks.lik
 
 
 #####################################################
-# or:
+# To select just a single event or a subset of events, use the indices or slices.
+# The following will access all tracks and their fields
+# of the third event (0 is the first):
 
-dir_y = mc_tracks.dir_y
-print(dir_y)
+f[2].tracks
 
+######################################################
+# The z direction of all tracks in the third event:
 
-#####################################################
-# item selection in tracks data
-# -----------------------------
-# tracks data can be selected as you would select an item from a numpy array.
-# for example, to select E (energy) in the tracks corresponding to the first event:
-
-print(tracks[0].E)
-
-#####################################################
-# or:
-
-print(tracks.E[0])
+f[2].tracks.dir_z
 
 
 #####################################################
-# slicing of tracks
-# -----------------
-# to select a slice of tracks data:
+# while here, we select the first 3 events. Notice that all fields will return
+# nested arrays, as we have seem above where all events were selected.
 
-print(tracks[0:3].E)
+f[:3]
 
-#####################################################
-# or:
+######################################################
+# All tracks for the first three events
 
-print(tracks.E[0:3])
+f[:3].tracks
 
-#####################################################
-# you can apply masks to tracks data as you would do with numpy arrays:
+######################################################
+# The z directions of all tracks of the first three events
 
-mask = tracks.lik > 100
-
-print(tracks.lik[mask])
+f[:3].tracks.dir_z
 
 #####################################################
-# or:
+# or events from 3 and 5 (again, 0 indexing):
 
-print(tracks.dir_z[mask])
+
+f[2:5]
+
+######################################################
+# the tracks of those events
+
+f[2:5].tracks
+
+######################################################
+# and just the z directions of those
+
+f[2:5].tracks.dir_z

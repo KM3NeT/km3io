@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from collections import namedtuple
 import numba as nb
 import numpy as np
 import awkward as ak
@@ -133,34 +134,19 @@ def fitinf(fitparam, tracks):
     ----------
     fitparam : int
         the fit parameter key according to fitparameters defined in
-        KM3NeT-Dataformat.
-    tracks : km3io.offline.OfflineBranch
-        the tracks class. both full tracks branch or a slice of the
-        tracks branch (example tracks[:, 0]) work.
+        KM3NeT-Dataformat (see km3io.definitions.fitparameters).
+    tracks : ak.Array or km3io.rootio.Branch
+        reconstructed tracks with .fitinf attribute
 
     Returns
     -------
     awkward1.Array
-        awkward array of the values of the fit parameter requested.
+        awkward array of the values of the fit parameter requested. Missing
+        values are set to NaN.
     """
     fit = tracks.fitinf
-    index = fitparam
-    if tracks.is_single and len(tracks) != 1:
-        params = fit[count_nested(fit, axis=1) > index]
-        out = params[:, index]
-
-    if tracks.is_single and len(tracks) == 1:
-        out = fit[index]
-
-    else:
-        if len(tracks[0]) == 1:  # case of tracks slice with 1 track per event.
-            params = fit[count_nested(fit, axis=1) > index]
-            out = params[:, index]
-        else:
-            params = fit[count_nested(fit, axis=2) > index]
-            out = ak.Array([i[:, index] for i in params])
-
-    return out
+    nonempty = ak.num(fit, axis=-1) > 0
+    return ak.fill_none(fit.mask[nonempty][..., 0], np.nan)
 
 
 def count_nested(arr, axis=0):
@@ -206,12 +192,9 @@ def get_multiplicity(tracks, rec_stages):
     awkward1.Array
         tracks multiplicty.
     """
-    masked_tracks = tracks[mask(tracks, stages=rec_stages)]
+    masked_tracks = tracks[mask(tracks.rec_stages, sequence=rec_stages)]
 
-    if tracks.is_single:
-        out = count_nested(masked_tracks.rec_stages, axis=0)
-    else:
-        out = count_nested(masked_tracks.rec_stages, axis=1)
+    out = count_nested(masked_tracks.rec_stages, axis=tracks.ndim - 1)
 
     return out
 
@@ -221,548 +204,223 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
 
     Parameters
     ----------
-    tracks : km3io.offline.OfflineBranch
-        Array of tracks or jagged array of tracks (multiple events).
+    tracks : awkward.Array
+      A list of tracks or doubly nested tracks, usually from
+      OfflineReader.events.tracks or subarrays of that, containing recunstructed
+      tracks.
     startend: tuple(int, int), optional
-        The required first and last stage in tracks.rec_stages.
+      The required first and last stage in tracks.rec_stages.
     minmax: tuple(int, int), optional
-        The range (minimum and maximum) value of rec_stages to take into account.
+      The range (minimum and maximum) value of rec_stages to take into account.
     stages : list or set, optional
-        - list: the order of the rec_stages is respected.
-        - set: a subset of required stages; the order is irrelevant.
+      - list: the order of the rec_stages is respected.
+      - set: a subset of required stages; the order is irrelevant.
 
     Returns
     -------
-    km3io.offline.OfflineBranch
-        The best tracks based on the selection.
+    awkward.Array or namedtuple
+      Be aware that the dimensions are kept, which means that the final
+      track attributes are nested when multiple events are passed in.
+      If a single event (just a list of tracks) is provided, a named tuple
+      with a single track and flat attributes is created.
 
     Raises
     ------
     ValueError
-        - too many inputs specified.
-        - no inputs are specified.
+      When invalid inputs are specified.
 
     """
     inputs = (stages, startend, minmax)
 
-    if all(v is None for v in inputs):
+    if sum(v is not None for v in inputs) != 1:
         raise ValueError("either stages, startend or minmax must be specified.")
 
-    if stages is not None and (startend is not None or minmax is not None):
-        raise ValueError("Please specify either a range or a set of rec stages.")
-
-    if stages is not None and startend is None and minmax is None:
-        selected_tracks = tracks[mask(tracks, stages=stages)]
-
-    if startend is not None and minmax is None and stages is None:
-        selected_tracks = tracks[mask(tracks, startend=startend)]
-
-    if minmax is not None and startend is None and stages is None:
-        selected_tracks = tracks[mask(tracks, minmax=minmax)]
-
-    return _max_lik_track(_longest_tracks(selected_tracks))
-
-
-def _longest_tracks(tracks):
-    """Select the longest reconstructed track"""
-    if tracks.is_single:
-        stages_nesting_level = 1
-        tracks_nesting_level = 0
-
-    else:
-        stages_nesting_level = 2
-        tracks_nesting_level = 1
-
-    len_stages = count_nested(tracks.rec_stages, axis=stages_nesting_level)
-    longest = tracks[len_stages == ak.max(len_stages, axis=tracks_nesting_level)]
-
-    return longest
-
-
-def _max_lik_track(tracks):
-    """Select the track with the highest likelihood """
-    if tracks.is_single:
-        tracks_nesting_level = 0
-    else:
-        tracks_nesting_level = 1
-
-    return tracks[tracks.lik == ak.max(tracks.lik, axis=tracks_nesting_level)]
-
-
-def mask(tracks, stages=None, startend=None, minmax=None):
-    """Create a mask for tracks.rec_stages.
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks, or one track, or slice of tracks, or slice of one track.
-    stages : list or set
-        reconstruction stages of interest:
-        - list: the order of rec_stages in respected.
-        - set: the order of rec_stages in irrelevant.
-    startend: tuple(int, int), optional
-        The required first and last stage in tracks.rec_stages.
-    minmax: tuple(int, int), optional
-        The range (minimum and maximum) value of rec_stages to take into account.
-
-    Returns
-    -------
-    awkward1.Array(bool)
-        an awkward1 Array mask where True corresponds to the positions
-        where stages were found. False otherwise.
-
-    Raises
-    ------
-    ValueError
-        - too many inputs specified.
-        - no inputs are specified.
-    """
-    inputs = (stages, startend, minmax)
-
-    if all(v is None for v in inputs):
-        raise ValueError("either stages, startend or minmax must be specified.")
-
-    if stages is not None and (startend is not None or minmax is not None):
-        raise ValueError("Please specify either a range or a set of rec stages.")
-
-    if stages is not None and startend is None and minmax is None:
+    if stages is not None:
         if isinstance(stages, list):
-            # order of stages is conserved
-            return _mask_explicit_rec_stages(tracks, stages)
-        if isinstance(stages, set):
-            # order of stages is no longer conserved
-            return _mask_rec_stages_in_set(tracks, stages)
-
-    if startend is not None and minmax is None and stages is None:
-        return _mask_rec_stages_between_start_end(tracks, *startend)
-
-    if minmax is not None and startend is None and stages is None:
-        return _mask_rec_stages_in_range_min_max(tracks, *minmax)
-
-
-def _mask_rec_stages_between_start_end(tracks, start, end):
-    """Mask tracks.rec_stages that start exactly with start and end exactly
-    with end. ie [start, a, b ...,z , end]"""
-    builder = ak.ArrayBuilder()
-    if tracks.is_single:
-        _find_between_single(tracks.rec_stages, start, end, builder)
-        return (builder.snapshot() == 1)[0]
-    else:
-        _find_between(tracks.rec_stages, start, end, builder)
-        return builder.snapshot() == 1
-
-
-@nb.jit(nopython=True)
-def _find_between(rec_stages, start, end, builder):
-    """Find tracks.rec_stages where rec_stages[0] == start and rec_stages[-1] == end."""
-
-    for s in rec_stages:
-        builder.begin_list()
-        for i in s:
-            num_stages = len(i)
-            if num_stages != 0:
-                if (i[0] == start) and (i[-1] == end):
-                    builder.append(1)
-                else:
-                    builder.append(0)
-            else:
-                builder.append(0)
-        builder.end_list()
-
-
-@nb.jit(nopython=True)
-def _find_between_single(rec_stages, start, end, builder):
-    """Find tracks.rec_stages where rec_stages[0] == start and
-    rec_stages[-1] == end in a single track."""
-
-    builder.begin_list()
-    for s in rec_stages:
-        num_stages = len(s)
-        if num_stages != 0:
-            if (s[0] == start) and (s[-1] == end):
-                builder.append(1)
-            else:
-                builder.append(0)
+            m1 = mask(tracks.rec_stages, sequence=stages)
+        elif isinstance(stages, set):
+            m1 = mask(tracks.rec_stages, atleast=list(stages))
         else:
-            builder.append(0)
-    builder.end_list()
+            raise ValueError("stages must be a list or a set of integers")
+
+    if startend is not None:
+        m1 = mask(tracks.rec_stages, startend=startend)
+
+    if minmax is not None:
+        m1 = mask(tracks.rec_stages, minmax=minmax)
+
+    try:
+        original_ndim = tracks.ndim
+    except AttributeError:
+        original_ndim = 1
+    axis = 1 if original_ndim == 2 else 0
+
+    tracks = tracks[m1]
+
+    rec_stage_lengths = ak.num(tracks.rec_stages, axis=-1)
+    max_rec_stage_length = ak.max(rec_stage_lengths, axis=axis)
+    m2 = rec_stage_lengths == max_rec_stage_length
+    tracks = tracks[m2]
+
+    m3 = ak.argmax(tracks.lik, axis=axis, keepdims=True)
+
+    out = tracks[m3]
+    if original_ndim == 1:
+        if isinstance(out, ak.Record):
+            return out[:, 0]
+        return out[0]
+    return out[:, 0]
 
 
-def _mask_explicit_rec_stages(tracks, stages):
-    """Mask explicit rec_stages .
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks or one track, or slice of tracks.
-    stages : list
-        reconstruction stages of interest. The order of stages is conserved.
-
-    Returns
-    -------
-    awkward1.Array
-        an awkward1 Array mask where True corresponds to the positions
-        where stages were found. False otherwise.
-    """
-
-    builder = ak.ArrayBuilder()
-    if tracks.is_single:
-        _find_single(tracks.rec_stages, ak.Array(stages), builder)
-        return (builder.snapshot() == 1)[0]
-    else:
-        _find(tracks.rec_stages, ak.Array(stages), builder)
-        return builder.snapshot() == 1
-
-
-@nb.jit(nopython=True)
-def _find(rec_stages, stages, builder):
-    """construct an awkward1 array with the same structure as tracks.rec_stages.
-    When stages are found, the Array is filled with value 1, otherwise it is filled
-    with value 0.
+def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):
+    """Return a boolean mask which mask each nested sub-array for a condition.
 
     Parameters
     ----------
-    rec_stages : awkward1.Array
-        tracks.rec_stages from multiple events.
-    stages : awkward1.Array
-        reconstruction stages of interest.
-    builder : awkward1.highlevel.ArrayBuilder
-        awkward1 Array builder.
+    arr : awkward.Array with ndim>=2
+        The array to mask.
+    startend: tuple(int, int), optional
+        True for entries where the first and last element are matching the tuple.
+    minmax: tuple(int, int), optional
+        True for entries where each element is within the min-max-range.
+    sequence : list(int), optional
+        True for entries which contain the exact same elements (in that specific
+        order)
+    atleast : list(int), optional
+        True for entries where at least the provided elements are present.
+
+    An extensive discussion about this implementation can be found at:
+    https://github.com/scikit-hep/awkward-1.0/issues/580
+    Many thanks for Jim for the fruitful discussion and the final implementation.
     """
-    for s in rec_stages:
-        builder.begin_list()
-        for i in s:
-            num_stages = len(i)
-            if num_stages == len(stages):
-                found = 0
-                for j in range(num_stages):
-                    if i[j] == stages[j]:
-                        found += 1
-                if found == num_stages:
-                    builder.append(1)
-                else:
-                    builder.append(0)
+    inputs = (sequence, startend, minmax, atleast)
+
+    if sum(v is not None for v in inputs) != 1:
+        raise ValueError(
+            "either sequence, startend, minmax or atleast must be specified."
+        )
+
+    def recurse(layout):
+        if layout.purelist_depth == 2:
+            if startend is not None:
+                np_array = _mask_startend(ak.Array(layout), *startend)
+            elif minmax is not None:
+                np_array = _mask_minmax(ak.Array(layout), *minmax)
+            elif sequence is not None:
+                np_array = _mask_sequence(ak.Array(layout), np.array(sequence))
+            elif atleast is not None:
+                np_array = _mask_atleast(ak.Array(layout), np.array(atleast))
+
+            return ak.layout.NumpyArray(np_array)
+
+        elif isinstance(
+            layout,
+            (
+                ak.layout.ListArray32,
+                ak.layout.ListArrayU32,
+                ak.layout.ListArray64,
+            ),
+        ):
+            if len(layout.stops) == 0:
+                content = recurse(layout.content)
             else:
-                builder.append(0)
-        builder.end_list()
+                content = recurse(layout.content[: np.max(layout.stops)])
+            return type(layout)(layout.starts, layout.stops, content)
 
+        elif isinstance(
+            layout,
+            (
+                ak.layout.ListOffsetArray32,
+                ak.layout.ListOffsetArrayU32,
+                ak.layout.ListOffsetArray64,
+            ),
+        ):
+            content = recurse(layout.content[: layout.offsets[-1]])
+            return type(layout)(layout.offsets, content)
 
-@nb.jit(nopython=True)
-def _find_single(rec_stages, stages, builder):
-    """Construct an awkward1 array with the same structure as tracks.rec_stages.
+        elif isinstance(layout, ak.layout.RegularArray):
+            content = recurse(layout.content)
+            return ak.layout.RegularArray(content, layout.size)
 
-    When stages are found, the Array is filled with value 1, otherwise it is filled
-    with value 0.
-
-    Parameters
-    ----------
-    rec_stages : awkward1.Array
-        tracks.rec_stages from a SINGLE event.
-    stages : awkward1.Array
-        reconstruction stages of interest.
-    builder : awkward1.highlevel.ArrayBuilder
-        awkward1 Array builder.
-    """
-    builder.begin_list()
-    for s in rec_stages:
-        num_stages = len(s)
-        if num_stages == len(stages):
-            found = 0
-            for j in range(num_stages):
-                if s[j] == stages[j]:
-                    found += 1
-            if found == num_stages:
-                builder.append(1)
-            else:
-                builder.append(0)
         else:
-            builder.append(0)
-    builder.end_list()
+            raise NotImplementedError(repr(arr))
+
+    layout = ak.to_layout(arr, allow_record=True, allow_other=False)
+    return ak.Array(recurse(layout))
+
+
+@nb.njit
+def _mask_startend(arr, start, end):
+    out = np.empty(len(arr), np.bool_)
+    for i, subarr in enumerate(arr):
+        out[i] = len(subarr) > 0 and subarr[0] == start and subarr[-1] == end
+    return out
+
+
+@nb.njit
+def _mask_minmax(arr, min, max):
+    out = np.empty(len(arr), np.bool_)
+    for i, subarr in enumerate(arr):
+        if len(subarr) == 0:
+            out[i] = False
+        else:
+            for el in subarr:
+                if el < min or el > max:
+                    out[i] = False
+                    break
+            else:
+                out[i] = True
+    return out
+
+
+@nb.njit
+def _mask_sequence(arr, sequence):
+    out = np.empty(len(arr), np.bool_)
+    n = len(sequence)
+    for i, subarr in enumerate(arr):
+        if len(subarr) != n:
+            out[i] = False
+        else:
+            for j in range(n):
+                if subarr[j] != sequence[j]:
+                    out[i] = False
+                    break
+            else:
+                out[i] = True
+    return out
+
+
+@nb.njit
+def _mask_atleast(arr, atleast):
+    out = np.empty(len(arr), np.bool_)
+    for i, subarr in enumerate(arr):
+        for req_el in atleast:
+            if req_el not in subarr:
+                out[i] = False
+                break
+        else:
+            out[i] = True
+    return out
 
 
 def best_jmuon(tracks):
-    """Select the best JMUON track.
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks, or one track, or slice of tracks, or slices of tracks.
-
-    Returns
-    -------
-    km3io.offline.OfflineBranch
-        the longest + highest likelihood track reconstructed with JMUON.
-    """
-    mask = _mask_rec_stages_in_range_min_max(
-        tracks, min_stage=krec.JMUONBEGIN, max_stage=krec.JMUONEND
-    )
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))
+    """Select the best JMUON track."""
+    return best_track(tracks, minmax=(krec.JMUONBEGIN, krec.JMUONEND))
 
 
 def best_jshower(tracks):
-    """Select the best JSHOWER track.
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks, or one track, or slice of tracks, or slices of tracks.
-
-    Returns
-    -------
-    km3io.offline.OfflineBranch
-        the longest + highest likelihood track reconstructed with JSHOWER.
-    """
-    mask = _mask_rec_stages_in_range_min_max(
-        tracks, min_stage=krec.JSHOWERBEGIN, max_stage=krec.JSHOWEREND
-    )
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))
+    """Select the best JSHOWER track."""
+    return best_track(tracks, minmax=(krec.JSHOWERBEGIN, krec.JSHOWEREND))
 
 
 def best_aashower(tracks):
-    """Select the best AASHOWER track.
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks, or one track, or slice of tracks, or slices of tracks.
-
-    Returns
-    -------
-    km3io.offline.OfflineBranch
-        the longest + highest likelihood track reconstructed with AASHOWER.
-    """
-    mask = _mask_rec_stages_in_range_min_max(
-        tracks, min_stage=krec.AASHOWERBEGIN, max_stage=krec.AASHOWEREND
-    )
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))
+    """Select the best AASHOWER track. """
+    return best_track(tracks, minmax=(krec.AASHOWERBEGIN, krec.AASHOWEREND))
 
 
 def best_dusjshower(tracks):
-    """Select the best DISJSHOWER track.
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks, or one track, or slice of tracks, or slices of tracks.
-
-    Returns
-    -------
-    km3io.offline.OfflineBranch
-        the longest + highest likelihood track reconstructed with DUSJSHOWER.
-    """
-    mask = _mask_rec_stages_in_range_min_max(
-        tracks, min_stage=krec.DUSJSHOWERBEGIN, max_stage=krec.DUSJSHOWEREND
-    )
-
-    return _max_lik_track(_longest_tracks(tracks[mask]))
-
-
-def _mask_rec_stages_in_range_min_max(tracks, min_stage=None, max_stage=None):
-    """Mask tracks where rec_stages are withing the range(min, max).
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks, or one track, or slice of tracks, or slices of tracks.
-    min_stage : int
-        minimum value of rec_stages.
-    max_stage : int
-        maximum value of rec_stages.
-
-
-    Returns
-    -------
-    awkward1.Array
-        an awkward1 Array mask where True corresponds to the positions
-        where stages were found. False otherwise.
-    """
-    if (min_stage is not None) and (max_stage is not None):
-
-        builder = ak.ArrayBuilder()
-        if tracks.is_single:
-            _find_in_range_single(tracks.rec_stages, min_stage, max_stage, builder)
-            return (builder.snapshot() == 1)[0]
-        else:
-            _find_in_range(tracks.rec_stages, min_stage, max_stage, builder)
-            return builder.snapshot() == 1
-
-    else:
-        raise ValueError("please provide min_stage and max_stage.")
-
-
-@nb.jit(nopython=True)
-def _find_in_range(rec_stages, min_stage, max_stage, builder):
-    """Construct an awkward1 array with the same structure as tracks.rec_stages.
-
-    When stages are within the range(min, max), the Array is filled with
-    value 1, otherwise it is filled with value 0.
-
-    Parameters
-    ----------
-    rec_stages : awkward1.Array
-        tracks.rec_stages of MULTILPLE events.
-    min_stage: int
-        minimum value of rec_stages.
-    max_stage: int
-        minimum value of rec_stages.
-    builder : awkward1.highlevel.ArrayBuilder
-        awkward1 Array builder.
-
-    """
-    for s in rec_stages:
-        builder.begin_list()
-        for i in s:
-            num_stages = len(i)
-            if num_stages != 0:
-                found = 0
-                for j in i:
-                    if min_stage <= j <= max_stage:
-                        found += 1
-                if found == num_stages:
-                    builder.append(1)
-                else:
-                    builder.append(0)
-            else:
-                builder.append(0)
-        builder.end_list()
-
-
-@nb.jit(nopython=True)
-def _find_in_range_single(rec_stages, min_stage, max_stage, builder):
-    """Construct an awkward1 array with the same structure as tracks.rec_stages.
-
-    When stages are within the range(min, max), the Array is filled with
-    value 1, otherwise it is filled with value 0.
-
-    Parameters
-    ----------
-    rec_stages : awkward1.Array
-        tracks.rec_stages of a SINGLE event.
-    min_stage: int
-        minimum value of rec_stages.
-    max_stage: int
-        minimum value of rec_stages.
-    builder : awkward1.highlevel.ArrayBuilder
-        awkward1 Array builder.
-    """
-    builder.begin_list()
-    for s in rec_stages:
-        num_stages = len(s)
-        if num_stages != 0:
-            found = 0
-            for i in s:
-                if min_stage <= i <= max_stage:
-                    found += 1
-            if found == num_stages:
-                builder.append(1)
-            else:
-                builder.append(0)
-        else:
-            builder.append(0)
-    builder.end_list()
-
-
-def _mask_rec_stages_in_set(tracks, stages):
-    """Mask tracks where rec_stages are withing the range(min, max).
-
-    Parameters
-    ----------
-    tracks : km3io.offline.OfflineBranch
-        tracks, or one track, or slice of tracks, or slices of tracks.
-    stages : set
-        set of stages to look for in tracks.rec_stages.
-
-    Returns
-    -------
-    awkward1.Array
-        an awkward1 Array mask where True corresponds to the positions
-        where stages were found. False otherwise.
-    """
-    if isinstance(stages, set):
-
-        builder = ak.ArrayBuilder()
-        if tracks.is_single:
-            _find_in_set_single(tracks.rec_stages, stages, builder)
-            return (builder.snapshot() == 1)[0]
-        else:
-            _find_in_set(tracks.rec_stages, stages, builder)
-            return builder.snapshot() == 1
-
-    else:
-        raise ValueError("stages must be a set")
-
-
-@nb.jit(nopython=True)
-def _find_in_set(rec_stages, stages, builder):
-    """Construct an awkward1 array with the same structure as tracks.rec_stages.
-
-    When all stages are found in rec_stages, the Array is filled with
-    value 1, otherwise it is filled with value 0.
-
-    Parameters
-    ----------
-    rec_stages : awkward1.Array
-        tracks.rec_stages of MULTILPLE events.
-    stages : set
-        set of stages.
-    builder : awkward1.highlevel.ArrayBuilder
-        awkward1 Array builder.
-
-    """
-    n = len(stages)
-    for s in rec_stages:
-        builder.begin_list()
-        for i in s:
-            num_stages = len(i)
-            if num_stages != 0:
-                found = 0
-                for j in i:
-                    if j in stages:
-                        found += 1
-                if found == n:
-                    builder.append(1)
-                else:
-                    builder.append(0)
-            else:
-                builder.append(0)
-        builder.end_list()
-
-
-@nb.jit(nopython=True)
-def _find_in_set_single(rec_stages, stages, builder):
-    """Construct an awkward1 array with the same structure as tracks.rec_stages.
-
-    When all stages  are found in rec_stages, the Array is filled with
-    value 1, otherwise it is filled with value 0.
-
-    Parameters
-    ----------
-    rec_stages : awkward1.Array
-        tracks.rec_stages of a SINGLE event.
-    stages : set
-        set of stages.
-    builder : awkward1.highlevel.ArrayBuilder
-        awkward1 Array builder.
-    """
-    n = len(stages)
-    builder.begin_list()
-    for s in rec_stages:
-        num_stages = len(s)
-        if num_stages != 0:
-            found = 0
-            for j in s:
-                if j in stages:
-                    found += 1
-            if found == n:
-                builder.append(1)
-            else:
-                builder.append(0)
-        else:
-            builder.append(0)
-    builder.end_list()
+    """Select the best DISJSHOWER track."""
+    return best_track(tracks, minmax=(krec.DUSJSHOWERBEGIN, krec.DUSJSHOWEREND))
 
 
 def is_cc(fobj):
@@ -788,32 +446,49 @@ def is_cc(fobj):
     w2list = fobj.events.w2list
     len_w2lists = ak.num(w2list, axis=1)
 
+    # According to: https://wiki.km3net.de/index.php/Simulations/The_gSeaGen_code#Physics_event_entries
+    # the interaction types are defined as follow:
+
+    # INTER   Interaction type
+    # 1       EM
+    # 2       Weak[CC]
+    # 3       Weak[NC]
+    # 4       Weak[CC+NC+interference]
+    # 5       NucleonDecay
+
+
     if all(len_w2lists <= 7):  # old nu file have w2list of len 7.
-        usr_names = fobj.events.mc_tracks.usr_names
-        usr_data = fobj.events.mc_tracks.usr
-        mask_cc_flag = usr_names[:, 0] == b"cc"
-        inter_ID = usr_data[:, 0][mask_cc_flag]
-        out = ak.flatten(inter_ID == 2)  # 2 is the interaction ID for CC.
+        # Checking the `cc` value in usr of the first mc_tracks,
+        # which are the primary neutrinos and carry the event property.
+        # This has been changed in 2020 to be a property in the w2list.
+        # See https://git.km3net.de/common/km3net-dataformat/-/issues/23
+        return usr(fobj.events.mc_tracks[:, 0], "cc") == 2
 
     else:
+        # TODO: to be tested with a newly generated files with th eupdated
+        # w2list definitionn.
         if "gseagen" in program.lower():
-
-            # According to: https://wiki.km3net.de/index.php/Simulations/The_gSeaGen_code#Physics_event_entries
-            # the interaction types are defined as follow:
-
-            # INTER   Interaction type
-            # 1       EM
-            # 2       Weak[CC]
-            # 3       Weak[NC]
-            # 4       Weak[CC+NC+interference]
-            # 5       NucleonDecay
-
-            cc_flag = w2list[:, kw2gsg.W2LIST_GSEAGEN_CC]
-            out = cc_flag > 0  # to be tested with a newly generated nu file.
+            return w2list[:, kw2gen.W2LIST_GSEAGEN_CC] == 2
         if "genhen" in program.lower():
-            cc_flag = w2list[:, kw2gen.W2LIST_GENHEN_CC]
-            out = cc_flag > 0
+            return w2list[:, kw2gen.W2LIST_GENHEN_CC] == 2
         else:
-            raise ValueError(f"simulation program {program} is not implemented.")
+            raise NotImplementedError(
+                f"don't know how to determine the CC-ness of {program} files."
+            )
 
-    return out
+
+def usr(objects, field):
+    """Return the usr-data for a given field.
+
+    Parameters
+    ----------
+    objects : awkward.Array
+      Events, tracks, hits or whatever objects which have usr and usr_names
+      fields (e.g. OfflineReader().events).
+    """
+    if len(unique(ak.num(objects.usr_names))) > 1:
+        # let's do it the hard way
+        return ak.flatten(objects.usr[objects.usr_names == field])
+    available_fields = objects.usr_names[0].tolist()
+    idx = available_fields.index(field)
+    return objects.usr[:, idx]

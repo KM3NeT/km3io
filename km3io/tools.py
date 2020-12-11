@@ -456,7 +456,6 @@ def is_cc(fobj):
     # 4       Weak[CC+NC+interference]
     # 5       NucleonDecay
 
-
     if all(len_w2lists <= 7):  # old nu file have w2list of len 7.
         # Checking the `cc` value in usr of the first mc_tracks,
         # which are the primary neutrinos and carry the event property.

@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-KM3NeT Data Definitions v1.2.4
+KM3NeT Data Definitions v1.3.1
 https://git.km3net.de/common/km3net-dataformat
 """
 
 # reconstruction
 data = {
     "JPP_RECONSTRUCTION_TYPE": 4000,
-    "JMUONFIT": 0,
     "JMUONBEGIN": 0,
     "JMUONPREFIT": 1,
     "JMUONSIMPLEX": 2,
@@ -16,7 +15,6 @@ data = {
     "JMUONSTART": 5,
     "JLINEFIT": 6,
     "JMUONEND": 99,
-    "JSHOWERFIT": 100,
     "JSHOWERBEGIN": 100,
     "JSHOWERPREFIT": 101,
     "JSHOWERPOSITIONFIT": 102,

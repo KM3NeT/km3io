@@ -3,6 +3,10 @@ Unreleased changes
 Version 0
 ---------
 
+0.19.2 / 2020-12-15
+~~~~~~~~~~~~~~~~~~~
+* Suppress FutureWarnings from uproot3
+
 0.19.1 / 2020-12-11
 ~~~~~~~~~~~~~~~~~~~
 * Minor hotfixes and cosmetics

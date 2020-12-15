@@ -14,6 +14,9 @@ Options:
     -h --help    Show this screen.
 
 """
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 import uproot3
 
 

@@ -459,6 +459,16 @@ class TestBranchIndexingMagic(unittest.TestCase):
         self.assertEqual(3, len(self.events[ak.Array([0, 2, 3])]))
 
 
+class TestBranchHighLevelAccessor(unittest.TestCase):
+    def test_tracks_arrays(self):
+        pos_xy = OFFLINE_FILE.tracks.arrays(["pos_x", "pos_y"])
+        n = len(pos_xy)
+        for i in range(n):
+            assert np.allclose(
+                OFFLINE_FILE.tracks.pos_x.tolist()[i], pos_xy.pos_x.tolist()[i]
+            )
+
+
 class TestUsr(unittest.TestCase):
     def setUp(self):
         self.f = OFFLINE_USR

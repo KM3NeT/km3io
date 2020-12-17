@@ -384,6 +384,10 @@ class Branch:
             # ignore the usual index magic and access `id` directly
             return len(self.id)
 
+    def arrays(self, *args, **kwargs):
+        """High-level interface to uproots arrays call on branches"""
+        return self._branch.arrays(*args, **kwargs, aliases=self._aliases)
+
     def __actual_len__(self):
         """The raw number of events without any indexing/slicing magic"""
         return len(self._branch[self._aliases["id"]].array())

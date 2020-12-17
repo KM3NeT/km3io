@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* Add ``Branch.arrays()`` for high-level access of ``uproot.TBranch.arrays()``
+
 Version 0
 ---------
 

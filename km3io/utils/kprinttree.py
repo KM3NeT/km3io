@@ -15,7 +15,8 @@ Options:
 
 """
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
+
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 import uproot3
 

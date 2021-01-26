@@ -1,41 +1,53 @@
+'''
+This tookit provides an interface to read the raw acoustic binary data tipe as produced by the Acoustic Data Filter (ADF).
+
+The acoustic signals are acquired by the CLB with a 195312.5 Hz sampling frequency (F_S) corresponding to a period of 5.12 microseconds (16 ns * 320).
+
+The acoustic data filter processes the stream in segments (windows) of given size. Two consecutive segments overlap by a given number of samples. These two parameters are specified in the ADF configuration as:
+* DAQ_ADF_ANALYSIS_WINDOW_SIZE (typ.: 131072) 
+* DAQ_ADF_ANALYSIS_WINDOW_OVERLAP (typ.: 7812)
+Typical values are indicated but may change in the future.
+
+When the ADF is set to dump the raw data, the overlapping segment is omitted so the length of the data chunk is FRAME_LENGTH = DAQ_ADF_ANALYSIS_WINDOW_SIZE - DAQ_ADF_ANALYSIS_WINDOW_OVERLAP.
+'''
+
 import numpy as np
-from scipy.io import wavfile
 
 '''
-Layout of the raw acoustic binary data tipe as produced by the Acoustic Data Filter (ADF). 
+Summary description of the raw acoustic data format.
+- 4B: UTC seconds (UNIX timestamp);
+- 4B: number of 16ns cycles;
+- 4B: referred to as 'samples' corresponds to DAQ_ADF_ANALYSIS_WINDOW_SIZE (typ.: 131072).
 
-WARNING: the output of the acoustic data filter may change in the future!
-
-The first two integer fields represent the time as: UTC seconds (UNIX timestamp) + number of 16ns cycles.
-
-The third integer field, 'samples', is undocumented, possibly unused or deprecated.
-
-The fourth field is a sequence of FRAME_LENGTH audio samples. Each sample is 32 bit float PCM value.
-
-It is not clear whether FRAME_LENGTH constant or depends on the ADF configuration. So far its value never changed.
+What follows a sequence of FRAME_LENGTH audio samples. Each sample is 32 bit float PCM value. FRAME_LENGTH cannot be reconstructed from DAQ_ADF_ANALYSIS_WINDOW_SIZE without knowing DAQ_ADF_ANALYSIS_WINDOW_OVERLAP so it has to be set by the user.
 
 As long as FRAME_LENGTH is constant within the same file, this approach will hold (FRAME_LENGTH can be made configurable in the constructor).
 
-Samples are acquired with a 195312.5 Hz sampling frequency (F_S). Note that this corresponds to a period of 5.12 microseconds (320 16ns-cycles)
+Note: each file contains data from a single transducer and the DOM or base ID is stored in the filename only. This is not a very good design but here it is tentatively dealt with.
 
-Each file contains data from a single transducer and the DOM or base ID is stored in the filename only. This is not a very good design but we deal with it.
-
-WARNING: data shoild be ordered but may not be contiguous in time.
+WARNING: data should be in general expected as ordered but may not be contiguous in time.
 '''
 
-FRAME_LENGTH = 123260
-DATA_TYPE    = np.dtype( [('utc_seconds', np.uint32),
+''' sampling frequency of the acoustic stream in the CLB '''
+F_S          = 195312.5
+
+def get_dtype(FRAME_LENGTH):
+    DATA_TYPE    = np.dtype( [('utc_seconds', np.uint32),
                        ('16ns_cycles', np.uint32),
                        ('samples'    , np.uint32),
                        ('frame', np.float32, FRAME_LENGTH)] )
-F_S          = 195312.5
+    return DATA_TYPE
 
 class RawAcousticReader():
 
-    def __init__(self, filepath):
+    def __init__(self, filepath, FRAME_LENGTH = 123260):
+
+        self.FRAME_LENGTH = FRAME_LENGTH
+        DATA_TYPE = get_dtype(FRAME_LENGTH)
+
         with open(filepath) as acoufile:
             self._data = np.fromfile(acoufile, dtype=DATA_TYPE)
-            '''extract 8 characters starting from the 5th'''
+            ''' extract 8 characters starting from the 5th to get the CLB id '''
             self._id   = filepath.split('/')[-1][4:1+12] 
 
     @property
@@ -57,31 +69,30 @@ class RawAcousticReader():
         Constructs sequence of times corresponding to each sample.
         For convenience, the time is stored as a double precision float.
         The resolution is not fixed (which is sub-optimal) but should always allow exact representation of the sample time.
-        A zero_time can be set to get times relative to a given one.
         '''
         sample_interval = 1 / F_S
-        frame_duration  = FRAME_LENGTH * sample_interval
+        frame_duration  = self.FRAME_LENGTH * sample_interval
         time_axis       = np.arange(0, frame_duration, sample_interval)
         start_frame     = self._data[0]
-        n_samples       = FRAME_LENGTH * len(self._data)
+        n_samples       = self.FRAME_LENGTH * len(self._data)
         
         timebase = np.zeros(n_samples, dtype=np.float64)
     
         for i, frame in enumerate(self._data):
-            sample_range = slice(i * FRAME_LENGTH, (i + 1) * FRAME_LENGTH)
+            sample_range = slice(i * self.FRAME_LENGTH, (i + 1) * self.FRAME_LENGTH)
             timebase[sample_range] = frame['utc_seconds'] + 16e-9 * frame['16ns_cycles'] + time_axis
 
         return timebase
-    
+
     '''
-    Write as wave, with optional gain
+    Write as wave, with optional gain.
     '''
     def to_wav(self, filepath, gain_dB = 0.0):
+        from scipy.io import wavfile
         pcm = self.pcm
         if gain_dB != 0.0:
             pcm *= 10 ** (0.1 * gain_dB)
         wavfile.write(filepath, int(F_S), pcm)
-        
         
         
         

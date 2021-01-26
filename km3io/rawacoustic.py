@@ -19,9 +19,9 @@ Summary description of the raw acoustic data format.
 - 4B: number of 16ns cycles;
 - 4B: referred to as 'samples' corresponds to DAQ_ADF_ANALYSIS_WINDOW_SIZE (typ.: 131072).
 
-What follows a sequence of FRAME_LENGTH audio samples. Each sample is 32 bit float PCM value. FRAME_LENGTH cannot be reconstructed from DAQ_ADF_ANALYSIS_WINDOW_SIZE without knowing DAQ_ADF_ANALYSIS_WINDOW_OVERLAP so it has to be set by the user.
+Follows a sequence of 4B * FRAME_LENGTH audio samples. Each sample is 32 bit float PCM value. FRAME_LENGTH cannot be reconstructed from DAQ_ADF_ANALYSIS_WINDOW_SIZE without knowing DAQ_ADF_ANALYSIS_WINDOW_OVERLAP so it has to be set by the user.
 
-As long as FRAME_LENGTH is constant within the same file, this approach will hold (FRAME_LENGTH can be made configurable in the constructor).
+FRAME_LENGTH should be constant within the same file, so this approach will hold (FRAME_LENGTH is configurable in the constructor).
 
 Note: each file contains data from a single transducer and the DOM or base ID is stored in the filename only. This is not a very good design but here it is tentatively dealt with.
 
@@ -33,6 +33,7 @@ F_S = 195312.5
 
 
 def get_dtype(FRAME_LENGTH):
+    """ Returns the data layout corresponding to FRAME_LENGTH """
     DATA_TYPE = np.dtype(
         [
             ("utc_seconds", np.uint32),
@@ -52,8 +53,9 @@ class RawAcousticReader:
 
         with open(filepath) as acoufile:
             self._data = np.fromfile(acoufile, dtype=DATA_TYPE)
-            """ extract 8 characters starting from the 5th to get the CLB id """
-            self._id = filepath.split("/")[-1][4 : 1 + 12]
+            """ extract CLB id from filename """
+            """ split the extension and scan backwards the path """
+            self._id = filepath.split(".")[-2][-24 : -16 + 1]
 
     @property
     def ID(self):

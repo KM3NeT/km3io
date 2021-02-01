@@ -1,9 +1,12 @@
 Unreleased changes
 ------------------
-* Fixes parsing error when a MC header contains invalid attribute names.
 
 Version 0
 ---------
+
+0.19.4 / 2021-02-01
+~~~~~~~~~~~~~~~~~~~
+* Fixed parsing error when a MC header contains invalid attribute names.
 
 0.19.3 / 2020-12-17
 ~~~~~~~~~~~~~~~~~~~

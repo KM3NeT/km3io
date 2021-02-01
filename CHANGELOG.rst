@@ -3,6 +3,9 @@ Unreleased changes
 
 Version 0
 ---------
+0.19.5 / 2021-02-01
+~~~~~~~~~~~~~~~~~~~
+* Adds access to ``mc_event_time``
 
 0.19.4 / 2021-02-01
 ~~~~~~~~~~~~~~~~~~~

@@ -98,6 +98,20 @@ class TestHeader(unittest.TestCase):
         assert "test" == header.undefined.field_2
         assert 3.4 == header.undefined.field_3
 
+    def test_header_with_invalid_field_or_attribute_names(self):
+        head = {
+            "a": "1 2 3",
+            "b+c": "4 5 6",
+        }
+
+        header = Header(head)
+        assert 1 == header["a"][0]
+        assert 2 == header["a"][1]
+        assert 3 == header["a"][2]
+        assert 4 == header["b+c"][0]
+        assert 5 == header["b+c"][1]
+        assert 6 == header["b+c"][2]
+
     def test_reading_header_from_sample_file(self):
         head = OFFLINE_NUMUCC.header
 

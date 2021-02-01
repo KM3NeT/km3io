@@ -113,17 +113,23 @@ class Header:
             values += [None] * (n_max - n_values)
             fields += ["field_{}".format(i) for i in range(n_fields, n_max)]
 
-            Constructor = namedtuple(attribute, fields)
-
             if not values:
                 continue
 
-            self._data[attribute] = Constructor(
-                **{f: to_num(v) for (f, v) in zip(fields, values)}
-            )
+            entry = {f: to_num(v) for (f, v) in zip(fields, values)}
+            try:
+                self._data[attribute] = namedtuple(attribute, fields)(**entry)
+            except ValueError:
+                self._data[attribute] = [to_num(v) for v in values]
 
         for attribute, value in self._data.items():
-            setattr(self, attribute, value)
+            try:
+                setattr(self, attribute, value)
+            except ValueError:
+                log.warning(
+                    f"Invalid attribute name for header entry '{attribute}'"
+                    ", access only as dictionary key."
+                )
 
     def __str__(self):
         lines = ["MC Header:"]
@@ -134,3 +140,6 @@ class Header:
             else:
                 lines.append("  {}: {}".format(key, value))
         return "\n".join(lines)
+
+    def __getitem__(self, key):
+        return self._data[key]

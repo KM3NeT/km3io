@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Fixes parsing error when a MC header contains invalid attribute names.
 
 Version 0
 ---------

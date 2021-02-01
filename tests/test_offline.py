@@ -102,15 +102,26 @@ class TestHeader(unittest.TestCase):
         head = {
             "a": "1 2 3",
             "b+c": "4 5 6",
+            "c": "foo",
+            "d": "7",
+            "e+f": "bar",
         }
 
         header = Header(head)
         assert 1 == header["a"][0]
         assert 2 == header["a"][1]
         assert 3 == header["a"][2]
+        assert 1 == header.a[0]
+        assert 2 == header.a[1]
+        assert 3 == header.a[2]
         assert 4 == header["b+c"][0]
         assert 5 == header["b+c"][1]
         assert 6 == header["b+c"][2]
+        assert "foo" == header.c
+        assert "foo" == header["c"]
+        assert 7 == header.d
+        assert 7 == header["d"]
+        assert "bar" == header["e+f"]
 
     def test_reading_header_from_sample_file(self):
         head = OFFLINE_NUMUCC.header

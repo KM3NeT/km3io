@@ -108,7 +108,10 @@ class Header:
             n_fields = len(fields)
 
             if n_values == 1 and n_fields == 0:
-                self._data[attribute] = to_num(values[0])
+                entry = to_num(values[0])
+                self._data[attribute] = entry
+                if attribute.isidentifier():
+                    setattr(self, attribute, entry)
                 continue
 
             n_max = max(n_values, n_fields)
@@ -118,16 +121,14 @@ class Header:
             if not values:
                 continue
 
-            entry = {f: to_num(v) for (f, v) in zip(fields, values)}
-            try:
-                self._data[attribute] = namedtuple(attribute, fields)(**entry)
-            except ValueError:
-                self._data[attribute] = [to_num(v) for v in values]
+            cls_name = attribute if attribute.isidentifier() else "HeaderEntry"
+            entry = namedtuple(cls_name, fields)(*[to_num(v) for v in values])
 
-        for attribute, value in self._data.items():
-            try:
-                setattr(self, attribute, value)
-            except ValueError:
+            self._data[attribute] = entry
+
+            if attribute.isidentifier():
+                setattr(self, attribute, entry)
+            else:
                 log.warning(
                     f"Invalid attribute name for header entry '{attribute}'"
                     ", access only as dictionary key."

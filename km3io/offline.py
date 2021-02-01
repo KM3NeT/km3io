@@ -17,8 +17,10 @@ class OfflineReader(EventReader):
 
     event_path = "E/Evt"
     item_name = "OfflineEvent"
-    skip_keys = ["t", "AAObject"]
+    skip_keys = ["t", "AAObject", "mc_event_time"]
     aliases = {
+        "mc_event_time_sec": "mc_event_time/mc_event_time.fSec",
+        "mc_event_time_ns": "mc_event_time/mc_event_time.fNanoSec",
         "t_sec": "t/t.fSec",
         "t_ns": "t/t.fNanoSec",
         "usr": "AAObject/usr",

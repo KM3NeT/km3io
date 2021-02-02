@@ -19,6 +19,8 @@ class AttrDict(dict):
         self.__dict__ = self
 
 
+daqdatatypes = AttrDict(daqdatatypes)
+root = AttrDict(root)
 trigger = AttrDict(trigger)
 fitparameters = AttrDict(fitparameters)
 reconstruction = AttrDict(reconstruction)

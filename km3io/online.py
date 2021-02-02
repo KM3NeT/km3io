@@ -134,7 +134,7 @@ class OnlineReader:
     @property
     def events(self):
         if self._events is None:
-            tree = self._fobj[TTREE_ONLINE_EVENT]
+            tree = self._fobj[root.TTREE_ONLINE_EVENT]
 
             headers = tree["KM3NETDAQ::JDAQEventHeader"].array(
                 uproot3.interpret(tree["KM3NETDAQ::JDAQEventHeader"], cntvers=True)

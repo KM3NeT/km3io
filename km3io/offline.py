@@ -5,7 +5,7 @@ import uproot
 import numpy as np
 import awkward as ak
 
-from .definitions import mc_header
+from .definitions import mc_header, root
 from .tools import cached_property, to_num, unfold_indices
 from .rootio import EventReader
 
@@ -15,7 +15,7 @@ log = logging.getLogger("offline")
 class OfflineReader(EventReader):
     """reader for offline ROOT files"""
 
-    event_path = "E/Evt"
+    event_path = f"{root.TTREE_OFFLINE_EVENT}/{root.TBRANCH_OFFLINE_EVENT}"
     item_name = "OfflineEvent"
     skip_keys = ["t", "AAObject", "mc_event_time"]
     aliases = {

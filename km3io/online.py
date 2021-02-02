@@ -1,9 +1,12 @@
 import binascii
 import os
+
 import uproot3
 import numpy as np
-
 import numba as nb
+
+from .definitions import root
+
 
 TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
 SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
@@ -131,7 +134,7 @@ class OnlineReader:
     @property
     def events(self):
         if self._events is None:
-            tree = self._fobj["KM3NET_EVENT"]
+            tree = self._fobj[TTREE_ONLINE_EVENT]
 
             headers = tree["KM3NETDAQ::JDAQEventHeader"].array(
                 uproot3.interpret(tree["KM3NETDAQ::JDAQEventHeader"], cntvers=True)

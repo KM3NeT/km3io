@@ -2,9 +2,11 @@
 
 from km3io._definitions.mc_header import data as mc_header
 
-from km3io._definitions.trigger import data as trigger
+from km3io._definitions.daqdatatypes import data as daqdatatypes
 from km3io._definitions.fitparameters import data as fitparameters
 from km3io._definitions.reconstruction import data as reconstruction
+from km3io._definitions.root import data as root
+from km3io._definitions.trigger import data as trigger
 from km3io._definitions.w2list_genhen import data as w2list_genhen
 from km3io._definitions.w2list_gseagen import data as w2list_gseagen
 

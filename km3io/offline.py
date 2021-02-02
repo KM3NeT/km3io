@@ -146,3 +146,12 @@ class Header:
 
     def __getitem__(self, key):
         return self._data[key]
+
+    def keys(self):
+        return self._data.keys()
+
+    def items(self):
+        return self._data.items()
+
+    def values(self):
+        return self._data.values()

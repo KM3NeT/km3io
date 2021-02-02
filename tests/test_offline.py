@@ -123,6 +123,20 @@ class TestHeader(unittest.TestCase):
         assert 7 == header["d"]
         assert "bar" == header["e+f"]
 
+    def test_header_behaves_like_a_dict(self):
+        head = {
+            "a": "1 2 3",
+            "b+c": "4 5 6",
+            "c": "foo",
+            "d": "7",
+            "e+f": "bar",
+        }
+
+        header = Header(head)
+        self.assertListEqual(list(head.keys()), list(header.keys()))
+        assert 5 == len(header.values())
+        assert 5 == len(header.items())
+
     def test_reading_header_from_sample_file(self):
         head = OFFLINE_NUMUCC.header
 

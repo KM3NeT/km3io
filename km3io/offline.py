@@ -134,6 +134,9 @@ class Header:
                     ", access only as dictionary key."
                 )
 
+    def __dir__(self):
+        return list(self.keys())
+
     def __str__(self):
         lines = ["MC Header:"]
         keys = set(mc_header.keys())

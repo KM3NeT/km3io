@@ -16,9 +16,10 @@ Options:
 """
 import warnings
 
-warnings.simplefilter(action="ignore", category=FutureWarning)
-
-import uproot3
+with warnings.catch_warnings():
+    for warning_category in (FutureWarning, DeprecationWarning):
+        warnings.simplefilter("ignore", category=warning_category)
+    import uproot3
 
 
 def print_tree(filename):

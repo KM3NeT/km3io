@@ -4,7 +4,10 @@ version = get_distribution(__name__).version
 
 import warnings
 
-warnings.simplefilter(action="ignore", category=FutureWarning)  # uproot3
+with warnings.catch_warnings():
+    for warning_category in (FutureWarning, DeprecationWarning):
+        warnings.simplefilter("ignore", category=warning_category)
+    import uproot3
 
 from .offline import OfflineReader
 from .online import OnlineReader

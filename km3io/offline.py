@@ -32,6 +32,13 @@ class OfflineReader(EventReader):
             "channel_id": "hits.channel_id",
             "dom_id": "hits.dom_id",
             "t": "hits.t",
+            "tdc": "hits.tdc",
+            "pos_x": "hits.pos.x",
+            "pos_y": "hits.pos.y",
+            "pos_z": "hits.pos.z",
+            "dir_x": "hits.dir.x",
+            "dir_y": "hits.dir.y",
+            "dir_z": "hits.dir.z",
             "tot": "hits.tot",
             "trig": "hits.trig",  # non-zero if the hit is a triggered hit
         },

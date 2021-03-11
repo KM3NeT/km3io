@@ -36,4 +36,4 @@ reconstruction_idx = {v: k for k, v in reconstruction.items()}
 w2list_genhen_idx = {v: k for k, v in w2list_genhen.items()}
 w2list_gseagen_idx = {v: k for k, v in w2list_gseagen.items()}
 pmt_status_idx = {v: k for k, v in pmt_status.items()}
-trkmembers_idx = {v: k for k, v in trksmembers.items()}
+trkmembers_idx = {v: k for k, v in trkmembers.items()}

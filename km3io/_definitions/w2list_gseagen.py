@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KM3NeT Data Definitions v1.3.1-22-gcbad051
+KM3NeT Data Definitions v2.0.0
 https://git.km3net.de/common/km3net-dataformat
 """
 
@@ -25,4 +25,8 @@ data = dict(
     W2LIST_GSEAGEN_TARGETZ=16,
     W2LIST_GSEAGEN_VERINCAN=17,
     W2LIST_GSEAGEN_LEPINCAN=18,
+    W2LIST_GSEAGEN_N_RETRIES=19,
+    W2LIST_GSEAGEN_CUSTOM_YAW=20,
+    W2LIST_GSEAGEN_CUSTOM_PITCH=21,
+    W2LIST_GSEAGEN_CUSTOM_ROLL=22,
 )

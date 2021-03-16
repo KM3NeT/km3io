@@ -161,6 +161,8 @@ class TestOfflineEvents(unittest.TestCase):
         self.det_id = [44] * self.n_events
         self.n_hits = [176, 125, 318, 157, 83, 60, 71, 84, 255, 105]
         self.n_tracks = [56, 55, 56, 56, 56, 56, 56, 56, 54, 56]
+        self.status = [100, 5, 11, 15, 1, 12, 12, 12, 12, 12]
+        self.mother_id = [-1, -1, 1, 1, 0, 2, 5, 5, 6, 8]
         self.t_sec = [
             1567036818,
             1567036818,
@@ -186,6 +188,12 @@ class TestOfflineEvents(unittest.TestCase):
             400000000,
         ]
 
+    def test_status(self):
+        assert np.allclose(self.status, f.mc_tracks[1].status[:10].tolist())
+            
+    def test_mother_id(self):
+        assert np.allclose(self.mother_id, f.mc_tracks[1].mother_id[:10].tolist())
+            
     def test_len(self):
         assert self.n_events == len(self.events)
 
@@ -430,6 +438,8 @@ class TestOfflineTracks(unittest.TestCase):
             "rec_type",
             "rec_stages",
             "fitinf",
+            "status",
+            "mother_id",
         ]:
             getattr(self.tracks, field)
 

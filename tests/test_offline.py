@@ -412,7 +412,7 @@ class TestOfflineTracks(unittest.TestCase):
         self.f = OFFLINE_FILE
         self.tracks = OFFLINE_FILE.events.tracks
         self.tracks_numucc = OFFLINE_NUMUCC
-        self.mc_tracks = OFFLINE_MC_TRACK
+        self.mc_tracks = OFFLINE_MC_TRACK.mc_tracks
         self.n_events = 10
         self.status = [100, 5, 11, 15, 1, 12, 12, 12, 12, 12]
         self.mother_id = [-1, -1, 1, 1, 0, 2, 5, 5, 6, 8]

@@ -416,6 +416,7 @@ class TestOfflineTracks(unittest.TestCase):
         self.tracks = OFFLINE_FILE.events.tracks
         self.tracks_numucc = OFFLINE_NUMUCC
         self.mc_tracks = OFFLINE_MC_TRACK.mc_tracks
+        self.mc_tracks_old = OFFLINE_MC_TRACK_USR.mc_tracks
         self.n_events = 10
         self.status = [100, 5, 11, 15, 1, 12, 12, 12, 12, 12]
         self.mother_id = [-1, -1, 1, 1, 0, 2, 5, 5, 6, 8]
@@ -447,7 +448,9 @@ class TestOfflineTracks(unittest.TestCase):
 
     def test_attribute_error_raised_for_older_files(self):
         with self.assertRaises(AttributeError):
-            self.tracks[1].mother_id
+            self.mc_tracks_old[1].mother_id
+        with self.assertRaises(AttributeError):
+            self.mc_tracks_old[1].status
 
     def test_item_selection(self):
         self.assertListEqual(

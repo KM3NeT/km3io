@@ -18,7 +18,10 @@ OFFLINE_MC_TRACK_USR = OfflineReader(
     )
 )
 OFFLINE_NUMUCC = OfflineReader(data_path("offline/numucc.root"))  # with mc data
-OFFLINE_MC_TRACK = OfflineReader(data_path("gseagen/gseagen_v7.0.0_numuCC_diffuse.aa.root"))
+OFFLINE_MC_TRACK = OfflineReader(
+    data_path("gseagen/gseagen_v7.0.0_numuCC_diffuse.aa.root")
+)
+
 
 class TestOfflineReader(unittest.TestCase):
     def setUp(self):
@@ -185,7 +188,7 @@ class TestOfflineEvents(unittest.TestCase):
             500000000,
             400000000,
         ]
-        
+
     def test_len(self):
         assert self.n_events == len(self.events)
 
@@ -438,14 +441,14 @@ class TestOfflineTracks(unittest.TestCase):
 
     def test_status(self):
         assert np.allclose(self.status, self.mc_tracks[1].status[:10].tolist())
-            
+
     def test_mother_id(self):
         assert np.allclose(self.mother_id, self.mc_tracks[1].mother_id[:10].tolist())
 
     def test_attribute_error_raised_for_older_files(self):
         with self.assertRaises(AttributeError):
             self.tracks[1].mother_id
-            
+
     def test_item_selection(self):
         self.assertListEqual(
             list(self.tracks[0].dir_z[:2]), [-0.872885221293917, -0.872885221293917]

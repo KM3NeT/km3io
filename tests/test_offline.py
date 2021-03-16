@@ -441,7 +441,11 @@ class TestOfflineTracks(unittest.TestCase):
             
     def test_mother_id(self):
         assert np.allclose(self.mother_id, self.mc_tracks[1].mother_id[:10].tolist())
-         
+
+    def test_attribute_error_raised_for_older_files(self):
+        with self.assertRaises(AttributeError):
+            self.tracks[1].mother_id
+            
     def test_item_selection(self):
         self.assertListEqual(
             list(self.tracks[0].dir_z[:2]), [-0.872885221293917, -0.872885221293917]

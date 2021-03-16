@@ -433,8 +433,6 @@ class TestOfflineTracks(unittest.TestCase):
             "rec_type",
             "rec_stages",
             "fitinf",
-            "status",
-            "mother_id",
         ]:
             getattr(self.tracks, field)
 

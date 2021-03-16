@@ -18,7 +18,7 @@ OFFLINE_MC_TRACK_USR = OfflineReader(
     )
 )
 OFFLINE_NUMUCC = OfflineReader(data_path("offline/numucc.root"))  # with mc data
-
+OFFLINE_MC_TRACK = OfflineReader(data_path("gseagen/gseagen_v7.0.0_numuCC_diffuse.aa.root"))
 
 class TestOfflineReader(unittest.TestCase):
     def setUp(self):
@@ -161,8 +161,6 @@ class TestOfflineEvents(unittest.TestCase):
         self.det_id = [44] * self.n_events
         self.n_hits = [176, 125, 318, 157, 83, 60, 71, 84, 255, 105]
         self.n_tracks = [56, 55, 56, 56, 56, 56, 56, 56, 54, 56]
-        self.status = [100, 5, 11, 15, 1, 12, 12, 12, 12, 12]
-        self.mother_id = [-1, -1, 1, 1, 0, 2, 5, 5, 6, 8]
         self.t_sec = [
             1567036818,
             1567036818,
@@ -187,13 +185,7 @@ class TestOfflineEvents(unittest.TestCase):
             500000000,
             400000000,
         ]
-
-    def test_status(self):
-        assert np.allclose(self.status, f.mc_tracks[1].status[:10].tolist())
-            
-    def test_mother_id(self):
-        assert np.allclose(self.mother_id, f.mc_tracks[1].mother_id[:10].tolist())
-            
+        
     def test_len(self):
         assert self.n_events == len(self.events)
 
@@ -420,7 +412,10 @@ class TestOfflineTracks(unittest.TestCase):
         self.f = OFFLINE_FILE
         self.tracks = OFFLINE_FILE.events.tracks
         self.tracks_numucc = OFFLINE_NUMUCC
+        self.mc_tracks = OFFLINE_MC_TRACK
         self.n_events = 10
+        self.status = [100, 5, 11, 15, 1, 12, 12, 12, 12, 12]
+        self.mother_id = [-1, -1, 1, 1, 0, 2, 5, 5, 6, 8]
 
     def test_fields(self):
         for field in [
@@ -443,6 +438,12 @@ class TestOfflineTracks(unittest.TestCase):
         ]:
             getattr(self.tracks, field)
 
+    def test_status(self):
+        assert np.allclose(self.status, self.mc_tracks[1].status[:10].tolist())
+            
+    def test_mother_id(self):
+        assert np.allclose(self.mother_id, self.mc_tracks[1].mother_id[:10].tolist())
+         
     def test_item_selection(self):
         self.assertListEqual(
             list(self.tracks[0].dir_z[:2]), [-0.872885221293917, -0.872885221293917]

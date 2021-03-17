@@ -9,6 +9,9 @@ from km3io._definitions.root import data as root
 from km3io._definitions.trigger import data as trigger
 from km3io._definitions.w2list_genhen import data as w2list_genhen
 from km3io._definitions.w2list_gseagen import data as w2list_gseagen
+from km3io._definitions.trkmembers import data as trkmembers
+from km3io._definitions.applications import data as applications
+from km3io._definitions.pmt_status import data as pmt_status
 
 
 class AttrDict(dict):
@@ -32,3 +35,5 @@ fitparameters_idx = {v: k for k, v in fitparameters.items()}
 reconstruction_idx = {v: k for k, v in reconstruction.items()}
 w2list_genhen_idx = {v: k for k, v in w2list_genhen.items()}
 w2list_gseagen_idx = {v: k for k, v in w2list_gseagen.items()}
+pmt_status_idx = {v: k for k, v in pmt_status.items()}
+trkmembers_idx = {v: k for k, v in trkmembers.items()}

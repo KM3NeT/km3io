@@ -1,9 +1,11 @@
 Unreleased changes
 ------------------
 * ``km3net-dataformat`` updated to 2.0.0
+* mother ID and status are now read out for MC tracks
 
 Version 0
 ---------
+
 0.20.0 / 2021-02-18
 ~~~~~~~~~~~~~~~~~~~
 * The fields ``.tdc``, ``.pos_{xyz}`` and ``.dir_{xyz}`` in ``.hits`` are

@@ -1,11 +1,11 @@
 Unreleased changes
 ------------------
-
-Version 0
----------
 0.20.1 / 2021-03-17
 ~~~~~~~~~~~~~~~~~~~
 * mother ID and status are now read out for MC tracks
+
+Version 0
+---------
 
 0.20.0 / 2021-02-18
 ~~~~~~~~~~~~~~~~~~~

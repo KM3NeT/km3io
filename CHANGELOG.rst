@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* ``km3net-dataformat`` updated to 2.0.0
 * mother ID and status are now read out for MC tracks
 
 Version 0

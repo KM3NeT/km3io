@@ -6,6 +6,7 @@ https://git.km3net.de/common/km3net-dataformat
 
 # fitparameters
 data = dict(
+    #jmuon chain
     JGANDALF_BETA0_RAD=0,
     JGANDALF_BETA1_RAD=1,
     JGANDALF_CHI2=2,
@@ -24,5 +25,11 @@ data = dict(
     JENERGY_NDF=15,
     JENERGY_NUMBER_OF_HITS=16,
     JCOPY_Z_M=17,
-    JSHOWERFIT_ENERGY=4,
+    
+    #jshowerfit chain
+    JSHOWERFIT_UNCORRECTED_ENERGY=4,
+
+    #aashowerfit chain
+    AASHOWERFIT_UNCORRECTED_ENERGY=0,
+    AASHOWERFIT_NUMBER_OF_HITS=1,
 )

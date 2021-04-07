@@ -27,9 +27,9 @@ data = dict(
     JCOPY_Z_M=17,
     
     #jshowerfit chain
-    JSHOWERFIT_UNCORRECTED_ENERGY=4,
+    JSHOWERFIT_ENERGY=4,
 
     #aashowerfit chain
-    AASHOWERFIT_UNCORRECTED_ENERGY=0,
+    AASHOWERFIT_ENERGY=0,
     AASHOWERFIT_NUMBER_OF_HITS=1,
 )

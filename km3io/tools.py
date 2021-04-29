@@ -272,7 +272,7 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
     return out[:, 0]
 
 def best_track_indices(tracks, startend=None, minmax=None, stages=None):
-    """Best track selection.
+    """Index of best track selection.
 
     Parameters
     ----------
@@ -288,13 +288,10 @@ def best_track_indices(tracks, startend=None, minmax=None, stages=None):
       - list: the order of the rec_stages is respected.
       - set: a subset of required stages; the order is irrelevant.
 
-    Returns (need to be edited)
+    Returns
     -------
-    awkward.Array or namedtuple
-      Be aware that the dimensions are kept, which means that the final
-      track attributes are nested when multiple events are passed in.
-      If a single event (just a list of tracks) is provided, a named tuple
-      with a single track and flat attributes is created.
+    integer
+      The index value of the best track out of the array of tracks given.
 
     Raises
     ------
@@ -327,25 +324,13 @@ def best_track_indices(tracks, startend=None, minmax=None, stages=None):
         original_ndim = 1
     axis = 1 if original_ndim == 2 else 0
 
-    tracks = tracks[m1]
-
-    rec_stage_lengths = ak.num(tracks.rec_stages, axis=-1)
+    rec_stage_lengths = ak.num(tracks[m1].rec_stages, axis=-1)
     max_rec_stage_length = ak.max(rec_stage_lengths, axis=axis)
     m2 = rec_stage_lengths == max_rec_stage_length
-    tracks = tracks[m2]
 
-    m3 = ak.argmax(tracks.lik, axis=axis, keepdims=True)
-
-    #out = tracks[m3]
+    m3 = ak.argmax(tracks[m2].lik, axis=axis, keepdims=True)
 
     return m1[m2[m3]]
-    '''
-    if original_ndim == 1:
-        if isinstance(out, ak.Record):
-            return out[:, 0]
-        return out[0]
-    return out[:, 0]
-    '''
 
 
 def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):

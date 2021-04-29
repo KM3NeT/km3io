@@ -271,67 +271,6 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
         return out[0]
     return out[:, 0]
 
-def best_track_indices(tracks, startend=None, minmax=None, stages=None):
-    """Index of best track selection.
-
-    Parameters
-    ----------
-    tracks : awkward.Array
-      A list of tracks or doubly nested tracks, usually from
-      OfflineReader.events.tracks or subarrays of that, containing recunstructed
-      tracks.
-    startend: tuple(int, int), optional
-      The required first and last stage in tracks.rec_stages.
-    minmax: tuple(int, int), optional
-      The range (minimum and maximum) value of rec_stages to take into account.
-    stages : list or set, optional
-      - list: the order of the rec_stages is respected.
-      - set: a subset of required stages; the order is irrelevant.
-
-    Returns
-    -------
-    integer
-      The index value of the best track out of the array of tracks given.
-
-    Raises
-    ------
-    ValueError
-      When invalid inputs are specified.
-
-    """
-    inputs = (stages, startend, minmax)
-
-    if sum(v is not None for v in inputs) != 1:
-        raise ValueError("either stages, startend or minmax must be specified.")
-
-    if stages is not None:
-        if isinstance(stages, list):
-            m1 = mask(tracks.rec_stages, sequence=stages)
-        elif isinstance(stages, set):
-            m1 = mask(tracks.rec_stages, atleast=list(stages))
-        else:
-            raise ValueError("stages must be a list or a set of integers")
-
-    if startend is not None:
-        m1 = mask(tracks.rec_stages, startend=startend)
-
-    if minmax is not None:
-        m1 = mask(tracks.rec_stages, minmax=minmax)
-
-    try:
-        original_ndim = tracks.ndim
-    except AttributeError:
-        original_ndim = 1
-    axis = 1 if original_ndim == 2 else 0
-
-    rec_stage_lengths = ak.num(tracks[m1].rec_stages, axis=-1)
-    max_rec_stage_length = ak.max(rec_stage_lengths, axis=axis)
-    m2 = rec_stage_lengths == max_rec_stage_length
-
-    m3 = ak.argmax(tracks[m2].lik, axis=axis, keepdims=True)
-
-    return m1[m2[m3]]
-
 
 def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):
     """Return a boolean mask which mask each nested sub-array for a condition.
@@ -482,6 +421,86 @@ def best_aashower(tracks):
 def best_dusjshower(tracks):
     """Select the best DISJSHOWER track."""
     return best_track(tracks, minmax=(krec.DUSJSHOWERBEGIN, krec.DUSJSHOWEREND))
+
+def best_track_indices(tracks, startend=None, minmax=None, stages=None):
+    """Index of best track selection.
+
+    Parameters
+    ----------
+    tracks : awkward.Array
+      A list of tracks or doubly nested tracks, usually from
+      OfflineReader.events.tracks or subarrays of that, containing recunstructed
+      tracks.
+    startend: tuple(int, int), optional
+      The required first and last stage in tracks.rec_stages.
+    minmax: tuple(int, int), optional
+      The range (minimum and maximum) value of rec_stages to take into account.
+    stages : list or set, optional
+      - list: the order of the rec_stages is respected.
+      - set: a subset of required stages; the order is irrelevant.
+
+    Returns
+    -------
+    integer
+      The index value of the best track out of the array of tracks given.
+
+    Raises
+    ------
+    ValueError
+      When invalid inputs are specified.
+
+    """
+    inputs = (stages, startend, minmax)
+
+    if sum(v is not None for v in inputs) != 1:
+        raise ValueError("either stages, startend or minmax must be specified.")
+
+    if stages is not None:
+        if isinstance(stages, list):
+            m1 = mask(tracks.rec_stages, sequence=stages)
+        elif isinstance(stages, set):
+            m1 = mask(tracks.rec_stages, atleast=list(stages))
+        else:
+            raise ValueError("stages must be a list or a set of integers")
+
+    if startend is not None:
+        m1 = mask(tracks.rec_stages, startend=startend)
+
+    if minmax is not None:
+        m1 = mask(tracks.rec_stages, minmax=minmax)
+
+    try:
+        original_ndim = tracks.ndim
+    except AttributeError:
+        original_ndim = 1
+    axis = 1 if original_ndim == 2 else 0
+
+    rec_stage_lengths = ak.num(tracks[m1].rec_stages, axis=-1)
+    max_rec_stage_length = ak.max(rec_stage_lengths, axis=axis)
+    m2 = rec_stage_lengths == max_rec_stage_length
+
+    m3 = ak.argmax(tracks[m2].lik, axis=axis, keepdims=True)
+
+    return m1[m2[m3]]
+
+def best_jmuon_indices(tracks):
+    """Select the index of the best JMUON track."""
+    return best_track_indices(tracks, minmax=(krec.JMUONBEGIN, krec.JMUONEND))
+
+
+def best_jshower_indices(tracks):
+    """Select the index of the best JSHOWER track."""
+    return best_track_indices(tracks, minmax=(krec.JSHOWERBEGIN, krec.JSHOWEREND))
+
+
+def best_aashower_indices(tracks):
+    """Select the index of the best AASHOWER track. """
+    return best_track_indices(tracks, minmax=(krec.AASHOWERBEGIN, krec.AASHOWEREND))
+
+
+def best_dusjshower_indices(tracks):
+    """Select the index of the best DISJSHOWER track."""
+    return best_track_indices(tracks, minmax=(krec.DUSJSHOWERBEGIN, krec.DUSJSHOWEREND))
 
 
 def is_cc(fobj):

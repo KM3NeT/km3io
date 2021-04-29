@@ -368,7 +368,7 @@ class TestBestJshowerIndices(unittest.TestCase):
         # there are no jshower events in this file
         best_indices = best_jshower_indices(OFFLINE_FILE.events.tracks)
 
-        assert len(best_indices) == 1
+        assert len(best_indices) == 10
 
         assert best_indices is None
 
@@ -378,7 +378,7 @@ class TestBestAashowerIndices(unittest.TestCase):
         # there are no aashower events in this file
         best_indices = best_aashower_indices(OFFLINE_FILE.events.tracks)
 
-        assert len(best_indices) == 1
+        assert len(best_indices) == 10
 
         assert best_indices is None
 
@@ -388,7 +388,7 @@ class TestBestDusjshowerIndices(unittest.TestCase):
         # there are no dusjshower events in this file
         best_indices = best_dusjshower_indices(OFFLINE_FILE.events.tracks)
 
-        assert len(best_indices) == 1
+        assert len(best_indices) == 10
 
         assert best_indices is None
 

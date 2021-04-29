@@ -358,7 +358,8 @@ class TestBestJmuonIndices(unittest.TestCase):
     def test_best_jmuon_indices(self):
         best_indices = best_jmuon_indices(OFFLINE_FILE.events.tracks)
 
-        assert len(best_indices) == 1
+        assert len(best_indices) == 10
+        print(best_indices)
 
         assert OFFLINE_FILE.events.tracks[best_indices] == best_jmuon(OFFLINE_FILE.events.tracks)
 
@@ -370,7 +371,7 @@ class TestBestJshowerIndices(unittest.TestCase):
 
         assert len(best_indices) == 10
 
-        assert best_indices is None
+        #assert best_indices is None
 
 
 class TestBestAashowerIndices(unittest.TestCase):
@@ -380,7 +381,7 @@ class TestBestAashowerIndices(unittest.TestCase):
 
         assert len(best_indices) == 10
 
-        assert best_indices is None
+        #assert best_indices is None
 
 
 class TestBestDusjshowerIndices(unittest.TestCase):
@@ -390,7 +391,7 @@ class TestBestDusjshowerIndices(unittest.TestCase):
 
         assert len(best_indices) == 10
 
-        assert best_indices is None
+        #assert best_indices is None
 
         
 class TestGetMultiplicity(unittest.TestCase):

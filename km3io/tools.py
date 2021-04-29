@@ -479,7 +479,7 @@ def best_track_indices(tracks, startend=None, minmax=None, stages=None):
     max_rec_stage_length = ak.max(rec_stage_lengths, axis=axis)
     m2 = rec_stage_lengths == max_rec_stage_length
 
-    m3 = ak.argmax(tracks[m2].lik, axis=axis, keepdims=True)
+    m3 = ak.argmax(tracks[m1][m2].lik, axis=axis, keepdims=True)
 
     return m1[m2[m3]]
 

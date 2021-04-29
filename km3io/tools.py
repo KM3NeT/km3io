@@ -271,6 +271,82 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
         return out[0]
     return out[:, 0]
 
+def best_track_indices(tracks, startend=None, minmax=None, stages=None):
+    """Best track selection.
+
+    Parameters
+    ----------
+    tracks : awkward.Array
+      A list of tracks or doubly nested tracks, usually from
+      OfflineReader.events.tracks or subarrays of that, containing recunstructed
+      tracks.
+    startend: tuple(int, int), optional
+      The required first and last stage in tracks.rec_stages.
+    minmax: tuple(int, int), optional
+      The range (minimum and maximum) value of rec_stages to take into account.
+    stages : list or set, optional
+      - list: the order of the rec_stages is respected.
+      - set: a subset of required stages; the order is irrelevant.
+
+    Returns (need to be edited)
+    -------
+    awkward.Array or namedtuple
+      Be aware that the dimensions are kept, which means that the final
+      track attributes are nested when multiple events are passed in.
+      If a single event (just a list of tracks) is provided, a named tuple
+      with a single track and flat attributes is created.
+
+    Raises
+    ------
+    ValueError
+      When invalid inputs are specified.
+
+    """
+    inputs = (stages, startend, minmax)
+
+    if sum(v is not None for v in inputs) != 1:
+        raise ValueError("either stages, startend or minmax must be specified.")
+
+    if stages is not None:
+        if isinstance(stages, list):
+            m1 = mask(tracks.rec_stages, sequence=stages)
+        elif isinstance(stages, set):
+            m1 = mask(tracks.rec_stages, atleast=list(stages))
+        else:
+            raise ValueError("stages must be a list or a set of integers")
+
+    if startend is not None:
+        m1 = mask(tracks.rec_stages, startend=startend)
+
+    if minmax is not None:
+        m1 = mask(tracks.rec_stages, minmax=minmax)
+
+    try:
+        original_ndim = tracks.ndim
+    except AttributeError:
+        original_ndim = 1
+    axis = 1 if original_ndim == 2 else 0
+
+    tracks = tracks[m1]
+
+    rec_stage_lengths = ak.num(tracks.rec_stages, axis=-1)
+    max_rec_stage_length = ak.max(rec_stage_lengths, axis=axis)
+    m2 = rec_stage_lengths == max_rec_stage_length
+    tracks = tracks[m2]
+
+    m3 = ak.argmax(tracks.lik, axis=axis, keepdims=True)
+
+    #out = tracks[m3]
+
+    return m1[m2[m3]]
+    '''
+    if original_ndim == 1:
+        if isinstance(out, ak.Record):
+            return out[:, 0]
+        return out[0]
+    return out[:, 0]
+    '''
+
 
 def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):
     """Return a boolean mask which mask each nested sub-array for a condition.

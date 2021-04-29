@@ -26,6 +26,11 @@ from km3io.tools import (
     best_jshower,
     best_aashower,
     best_dusjshower,
+    best_track_indices,
+    best_jmuon_indices,
+    best_jshower_indices,
+    best_aashower_indices,
+    best_dusjshower_indices,
     is_cc,
     usr,
 )
@@ -349,6 +354,45 @@ class TestBestDusjshower(unittest.TestCase):
         assert best.lik[2] is None
 
 
+class TestBestJmuonIndices(unittest.TestCase):
+    def test_best_jmuon_indices(self):
+        best_indices = best_jmuon_indices(OFFLINE_FILE.events.tracks)
+
+        assert len(best_indices) == 1
+
+        assert OFFLINE_FILE.events.tracks[best_indices] == best_jmuon(OFFLINE_FILE.events.tracks)
+
+
+class TestBestJshowerIndices(unittest.TestCase):
+    def test_best_jshower_indices(self):
+        # there are no jshower events in this file
+        best_indices = best_jshower_indices(OFFLINE_FILE.events.tracks)
+
+        assert len(best_indices) == 1
+
+        assert best_indices is None
+
+
+class TestBestAashowerIndices(unittest.TestCase):
+    def test_best_aashower_indices(self):
+        # there are no aashower events in this file
+        best_indices = best_aashower_indices(OFFLINE_FILE.events.tracks)
+
+        assert len(best_indices) == 1
+
+        assert best_indices is None
+
+
+class TestBestDusjshowerIndices(unittest.TestCase):
+    def test_best_dusjshower_indices(self):
+        # there are no dusjshower events in this file
+        best_indices = best_dusjshower_indices(OFFLINE_FILE.events.tracks)
+
+        assert len(best_indices) == 1
+
+        assert best_indices is None
+
+        
 class TestGetMultiplicity(unittest.TestCase):
     def test_get_multiplicity(self):
         multiplicity = get_multiplicity(OFFLINE_FILE.events.tracks, [1, 3, 5, 4])

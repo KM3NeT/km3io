@@ -481,7 +481,7 @@ def best_track_indices(tracks, startend=None, minmax=None, stages=None):
 
     m3 = ak.argmax(tracks[m1][m2].lik, axis=axis, keepdims=True)
 
-    return m1[m2[m3]]
+    return m1, m2, m3
 
 def best_jmuon_indices(tracks):
     """Select the index of the best JMUON track."""

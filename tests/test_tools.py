@@ -358,9 +358,9 @@ class TestBestJmuonIndices(unittest.TestCase):
     def test_best_jmuon_indices(self):
         import logging
         m1, m2, m3 = best_jmuon_indices(OFFLINE_FILE.events.tracks)
-        logging.info("m1: {}".format(m1))
-        logging.info("m2: {}".format(m2))
-        logging.info("m3: {}".format(m3))
+        logging.debug("m1: {}".format(m1))
+        logging.debug("m2: {}".format(m2))
+        logging.debug("m3: {}".format(m3))
         #assert len(best_indices) == 10
         #print(best_indices)
 

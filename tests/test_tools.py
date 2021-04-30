@@ -368,6 +368,7 @@ class TestBestJmuonIndices(unittest.TestCase):
 
 class TestBestJshowerIndices(unittest.TestCase):
     def test_best_jshower_indices(self):
+        pass
         # there are no jshower events in this file
         #best_indices = best_jshower_indices(OFFLINE_FILE.events.tracks)
 
@@ -378,6 +379,7 @@ class TestBestJshowerIndices(unittest.TestCase):
 
 class TestBestAashowerIndices(unittest.TestCase):
     def test_best_aashower_indices(self):
+        pass
         # there are no aashower events in this file
         #best_indices = best_aashower_indices(OFFLINE_FILE.events.tracks)
 
@@ -388,6 +390,7 @@ class TestBestAashowerIndices(unittest.TestCase):
 
 class TestBestDusjshowerIndices(unittest.TestCase):
     def test_best_dusjshower_indices(self):
+        pass
         # there are no dusjshower events in this file
         #best_indices = best_dusjshower_indices(OFFLINE_FILE.events.tracks)
 

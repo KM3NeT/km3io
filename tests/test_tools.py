@@ -348,6 +348,11 @@ class TestBestDusjshower(unittest.TestCase):
         assert best.lik[1] is None
         assert best.lik[2] is None
 
+class TestBestTrackPerformance(unittest.TestCase):
+    def test_when_passing_sliced_tracks_only_those_are_processed(self):
+        tracks = OFFLINE_FILE.events.tracks[1:3]
+
+
 
 class TestGetMultiplicity(unittest.TestCase):
     def test_get_multiplicity(self):

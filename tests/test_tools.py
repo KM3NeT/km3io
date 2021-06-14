@@ -8,7 +8,6 @@ from pathlib import Path
 from km3net_testdata import data_path
 from km3io.definitions import fitparameters as kfit
 
-
 from km3io import OfflineReader
 from km3io.tools import (
     to_num,
@@ -28,6 +27,9 @@ from km3io.tools import (
     best_dusjshower,
     is_cc,
     usr,
+    is_3dshower,
+    is_mxshower,
+    is_3dmuon
 )
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
@@ -581,3 +583,37 @@ class TestUsr(unittest.TestCase):
             usr(OFFLINE_MC_TRACK_USR.mc_tracks[0], "bx").tolist(),
             atol=0.0001,
         )
+class Testis_3dshower(unittest.TestCase):
+    trigBit = ktrg['']
+    def test_is_3dshower(self):
+        booleanarr = is_3dshower(OFFLIOFFLINE_USRNE_FILE.events.trigger_mask)
+        assert len(booleanarr) == len(OFFLINE_USR.events.trigger_mask)
+        assert booleanarr.dtype == bool
+
+    def test_mc_3dshower(self):
+        booleanarr = is_3dshower(OFFLINE_MC_TRACK_USR.events.trigger_mask)
+        assert len(booleanarr) == len(OFFLINE_MC_TRACK_USR.events.trigger_mask)
+        assert booleanarr.dtype == bool
+
+class Testis_mxshower(unittest.TestCase):
+
+    def test_is_mxshower(self):
+        booleanarr = is_mxshower(OFFLINE_USR.events.trigger_mask)
+        assert len(booleanarr) == len(OFFLINE_USR.events.trigger_mask)
+        assert booleanarr.dtype == bool
+
+    def test_mc_is_mxshower(self):
+        booleanarr = is_3dshower(OFFLINE_MC_TRACK_USR.events.trigger_mask)
+        assert len(booleanarr) == len(OFFLINE_MC_TRACK_USR.events.trigger_mask)
+        assert booleanarr.dtype == bool
+
+class Testis_3dmuon(unittest.TestCase):
+    def test_is_3dmuon(self):
+        booleanarr = is_3dmuon(OFFLINE_USR.events.trigger_mask)
+        assert len(booleanarr) == len(OFFLINE_USR.events.trigger_mask)
+        assert booleanarr.dtype == bool
+
+    def test_mc_is_3dmuon(self):
+        booleanarr = is_3dmuon(OFFLINE_MC_TRACK_USR.events.trigger_mask)
+        assert len(booleanarr) == len(OFFLINE_MC_TRACK_USR.events.trigger_mask)
+        assert booleanarr.dtype == bool

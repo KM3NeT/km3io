@@ -491,3 +491,36 @@ def usr(objects, field):
     available_fields = objects.usr_names[0].tolist()
     idx = available_fields.index(field)
     return objects.usr[:, idx]
+
+def is_3dshower(trigger_mask):
+    """Return boolean array showing which event contains the 3DShower trigger
+
+    Parameters
+    ----------
+    trigger_mask : awkward.Array
+      Array containing the trigger_mask value for each event.
+    """
+    return bool(trigger_mask & 2)
+
+
+def is_mxshower(trigger_mask):
+    """Return boolean array showing which event contains the MXShower trigger
+
+    Parameters
+    ----------
+    trigger_mask : awkward.Array
+      Array containing the trigger_mask value for each event.
+    """
+    return bool(trigger_mask & 4)
+
+
+def is_3dmuon(trigger_mask):
+    """Return boolean array showing which event contains the 3DMuon trigger
+
+    Parameters
+    ----------
+    trigger_mask : awkward.Array
+      Array containing the trigger_mask value for each event.
+    """
+    return bool(trigger_mask & 16)
+

@@ -1,4 +1,4 @@
-black
+black==21.6b0
 km3net-testdata>=0.2.19
 matplotlib
 memory_profiler

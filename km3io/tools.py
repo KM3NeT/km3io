@@ -491,3 +491,47 @@ def usr(objects, field):
     available_fields = objects.usr_names[0].tolist()
     idx = available_fields.index(field)
     return objects.usr[:, idx]
+
+
+def is_bit_set(value, bit_position):
+    """Returns true if a bit at the given position is 1.
+
+    value: int or array(int)
+      The value to check, can be a single value or an array of values.
+    bit_position: int
+      0 for the first position, 1 for the second etc.
+    """
+    return (np.array(value) & (1 << bit_position)).astype(bool)
+
+
+def is_3dshower(trigger_mask):
+    """Returns True if the trigger mask contains the 3D shower flag.
+
+    Parameters
+    ----------
+    trigger_mask : int or array(int)
+      A value or an array of the trigger_mask, either of an event, or a hit.
+    """
+    return is_bit_set(trigger_mask, ktrg.JTRIGGER3DSHOWER)
+
+
+def is_mxshower(trigger_mask):
+    """Returns True if the trigger mask contains the MX shower flag.
+
+    Parameters
+    ----------
+    trigger_mask : int or array(int)
+      A value or an array of the trigger_mask, either of an event, or a hit.
+    """
+    return is_bit_set(trigger_mask, ktrg.JTRIGGERMXSHOWER)
+
+
+def is_3dmuon(trigger_mask):
+    """Returns True if the trigger mask contains the 3D muon flag.
+
+    Parameters
+    ----------
+    trigger_mask : int or array(int)
+      A value or an array of the trigger_mask, either of an event, or a hit.
+    """
+    return is_bit_set(trigger_mask, ktrg.JTRIGGER3DMUON)

@@ -1,13 +1,15 @@
 Unreleased changes
 ------------------
 
+Version 0
+---------
+
+0.22.0 / 2021-06-15
+~~~~~~~~~~~~~~~~~~~
 * Added ``km3io.tools.is_bit_set()`` along with some special methods to check
   if a given ``trigger_mask`` (of an event or a hit) has a specific trigger
   bit set, via ``km3io.tools.is_3dmuon``, ``km3io.tools.is_3dshower`` and
   ``km3io.tools.is_mxshower``
-
-Version 0
----------
 
 0.21.0 / 2021-04-08
 ~~~~~~~~~~~~~~~~~~~

@@ -584,7 +584,6 @@ class TestUsr(unittest.TestCase):
             atol=0.0001,
         )
 class Testis_3dshower(unittest.TestCase):
-    trigBit = ktrg['']
     def test_is_3dshower(self):
         booleanarr = is_3dshower(OFFLIOFFLINE_USRNE_FILE.events.trigger_mask)
         assert len(booleanarr) == len(OFFLINE_USR.events.trigger_mask)

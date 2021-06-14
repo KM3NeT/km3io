@@ -414,7 +414,7 @@ def best_jshower(tracks):
 
 
 def best_aashower(tracks):
-    """Select the best AASHOWER track. """
+    """Select the best AASHOWER track."""
     return best_track(tracks, minmax=(krec.AASHOWERBEGIN, krec.AASHOWEREND))
 
 

@@ -27,9 +27,10 @@ from km3io.tools import (
     best_dusjshower,
     is_cc,
     usr,
+    is_bit_set,
     is_3dshower,
     is_mxshower,
-    is_3dmuon
+    is_3dmuon,
 )
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
@@ -583,36 +584,61 @@ class TestUsr(unittest.TestCase):
             usr(OFFLINE_MC_TRACK_USR.mc_tracks[0], "bx").tolist(),
             atol=0.0001,
         )
-class Testis_3dshower(unittest.TestCase):
+
+
+class TestIsBitSet(unittest.TestCase):
+    def test_is_bit_set_for_single_values(self):
+        value = 2  # 10
+        assert not is_bit_set(value, 0)
+        assert is_bit_set(value, 1)
+        value = 42  # 101010
+        assert not is_bit_set(value, 0)
+        assert is_bit_set(value, 1)
+        assert not is_bit_set(value, 2)
+        assert is_bit_set(value, 3)
+        assert not is_bit_set(value, 4)
+        assert is_bit_set(value, 5)
+
+    def test_is_bit_set_for_lists(self):
+        values = [2, 42, 4]
+        assert np.allclose([True, True, False], is_bit_set(values, 1))
+
+    def test_is_bit_set_for_numpy_arrays(self):
+        values = np.array([2, 42, 4])
+        assert np.allclose([True, True, False], is_bit_set(values, 1))
+
+    def test_is_bit_set_for_awkward_arrays(self):
+        values = ak.Array([2, 42, 4])
+        assert np.allclose([True, True, False], is_bit_set(values, 1))
+
+
+class TestTriggerMaskChecks(unittest.TestCase):
     def test_is_3dshower(self):
-        booleanarr = is_3dshower(OFFLIOFFLINE_USRNE_FILE.events.trigger_mask)
-        assert len(booleanarr) == len(OFFLINE_USR.events.trigger_mask)
-        assert booleanarr.dtype == bool
-
-    def test_mc_3dshower(self):
-        booleanarr = is_3dshower(OFFLINE_MC_TRACK_USR.events.trigger_mask)
-        assert len(booleanarr) == len(OFFLINE_MC_TRACK_USR.events.trigger_mask)
-        assert booleanarr.dtype == bool
-
-class Testis_mxshower(unittest.TestCase):
+        assert np.allclose(
+            [True, True, True, True, True, False, False, True, True, True],
+            is_3dshower(OFFLINE_FILE.events.trigger_mask),
+        )
+        assert np.allclose(
+            [True, True, True, True, True, True, True, True, True, False],
+            is_3dshower(GENHEN_OFFLINE_FILE.events.trigger_mask),
+        )
 
     def test_is_mxshower(self):
-        booleanarr = is_mxshower(OFFLINE_USR.events.trigger_mask)
-        assert len(booleanarr) == len(OFFLINE_USR.events.trigger_mask)
-        assert booleanarr.dtype == bool
+        assert np.allclose(
+            [True, True, True, True, True, True, True, True, True, True],
+            is_mxshower(OFFLINE_FILE.events.trigger_mask),
+        )
+        assert np.allclose(
+            [False, False, False, False, False, False, False, False, False, False],
+            is_mxshower(GENHEN_OFFLINE_FILE.events.trigger_mask),
+        )
 
-    def test_mc_is_mxshower(self):
-        booleanarr = is_3dshower(OFFLINE_MC_TRACK_USR.events.trigger_mask)
-        assert len(booleanarr) == len(OFFLINE_MC_TRACK_USR.events.trigger_mask)
-        assert booleanarr.dtype == bool
-
-class Testis_3dmuon(unittest.TestCase):
     def test_is_3dmuon(self):
-        booleanarr = is_3dmuon(OFFLINE_USR.events.trigger_mask)
-        assert len(booleanarr) == len(OFFLINE_USR.events.trigger_mask)
-        assert booleanarr.dtype == bool
-
-    def test_mc_is_3dmuon(self):
-        booleanarr = is_3dmuon(OFFLINE_MC_TRACK_USR.events.trigger_mask)
-        assert len(booleanarr) == len(OFFLINE_MC_TRACK_USR.events.trigger_mask)
-        assert booleanarr.dtype == bool
+        assert np.allclose(
+            [True, True, True, True, True, False, False, True, True, True],
+            is_3dmuon(OFFLINE_FILE.events.trigger_mask),
+        )
+        assert np.allclose(
+            [False, False, False, True, False, False, True, False, True, True],
+            is_3dmuon(GENHEN_OFFLINE_FILE.events.trigger_mask),
+        )

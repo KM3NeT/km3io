@@ -9,6 +9,7 @@ pytest-cov
 pytest-flake8
 pytest-pylint
 pytest-watch
+scipy
 sphinx
 sphinx-autoapi
 sphinx-gallery>=0.1.12

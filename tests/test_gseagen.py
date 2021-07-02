@@ -20,12 +20,12 @@ class TestGSGHeader(unittest.TestCase):
         self.header = GSG_READER.header
 
     def test_str_byte_type(self):
-        assert type(self.header["gSeaGenVer"]) in AWKWARD_STR_CLASSES
-        assert type(self.header["GenieVer"]) in AWKWARD_STR_CLASSES
-        assert type(self.header["gSeaGenVer"]) in AWKWARD_STR_CLASSES
-        assert type(self.header["InpXSecFile"]) in AWKWARD_STR_CLASSES
-        assert type(self.header["Flux1"]) in AWKWARD_STR_CLASSES
-        assert type(self.header["Flux2"]) in AWKWARD_STR_CLASSES
+        assert isinstance(self.header["gSeaGenVer"], str)
+        assert isinstance(self.header["GenieVer"], str)
+        assert isinstance(self.header["gSeaGenVer"], str)
+        assert isinstance(self.header["InpXSecFile"], str)
+        assert isinstance(self.header["Flux1"], str)
+        assert isinstance(self.header["Flux2"], str)
 
     def test_values(self):
         assert self.header["RunNu"] == 1

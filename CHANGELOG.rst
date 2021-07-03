@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.23.0 / 2021-07-03
+~~~~~~~~~~~~~~~~~~~
+* ``km3io.acoustics`` was added which provides ``RawAcousticsReader`` to
+  read -- wait for it -- raw acoustics data
 
 0.22.0 / 2021-06-15
 ~~~~~~~~~~~~~~~~~~~

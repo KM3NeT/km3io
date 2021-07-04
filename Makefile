@@ -39,7 +39,7 @@ dependencies:
 
 .PHONY: black
 black:
-	black --exclude '/_definitions/' km3io
+	black --exclude '/_definitions/|version.py' km3io
 	black examples
 	black tests
 	black doc/conf.py

@@ -10,7 +10,7 @@ The km3io Python package
 .. image:: https://api.codacy.com/project/badge/Grade/0660338483874475ba04f324de2123ec
     :target: https://www.codacy.com/manual/tamasgal/km3io?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=KM3NeT/km3io&amp;utm_campaign=Badge_Grade
 
-.. image:: https://examples.pages.km3net.de/km3badges/docs-latest-brightgreen.svg
+.. image:: https://git.km3net.de/templates/python-project/-/commit/f093d1b738668fd5f38b7ca21950ba7ec7222188
     :target: https://km3py.pages.km3net.de/km3io
 
 This software provides a set of Python classes to read KM3NeT ROOT files

@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.23.1 / 2021-09-28
+~~~~~~~~~~~~~~~~~~~
+* KM3NeT Dataformat definition updated to 2.1.0+
+
 0.23.0 / 2021-07-03
 ~~~~~~~~~~~~~~~~~~~
 * ``km3io.acoustics`` was added which provides ``RawAcousticsReader`` to

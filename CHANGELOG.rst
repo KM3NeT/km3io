@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* The fields ``.a`` is now read by default.
 
 Version 0
 ---------

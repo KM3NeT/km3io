@@ -1,9 +1,13 @@
 Unreleased changes
 ------------------
-* The fields ``.a`` is now read by default.
+
 
 Version 0
 ---------
+0.24.0 / 2021-11-02
+~~~~~~~~~~~~~~~~~~~
+* The field ``.a`` (amplitude) for Hits is now accessible
+
 0.23.1 / 2021-09-28
 ~~~~~~~~~~~~~~~~~~~
 * KM3NeT Dataformat definition updated to 2.1.0+

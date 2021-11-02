@@ -41,7 +41,7 @@ class OfflineReader(EventReader):
             "dir_y": "hits.dir.y",
             "dir_z": "hits.dir.z",
             "tot": "hits.tot",
-            "a": "mc_hits.a",  # hit amplitude (in p.e.)
+            "a": "hits.a",  # hit amplitude (in p.e.)
             "trig": "hits.trig",  # non-zero if the hit is a triggered hit
         },
         "mc_hits": {

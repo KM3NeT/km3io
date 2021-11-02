@@ -406,6 +406,7 @@ class TestOfflineHits(unittest.TestCase):
         assert "channel_id" in self.hits.fields
         assert "t" in self.hits.fields
         assert "tot" in self.hits.fields
+        assert "a" in self.hits.fields
         assert "trig" in self.hits.fields
         assert "id" in self.hits.fields
 

@@ -493,15 +493,16 @@ def usr(objects, field):
     return objects.usr[:, idx]
 
 
+@nb.vectorize(("boolean(int64, int64)", "boolean(uint64, int64)"), nopython=True)
 def is_bit_set(value, bit_position):
     """Returns true if a bit at the given position is 1.
 
-    value: int or array(int)
+    value: int or array([u]int64)
       The value to check, can be a single value or an array of values.
     bit_position: int
       0 for the first position, 1 for the second etc.
     """
-    return (np.array(value) & (1 << bit_position)).astype(bool)
+    return bool(value & (1 << bit_position))
 
 
 def is_3dshower(trigger_mask):

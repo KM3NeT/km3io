@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
-
+* The ``km3io.tools.is_bit_set()`` and all the related trigger mask checkers
+  (``is_3dmuon()``...) are now compatible with Numba
 
 Version 0
 ---------

@@ -1,10 +1,13 @@
 Unreleased changes
 ------------------
-* The ``km3io.tools.is_bit_set()`` and all the related trigger mask checkers
-  (``is_3dmuon()``...) are now compatible with Numba
 
 Version 0
 ---------
+0.24.1 / 2021-11-05
+~~~~~~~~~~~~~~~~~~~
+* The ``km3io.tools.is_bit_set()`` and all the related trigger mask checkers
+  (``is_3dmuon()``...) are now compatible with Numba
+
 0.24.0 / 2021-11-02
 ~~~~~~~~~~~~~~~~~~~
 * The field ``.a`` (amplitude) for Hits is now accessible

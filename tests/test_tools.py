@@ -609,36 +609,36 @@ class TestIsBitSet(unittest.TestCase):
 
     def test_is_bit_set_for_awkward_arrays(self):
         values = ak.Array([2, 42, 4])
-        assert np.allclose([True, True, False], is_bit_set(values, 1))
+        assert np.allclose([True, True, False], list(is_bit_set(values, 1)))
 
 
 class TestTriggerMaskChecks(unittest.TestCase):
     def test_is_3dshower(self):
         assert np.allclose(
             [True, True, True, True, True, False, False, True, True, True],
-            is_3dshower(OFFLINE_FILE.events.trigger_mask),
+            list(is_3dshower(OFFLINE_FILE.events.trigger_mask)),
         )
         assert np.allclose(
             [True, True, True, True, True, True, True, True, True, False],
-            is_3dshower(GENHEN_OFFLINE_FILE.events.trigger_mask),
+            list(is_3dshower(GENHEN_OFFLINE_FILE.events.trigger_mask)),
         )
 
     def test_is_mxshower(self):
         assert np.allclose(
             [True, True, True, True, True, True, True, True, True, True],
-            is_mxshower(OFFLINE_FILE.events.trigger_mask),
+            list(is_mxshower(OFFLINE_FILE.events.trigger_mask)),
         )
         assert np.allclose(
             [False, False, False, False, False, False, False, False, False, False],
-            is_mxshower(GENHEN_OFFLINE_FILE.events.trigger_mask),
+            list(is_mxshower(GENHEN_OFFLINE_FILE.events.trigger_mask)),
         )
 
     def test_is_3dmuon(self):
         assert np.allclose(
             [True, True, True, True, True, False, False, True, True, True],
-            is_3dmuon(OFFLINE_FILE.events.trigger_mask),
+            list(is_3dmuon(OFFLINE_FILE.events.trigger_mask)),
         )
         assert np.allclose(
             [False, False, False, True, False, False, True, False, True, True],
-            is_3dmuon(GENHEN_OFFLINE_FILE.events.trigger_mask),
+            list(is_3dmuon(GENHEN_OFFLINE_FILE.events.trigger_mask)),
         )

@@ -127,3 +127,4 @@ cc-lyon:
     only:
         - tags
         - master
+    allow_failure: true

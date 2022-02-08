@@ -9,6 +9,7 @@ install:
 
 install-dev:
 	pip install -e ".[dev]"
+	python -m ipykernel install --user --name=km3io
 
 clean:
 	python setup.py clean --all

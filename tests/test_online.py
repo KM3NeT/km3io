@@ -175,7 +175,9 @@ class TestTimeslice(unittest.TestCase):
 
 class TestSummaryslices(unittest.TestCase):
     def setUp(self):
-        self.ss = OnlineReader(ONLINE_FILE).summaryslices
+        for chunk in OnlineReader(ONLINE_FILE).summaryslices:
+            self.ss = chunk
+            break
 
     def test_headers(self):
         assert 3 == len(self.ss.headers)
@@ -186,9 +188,6 @@ class TestSummaryslices(unittest.TestCase):
 
     def test_slices(self):
         assert 3 == len(self.ss.slices)
-
-    def test_rates(self):
-        assert 3 == len(self.ss.rates)
 
     def test_fifo(self):
         s = self.ss.slices[0]
@@ -700,7 +699,10 @@ class TestGetChannelFlags_Issue59(unittest.TestCase):
         r = OnlineReader(
             data_path("online/KM3NeT_00000049_00008456.summaryslice-167941.root")
         )
-        summaryslice = r.summaryslices.slices[0]
+
+        for chunks in r.summaryslices:
+            summaryslice = chunks.slices[0]
+            break
 
         for ours, ref in zip(summaryslice, ref_entries):
             assert ours.dom_id == to_num(ref.dom_id)
@@ -766,16 +768,16 @@ class TestSummarysliceReader(unittest.TestCase):
 
         for ss in sr:
             self.assertListEqual(
-                ss[0].dom_id[:3].to_list(), [806451572, 806455814, 806465101]
+                ss.slices[0].dom_id[:3].to_list(), [806451572, 806455814, 806465101]
             )
             self.assertListEqual(
-                ss[0].dom_id[-3:].to_list(), [809526097, 809544058, 809544061]
+                ss.slices[0].dom_id[-3:].to_list(), [809526097, 809544058, 809544061]
             )
-            assert len(ss) == 3
-            assert len(ss[0]) == 64
-            assert len(ss[1]) == 66
-            assert len(ss[2]) == 68
-            self.assertListEqual(ss[0].ch5[:3].to_list(), [75, 62, 55])
+            assert len(ss.slices) == 3
+            assert len(ss.slices[0]) == 64
+            assert len(ss.slices[1]) == 66
+            assert len(ss.slices[2]) == 68
+            self.assertListEqual(ss.slices[0].ch5[:3].to_list(), [75, 62, 55])
 
         sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1)
 
@@ -784,7 +786,7 @@ class TestSummarysliceReader(unittest.TestCase):
         for idx, ss in enumerate(sr):
             # self.assertListEqual(ss[0].dom_id[:3].to_list(), [806451572, 806455814, 806465101])
             # self.assertListEqual(ss[0].dom_id[-3:].to_list(), [809526097, 809544058, 809544061])
-            assert len(ss) == 1
-            assert len(ss[0]) == lengths[idx]
-            assert len(ss[0].dom_id) == lengths[idx]
-            assert len(ss[0].ch3) == lengths[idx]
+            assert len(ss.slices) == 1
+            assert len(ss.slices[0]) == lengths[idx]
+            assert len(ss.slices[0].dom_id) == lengths[idx]
+            assert len(ss.slices[0].ch3) == lengths[idx]

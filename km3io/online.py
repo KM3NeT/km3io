@@ -1,4 +1,5 @@
 import binascii
+from collections import namedtuple
 import os
 import uproot
 import uproot3
@@ -22,36 +23,70 @@ RATE_FACTOR = np.log(MAXIMAL_RATE_HZ / MINIMAL_RATE_HZ) / 255
 CHANNEL_BITS_TEMPLATE = np.zeros(31, dtype=bool)
 
 
+SummarysliceChunk = namedtuple(field_names=["headers", "slices"], typename="SummarysliceChunk")
+
+
 class SummarysliceReader:
+    """
+    A reader for summaryslices which are loaded as chunks given by step_size.
+
+    To be used as an iterator (`for chunks in SummarysliceReader(...): ...`)
+    """
     TREE_ADDR = "KM3NET_SUMMARYSLICE/KM3NET_SUMMARYSLICE"
-    BRANCH_NAME = "vector<KM3NETDAQ::JDAQSummaryFrame>"
+    SUMMARYSLICES_BRANCH_NAME = "vector<KM3NETDAQ::JDAQSummaryFrame>"
+    HEADERS_BRANCH_NAME = "KM3NETDAQ::JDAQSummarysliceHeader"
     SUMMARYSLICE_INTERPRETATION = uproot.interpretation.jagged.AsJagged(
         uproot.interpretation.numerical.AsDtype(
             [
                 ("dom_id", ">i4"),
-                ("dq_status", "u4"),
-                ("hrv", "<u4"),
-                ("fifo", "<u4"),
-                ("status3", "u4"),
-                ("status4", "u4"),
+                ("dq_status", ">u4"),
+                ("hrv", ">u4"),
+                ("fifo", ">u4"),
+                ("status3", ">u4"),
+                ("status4", ">u4"),
             ]
             + [(f"ch{c}", "u1") for c in range(31)]
         ),
         header_bytes=10,
     )
+    HEADER_INTERPRETATION = uproot.interpretation.numerical.AsDtype(
+            [
+                (" cnt", "u4"),
+                (" vers", "u2"),
+                (" cnt2", "u4"),
+                (" vers2", "u2"),
+                (" cnt3", "u4"),
+                (" vers3", "u2"),
+                ("detector_id", ">i4"),
+                ("run", ">i4"),
+                ("frame_index", ">i4"),
+                (" cnt4", "u4"),
+                (" vers4", "u2"),
+                ("UTC_seconds", ">u4"),
+                ("UTC_16nanosecondcycles", ">u4"),
+            ]
+        )
 
-    def __init__(self, filename, step_size=1000):
-        self._filename = filename
+    def __init__(self, fobj, step_size=1000):
+        if isinstance(fobj, str):
+            self._fobj = uproot.open(fobj)
+        else:
+            self._fobj = fobj
         self._step_size = step_size
-        self._fobj = uproot.open(filename)
         self._branch = self._fobj[self.TREE_ADDR]
 
     def _summaryslices_generator(self):
-        expressions = {self.BRANCH_NAME: self.SUMMARYSLICE_INTERPRETATION}
-        for summaryslices in self._branch.iterate(
+        expressions = {
+            self.SUMMARYSLICES_BRANCH_NAME: self.SUMMARYSLICE_INTERPRETATION,
+            self.HEADERS_BRANCH_NAME: self.HEADER_INTERPRETATION,
+        }
+        for chunk in self._branch.iterate(
             expressions, step_size=self._step_size
         ):
-            yield summaryslices[self.BRANCH_NAME]
+            yield SummarysliceChunk(
+                chunk[self.HEADERS_BRANCH_NAME],
+                chunk[self.SUMMARYSLICES_BRANCH_NAME],
+            )
 
     def __iter__(self):
         self._summaryslices = self._summaryslices_generator()
@@ -62,6 +97,9 @@ class SummarysliceReader:
 
     def __len__(self):
         return int(np.ceil(self._branch.num_entries / self._step_size))
+
+    def __repr__(self):
+        return f"<SummarysliceReader {self._branch.num_entries} summaryslices, step_size={self._step_size} ({len(self)} chunks)>"
 
 
 @nb.vectorize(
@@ -224,72 +262,8 @@ class OnlineReader:
     @property
     def summaryslices(self):
         if self._summaryslices is None:
-            self._summaryslices = SummarySlices(self._fobj)
+            self._summaryslices = SummarysliceReader(uproot.open(self._filename))  # TODO: remove when using uproot4
         return self._summaryslices
-
-
-class SummarySlices:
-    """A wrapper for summary slices"""
-
-    def __init__(self, fobj):
-        self._fobj = fobj
-        self._slices = None
-        self._headers = None
-        self._rates = None
-        self._ch_selector = ["ch{}".format(c) for c in range(31)]
-
-    @property
-    def headers(self):
-        if self._headers is None:
-            self._headers = self._read_headers()
-        return self._headers
-
-    @property
-    def slices(self):
-        if self._slices is None:
-            self._slices = self._read_summaryslices()
-        return self._slices
-
-    @property
-    def rates(self):
-        if self._rates is None:
-            self._rates = self.slices[["dom_id"] + self._ch_selector]
-        return self._rates
-
-    def _read_summaryslices(self):
-        """Reads a lazyarray of summary slices"""
-        tree = self._fobj[b"KM3NET_SUMMARYSLICE"][b"KM3NET_SUMMARYSLICE"]
-        return tree[b"vector<KM3NETDAQ::JDAQSummaryFrame>"].lazyarray(
-            uproot3.asjagged(
-                uproot3.astable(
-                    uproot3.asdtype(
-                        [
-                            ("dom_id", "i4"),
-                            ("dq_status", "u4"),
-                            ("hrv", "u4"),
-                            ("fifo", "u4"),
-                            ("status3", "u4"),
-                            ("status4", "u4"),
-                        ]
-                        + [(c, "u1") for c in self._ch_selector]
-                    )
-                ),
-                skipbytes=10,
-            ),
-            basketcache=uproot3.cache.ThreadSafeArrayCache(
-                SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE
-            ),
-        )
-
-    def _read_headers(self):
-        """Reads a lazyarray of summary slice headers"""
-        tree = self._fobj[b"KM3NET_SUMMARYSLICE"][b"KM3NET_SUMMARYSLICE"]
-        return tree[b"KM3NETDAQ::JDAQSummarysliceHeader"].lazyarray(
-            uproot3.interpret(tree[b"KM3NETDAQ::JDAQSummarysliceHeader"], cntvers=True)
-        )
-
-    def __str__(self):
-        return "Number of summaryslices: {}".format(len(self.headers))
 
 
 class Timeslices:

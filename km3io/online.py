@@ -1,5 +1,6 @@
 import binascii
 import os
+import uproot
 import uproot3
 import numpy as np
 
@@ -19,6 +20,45 @@ MAXIMAL_RATE_HZ = 2.0e6
 RATE_FACTOR = np.log(MAXIMAL_RATE_HZ / MINIMAL_RATE_HZ) / 255
 
 CHANNEL_BITS_TEMPLATE = np.zeros(31, dtype=bool)
+
+
+class SummarysliceReader:
+    TREE_ADDR = "KM3NET_SUMMARYSLICE/KM3NET_SUMMARYSLICE"
+    BRANCH_NAME = "vector<KM3NETDAQ::JDAQSummaryFrame>"
+    SUMMARYSLICE_INTERPRETATION = uproot.interpretation.jagged.AsJagged(
+        uproot.interpretation.numerical.AsDtype(
+            [
+                ("dom_id", ">i4"),
+                ("dq_status", "u4"),
+                ("hrv", "<u4"),
+                ("fifo", "<u4"),
+                ("status3", "u4"),
+                ("status4", "u4"),
+            ]
+            + [(f"ch{c}", "u1") for c in range(31)]
+        ),
+        header_bytes=10,
+    )
+
+    def __init__(self, filename, step_size=1000):
+        self._filename = filename
+        self._step_size = step_size
+        self._fobj = uproot.open(filename)
+        self._branch = self._fobj[self.TREE_ADDR]
+
+    def _summaryslices_generator(self):
+        expressions = {self.BRANCH_NAME: self.SUMMARYSLICE_INTERPRETATION}
+        for summaryslices in self._branch.iterate(
+            expressions, step_size=self._step_size
+        ):
+            yield summaryslices[self.BRANCH_NAME]
+
+    def __iter__(self):
+        self._summaryslices = self._summaryslices_generator()
+        return self
+
+    def __next__(self):
+        return next(self._summaryslices)
 
 
 @nb.vectorize(

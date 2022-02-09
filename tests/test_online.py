@@ -3,11 +3,13 @@ import itertools
 import os
 import re
 import unittest
+import numpy as np
 
 from km3net_testdata import data_path
 
 from km3io.online import (
     OnlineReader,
+    SummarysliceReader,
     get_rate,
     has_udp_trailer,
     get_udp_max_sequence_number,
@@ -731,3 +733,50 @@ class TestGetRate(unittest.TestCase):
     def test_vectorized_input(self):
         self.assertListEqual([2054], list(get_rate([1])))
         self.assertListEqual([2054, 2111, 2169], list(get_rate([1, 2, 3])))
+
+
+class TestSummarysliceReader(unittest.TestCase):
+    def test_init(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"))
+
+    def test_iterate_with_step_size_one(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1)
+        i = 0
+        for ss in sr:
+            i += 1
+        assert i == 3
+
+    def test_iterate_with_step_size_bigger_than_number_of_elements(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1000)
+        i = 0
+        for ss in sr:
+            i += 1
+        assert i == 1
+
+    def test_iterate_gives_correct_data_slices(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1000)
+
+        for ss in sr:
+            self.assertListEqual(
+                ss[0].dom_id[:3].to_list(), [806451572, 806455814, 806465101]
+            )
+            self.assertListEqual(
+                ss[0].dom_id[-3:].to_list(), [809526097, 809544058, 809544061]
+            )
+            assert len(ss) == 3
+            assert len(ss[0]) == 64
+            assert len(ss[1]) == 66
+            assert len(ss[2]) == 68
+            self.assertListEqual(ss[0].ch5[:3].to_list(), [75, 62, 55])
+
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1)
+
+        lengths = [64, 66, 68]
+
+        for idx, ss in enumerate(sr):
+            # self.assertListEqual(ss[0].dom_id[:3].to_list(), [806451572, 806455814, 806465101])
+            # self.assertListEqual(ss[0].dom_id[-3:].to_list(), [809526097, 809544058, 809544061])
+            assert len(ss) == 1
+            assert len(ss[0]) == lengths[idx]
+            assert len(ss[0].dom_id) == lengths[idx]
+            assert len(ss[0].ch3) == lengths[idx]

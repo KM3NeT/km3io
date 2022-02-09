@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Added a new, high-performance Summaryslice reader ``km3io.online.SummarysliceReader``
 
 Version 0
 ---------

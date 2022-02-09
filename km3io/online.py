@@ -61,7 +61,7 @@ class SummarysliceReader:
         return next(self._summaryslices)
 
     def __len__(self):
-        return int(np.ceil(len(self._branch) / self._step_size))
+        return int(np.ceil(self._branch.num_entries / self._step_size))
 
 
 @nb.vectorize(

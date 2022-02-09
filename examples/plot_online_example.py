@@ -65,7 +65,7 @@ print(dom_ids)
 # The .type attribute (or in general, <TAB> completion) is useful to find out
 # more about the field structure:
 
-print(chunks.slices.type)
+print(chunk.slices.type)
 
 #####################################################
 # Similar to the summaryslice data, the headers can be accessed the same way

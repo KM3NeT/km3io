@@ -60,6 +60,9 @@ class SummarysliceReader:
     def __next__(self):
         return next(self._summaryslices)
 
+    def __len__(self):
+        return int(np.ceil(len(self._branch) / self._step_size))
+
 
 @nb.vectorize(
     [nb.int32(nb.int8), nb.int32(nb.int16), nb.int32(nb.int32), nb.int32(nb.int64)]

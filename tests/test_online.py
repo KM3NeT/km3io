@@ -739,6 +739,14 @@ class TestSummarysliceReader(unittest.TestCase):
     def test_init(self):
         sr = SummarysliceReader(data_path("online/km3net_online.root"))
 
+    def test_length(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"))
+        assert 1 == len(sr)
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=2)
+        assert 2 == len(sr)
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=3)
+        assert 1 == len(sr)
+
     def test_iterate_with_step_size_one(self):
         sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1)
         i = 0

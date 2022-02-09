@@ -49,7 +49,7 @@ print(f.events[0].snapshot_hits.tot)
 # keyword and then use the data which has been "pulled out" of the ROOT file.
 
 
-for chunk in f.summaryslices.slices:
+for chunk in f.slices:
     break
 
 #####################################################
@@ -72,3 +72,6 @@ print(chunks.slices.type)
 # To read the frame index of all summaryslices in the obtained chunk:
 
 print(chunk.headers.frame_index)
+
+#####################################################
+# To be continued...

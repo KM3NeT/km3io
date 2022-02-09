@@ -49,7 +49,7 @@ print(f.events[0].snapshot_hits.tot)
 # keyword and then use the data which has been "pulled out" of the ROOT file.
 
 
-for chunk in f.slices:
+for chunk in f.summaryslices:
     break
 
 #####################################################

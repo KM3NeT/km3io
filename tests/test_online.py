@@ -749,6 +749,46 @@ class TestSummarysliceReader(unittest.TestCase):
         sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=3)
         assert 1 == len(sr)
 
+    def test_getitem_raises_when_out_of_range(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1)
+        with self.assertRaises(IndexError):
+            sr[123]
+        with self.assertRaises(IndexError):
+            sr[-123]
+        with self.assertRaises(IndexError):
+            sr[3]
+        sr[-3]  # this should still work, gives the first element in this case
+        with self.assertRaises(IndexError):
+            sr[-4]
+
+    def test_getitem(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1)
+        for idx in range(len(sr)):
+            assert len(sr[idx].headers) == 1
+            assert len(sr[idx].slices) == 1
+
+        first_frame_index = sr[0].headers.frame_index  # 126
+        last_frame_index = sr[2].headers.frame_index  # 128
+
+        assert 126 == first_frame_index
+        assert 128 == last_frame_index
+
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=2)
+        assert len(sr[0].headers) == 2
+        assert len(sr[0].slices) == 2
+        assert len(sr[1].headers) == 1
+        assert len(sr[1].slices) == 1
+        with self.assertRaises(IndexError):
+            assert len(sr[2].headers) == 0
+            assert len(sr[2].slices) == 0
+
+        assert first_frame_index == sr[0].headers[0].frame_index
+        assert last_frame_index == sr[1].headers[0].frame_index
+
+
+        assert last_frame_index == sr[-1].headers[0].frame_index
+        assert first_frame_index == sr[-2].headers[0].frame_index
+
     def test_iterate_with_step_size_one(self):
         sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1)
         i = 0

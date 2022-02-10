@@ -96,6 +96,22 @@ class SummarysliceReader:
                 *[getattr(chunk, bc.branch_address) for bc in self._subbranches]
             )
 
+    def __getitem__(self, idx):
+        if idx >= len(self) or idx < -len(self):
+            raise IndexError("Chunk index out of range")
+
+        s = self._step_size
+
+        if idx < 0:
+            idx = len(self) + idx
+
+        chunk = self._branch.arrays(
+            dict(self._subbranches), entry_start=idx * s, entry_stop=(idx + 1) * s
+        )
+        return self.ChunksConstructor(
+            *[getattr(chunk, bc.branch_address) for bc in self._subbranches]
+        )
+
     def __iter__(self):
         self._chunks = self._chunks_generator()
         return self
@@ -107,7 +123,14 @@ class SummarysliceReader:
         return int(np.ceil(self._branch.num_entries / self._step_size))
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} {self._branch.num_entries} items, step_size={self._step_size} ({len(self)} chunks)>"
+        step_size = self._step_size
+        n_items = self._branch.num_entries
+        cls_name = self.__class__.__name__
+        n_chunks = len(self)
+        return (
+            f"<{cls_name} {n_items} items, step_size={step_size} "
+            f"({n_chunks} chunk{'' if n_chunks == 1 else 's'})>"
+        )
 
 
 @nb.vectorize(

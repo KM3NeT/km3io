@@ -785,7 +785,6 @@ class TestSummarysliceReader(unittest.TestCase):
         assert first_frame_index == sr[0].headers[0].frame_index
         assert last_frame_index == sr[1].headers[0].frame_index
 
-
         assert last_frame_index == sr[-1].headers[0].frame_index
         assert first_frame_index == sr[-2].headers[0].frame_index
 

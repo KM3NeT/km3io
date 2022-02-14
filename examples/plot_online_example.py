@@ -40,29 +40,38 @@ print(f.events[0].snapshot_hits.tot)
 # Reading SummarySlices
 # ---------------------
 # The following example shows how to access summary slices, in particular the DOM
-# IDs of the slice with the index 0:
+# IDs of the slice with the index 0.
+# The current implementation of the summaryslice I/O uses a chunked reading for
+# better performance, which means that when you iterate through the `.slices`,
+# you'll get chunks of summaryslices in each iteration instead of a single one.
+#
+# In the example below, we simulate a single iteration by using the `break`
+# keyword and then use the data which has been "pulled out" of the ROOT file.
 
-dom_ids = f.summaryslices.slices[0].dom_id
+
+for chunk in f.summaryslices:
+    break
+
+#####################################################
+# `chunk` now contains the first set of summaryslices so `chunk.slice[0]` refers
+# to the first summaryslice in the ROOT file. To access e.g. the DOM IDs, use
+# the `.dom_id` attribute
+
+dom_ids = chunk.slices[0].dom_id
 
 print(dom_ids)
 
 #####################################################
-# The .dtype attribute (or in general, <TAB> completion) is useful to find out
+# The .type attribute (or in general, <TAB> completion) is useful to find out
 # more about the field structure:
 
-print(f.summaryslices.headers.dtype)
+print(chunk.slices.type)
 
 #####################################################
-# To read the frame index:
+# Similar to the summaryslice data, the headers can be accessed the same way
+# To read the frame index of all summaryslices in the obtained chunk:
 
-print(f.summaryslices.headers.frame_index)
-
-#####################################################
-# The resulting array is a ChunkedArray which is an extended version of a
-# numpy array and behaves like one.
+print(chunk.headers.frame_index)
 
 #####################################################
-# Reading TimeSlices
-# ------------------
-# To be continued.
-#
+# To be continued...

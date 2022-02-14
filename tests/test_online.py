@@ -3,11 +3,13 @@ import itertools
 import os
 import re
 import unittest
+import numpy as np
 
 from km3net_testdata import data_path
 
 from km3io.online import (
     OnlineReader,
+    SummarysliceReader,
     get_rate,
     has_udp_trailer,
     get_udp_max_sequence_number,
@@ -173,7 +175,9 @@ class TestTimeslice(unittest.TestCase):
 
 class TestSummaryslices(unittest.TestCase):
     def setUp(self):
-        self.ss = OnlineReader(ONLINE_FILE).summaryslices
+        for chunk in OnlineReader(ONLINE_FILE).summaryslices:
+            self.ss = chunk
+            break
 
     def test_headers(self):
         assert 3 == len(self.ss.headers)
@@ -184,9 +188,6 @@ class TestSummaryslices(unittest.TestCase):
 
     def test_slices(self):
         assert 3 == len(self.ss.slices)
-
-    def test_rates(self):
-        assert 3 == len(self.ss.rates)
 
     def test_fifo(self):
         s = self.ss.slices[0]
@@ -698,7 +699,10 @@ class TestGetChannelFlags_Issue59(unittest.TestCase):
         r = OnlineReader(
             data_path("online/KM3NeT_00000049_00008456.summaryslice-167941.root")
         )
-        summaryslice = r.summaryslices.slices[0]
+
+        for chunks in r.summaryslices:
+            summaryslice = chunks.slices[0]
+            break
 
         for ours, ref in zip(summaryslice, ref_entries):
             assert ours.dom_id == to_num(ref.dom_id)
@@ -731,3 +735,97 @@ class TestGetRate(unittest.TestCase):
     def test_vectorized_input(self):
         self.assertListEqual([2054], list(get_rate([1])))
         self.assertListEqual([2054, 2111, 2169], list(get_rate([1, 2, 3])))
+
+
+class TestSummarysliceReader(unittest.TestCase):
+    def test_init(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"))
+
+    def test_length(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"))
+        assert 1 == len(sr)
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=2)
+        assert 2 == len(sr)
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=3)
+        assert 1 == len(sr)
+
+    def test_getitem_raises_when_out_of_range(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1)
+        with self.assertRaises(IndexError):
+            sr[123]
+        with self.assertRaises(IndexError):
+            sr[-123]
+        with self.assertRaises(IndexError):
+            sr[3]
+        sr[-3]  # this should still work, gives the first element in this case
+        with self.assertRaises(IndexError):
+            sr[-4]
+
+    def test_getitem(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1)
+        for idx in range(len(sr)):
+            assert len(sr[idx].headers) == 1
+            assert len(sr[idx].slices) == 1
+
+        first_frame_index = sr[0].headers.frame_index  # 126
+        last_frame_index = sr[2].headers.frame_index  # 128
+
+        assert 126 == first_frame_index
+        assert 128 == last_frame_index
+
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=2)
+        assert len(sr[0].headers) == 2
+        assert len(sr[0].slices) == 2
+        assert len(sr[1].headers) == 1
+        assert len(sr[1].slices) == 1
+        with self.assertRaises(IndexError):
+            assert len(sr[2].headers) == 0
+            assert len(sr[2].slices) == 0
+
+        assert first_frame_index == sr[0].headers[0].frame_index
+        assert last_frame_index == sr[1].headers[0].frame_index
+
+        assert last_frame_index == sr[-1].headers[0].frame_index
+        assert first_frame_index == sr[-2].headers[0].frame_index
+
+    def test_iterate_with_step_size_one(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1)
+        i = 0
+        for ss in sr:
+            i += 1
+        assert i == 3
+
+    def test_iterate_with_step_size_bigger_than_number_of_elements(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1000)
+        i = 0
+        for ss in sr:
+            i += 1
+        assert i == 1
+
+    def test_iterate_gives_correct_data_slices(self):
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1000)
+
+        for ss in sr:
+            self.assertListEqual(
+                ss.slices[0].dom_id[:3].to_list(), [806451572, 806455814, 806465101]
+            )
+            self.assertListEqual(
+                ss.slices[0].dom_id[-3:].to_list(), [809526097, 809544058, 809544061]
+            )
+            assert len(ss.slices) == 3
+            assert len(ss.slices[0]) == 64
+            assert len(ss.slices[1]) == 66
+            assert len(ss.slices[2]) == 68
+            self.assertListEqual(ss.slices[0].ch5[:3].to_list(), [75, 62, 55])
+
+        sr = SummarysliceReader(data_path("online/km3net_online.root"), step_size=1)
+
+        lengths = [64, 66, 68]
+
+        for idx, ss in enumerate(sr):
+            # self.assertListEqual(ss[0].dom_id[:3].to_list(), [806451572, 806455814, 806465101])
+            # self.assertListEqual(ss[0].dom_id[-3:].to_list(), [809526097, 809544058, 809544061])
+            assert len(ss.slices) == 1
+            assert len(ss.slices[0]) == lengths[idx]
+            assert len(ss.slices[0].dom_id) == lengths[idx]
+            assert len(ss.slices[0].ch3) == lengths[idx]

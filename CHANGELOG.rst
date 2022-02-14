@@ -1,5 +1,9 @@
 Unreleased changes
 ------------------
+* Added a new, high-performance Summaryslice reader ``km3io.online.SummarysliceReader``
+* The old ``km3io.OnlineReader.summarslices`` is now using the new ``SummarysliceReader``
+  which has a slightly different API (but at least an order of magnitude better
+  performance and much nicer high-level API thanks to AwkwardArrays)
 
 Version 0
 ---------

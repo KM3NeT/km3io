@@ -9,7 +9,10 @@ from .tools import cached_property
 
 
 class GSGReader(EventReader):
-    """reader for gSeaGen ROOT files"""
+
+    """
+    Reader for gSeaGen ROOT files
+    """
 
     header_key = "Header"
     event_path = "Events"

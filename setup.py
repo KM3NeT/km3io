@@ -10,7 +10,7 @@ import sys
 
 
 def read_requirements(kind):
-    """Return a list of stripped lines from a file"""
+    """Return a list of stripped lines from a file."""
     with open(os.path.join("requirements", kind + ".txt")) as fobj:
         return [l.strip() for l in fobj.readlines()]
 

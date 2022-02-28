@@ -182,11 +182,12 @@ class EventReader:
             )
 
     def __iter__(self, chunkwise=False):
+        """Iterate over the events, chunkwise if True."""
         self._events = self._event_generator(chunkwise=chunkwise)
         return self
 
     def _get_iterator_limits(self):
-        """Determines start and stop, used for event iteration"""
+        """Determine start and stop, used for event iteration."""
         if len(self._index_chain) > 1:
             raise NotImplementedError(
                 "iteration is currently not supported with nested slices"
@@ -273,6 +274,7 @@ class EventReader:
         return next(self._events)
 
     def __len__(self):
+        """Return the number of elements"""
         if not self._index_chain:
             return self._fobj[self.event_path].num_entries
         elif isinstance(self._index_chain[-1], (int, np.int32, np.int64)):

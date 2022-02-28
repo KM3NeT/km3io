@@ -97,6 +97,7 @@ class SummarysliceReader:
             )
 
     def __getitem__(self, idx):
+        """The magic for slicing and indexing"""
         if idx >= len(self) or idx < -len(self):
             raise IndexError("Chunk index out of range")
 
@@ -120,6 +121,7 @@ class SummarysliceReader:
         return next(self._chunks)
 
     def __len__(self):
+        """Return the number of chunks"""
         return int(np.ceil(self._branch.num_entries / self._step_size))
 
     def __repr__(self):
@@ -171,7 +173,8 @@ def unpack_bits(value, bits_template, out):  # pragma: no cover
 
 
 def get_channel_flags(value):
-    """Returns the hrv/fifo flags for the PMT channels (hrv/fifo)
+    """
+    Returns the hrv/fifo flags for the PMT channels (hrv/fifo)
 
     Parameters
     ----------
@@ -184,7 +187,8 @@ def get_channel_flags(value):
 
 
 def get_number_udp_packets(value):
-    """Returns the number of received UDP packets (dq_status)
+    """
+    Returns the number of received UDP packets (dq_status)
 
     Parameters
     ----------
@@ -195,7 +199,8 @@ def get_number_udp_packets(value):
 
 
 def get_udp_max_sequence_number(value):
-    """Returns the maximum sequence number of the received UDP packets (dq_status)
+    """
+    Return the maximum sequence number of the received UDP packets (dq_status)
 
     Parameters
     ----------
@@ -206,7 +211,8 @@ def get_udp_max_sequence_number(value):
 
 
 def has_udp_trailer(value):
-    """Returns the UDP Trailer flag (fifo)
+    """
+    Return the UDP Trailer flag (fifo)
 
     Parameters
     ----------
@@ -300,6 +306,7 @@ class OnlineReader:
 
 
 class Timeslices:
+
     """A simple wrapper for timeslices"""
 
     def __init__(self, fobj):
@@ -360,6 +367,9 @@ class Timeslices:
 
 
 class TimesliceStream:
+
+    """The representation of a timeslice stream"""
+
     def __init__(self, headers, superframes, hits_buffer):
         # self.headers = headers.lazyarray(
         #     uproot3.asjagged(uproot3.astable(

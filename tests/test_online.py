@@ -1,9 +1,7 @@
 from collections import namedtuple
 import itertools
-import os
 import re
 import unittest
-import numpy as np
 
 from km3net_testdata import data_path
 

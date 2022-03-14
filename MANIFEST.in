@@ -1,6 +1,6 @@
 include README.rst CHANGELOG.rst CONTRIBUTING.rst
 include LICENSE
 include setup.py setup.cfg pyproject.toml
-include src/km3io/version.txt
+include src/km3io/version.py
 
 recursive-include tests

@@ -1,12 +1,17 @@
 Unreleased changes
 ------------------
+
+Version 0
+---------
+0.25.0 / 2022-03-14
+~~~~~~~~~~~~~~~~~~~
+* uproot 4.2.2+ required, which fixes a regression problem when reading doubly nested
+  structures
 * Added a new, high-performance Summaryslice reader ``km3io.online.SummarysliceReader``
 * The old ``km3io.OnlineReader.summarslices`` is now using the new ``SummarysliceReader``
   which has a slightly different API (but at least an order of magnitude better
   performance and much nicer high-level API thanks to AwkwardArrays)
 
-Version 0
----------
 0.24.1 / 2021-11-05
 ~~~~~~~~~~~~~~~~~~~
 * The ``km3io.tools.is_bit_set()`` and all the related trigger mask checkers

@@ -2,12 +2,9 @@
 source = km3io
 
 [report]
-include =
-    km3io/*
 omit =
-    tests/*
-    km3io/definitions/*
-    km3io/version.py
+    src/km3io/definitions/*
+    src/km3io/version.py
 exclude_lines =
     pragma: no cover
     raise AssertionError

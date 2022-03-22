@@ -8,7 +8,6 @@ variables:
 cache:
   paths:
     - .cache/pip
-    - venv/
   key: "$CI_COMMIT_REF_SLUG"
 
 stages:

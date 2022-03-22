@@ -51,7 +51,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # AutoAPI
 autoapi_type = "python"
-autoapi_dirs = ["../km3io"]
+autoapi_dirs = ["../src/km3io"]
 autoapi_options = ["members", "undoc-members", "show-module-summary"]
 autoapi_include_summaries = True
 

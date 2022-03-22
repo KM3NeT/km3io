@@ -18,7 +18,7 @@ test:
 	py.test --junitxml=./reports/junit.xml -o junit_suite_name=$(PKGNAME) tests
 
 test-cov:
-	py.test --cov ./km3io --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage tests
+	py.test --cov src/km3io --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage tests
 
 test-loop: 
 	py.test tests
@@ -40,7 +40,7 @@ dependencies:
 
 .PHONY: black
 black:
-	black --exclude '/_definitions/|version.py' km3io
+	black --exclude '/_definitions/|version.py' src/km3io
 	black examples
 	black tests
 	black doc/conf.py
@@ -48,7 +48,7 @@ black:
 
 .PHONY: black-check
 black-check:
-	black --check --exclude '/_definitions/|version.py' km3io
+	black --check --exclude '/_definitions/|version.py' src/km3io
 	black --check examples
 	black --check tests
 	black --check doc/conf.py

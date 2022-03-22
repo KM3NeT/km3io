@@ -2,4 +2,4 @@
 requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
 
 [tool.setuptools_scm]
-write_to = "km3io/version.py"
+write_to = "src/km3io/version.py"

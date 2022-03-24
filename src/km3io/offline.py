@@ -83,6 +83,7 @@ class OfflineReader(EventReader):
             "len": "mc_trks.len",
             "status": "mc_trks.status",
             "mother_id": "mc_trks.mother_id",
+            "counter": "mc_trks.counter",
             "pdgid": "mc_trks.type",
             "hit_ids": "mc_trks.hit_ids",
             "usr": "mc_trks.usr",  # TODO: trouble with uproot4

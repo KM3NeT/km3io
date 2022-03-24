@@ -491,6 +491,14 @@ class TestOfflineTracks(unittest.TestCase):
         )
 
 
+class TestMisc(unittest.TestCase):
+    def test_mc_tracks_counter(self):
+        r = OfflineReader(data_path("gseagen/DAT000001.gSeaGen.1.aa.root"))
+        np.testing.assert_allclose(
+            [0, 0, 6, 7, 0, 0, 2, 53, 0, 0, 6, 57, 0], r.mc_tracks.counter[0][:13]
+        )
+
+
 class TestBranchIndexingMagic(unittest.TestCase):
     def setUp(self):
         self.events = OFFLINE_FILE.events

@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.25.1 / 2022-03-24
+~~~~~~~~~~~~~~~~~~~
+* the ``.counter`` field for ``mc_trks/mc_tracks`` is now accessible
+
 0.25.0 / 2022-03-14
 ~~~~~~~~~~~~~~~~~~~
 * uproot 4.2.2+ required, which fixes a regression problem when reading doubly nested

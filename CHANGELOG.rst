@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.25.2 / 2022-03-27
+~~~~~~~~~~~~~~~~~~~
+* Fixes the version
+
 0.25.1 / 2022-03-24
 ~~~~~~~~~~~~~~~~~~~
 * the ``.counter`` field for ``mc_trks/mc_tracks`` is now accessible

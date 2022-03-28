@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KM3NeT Data Definitions v2.1.0-1-ga85a9c1
+KM3NeT Data Definitions v2.2.0
 https://git.km3net.de/common/km3net-dataformat
 """
 
@@ -12,6 +12,7 @@ data = dict(
     TRK_ST_FINALSTATE=1,
     TRK_ST_PRIMARYNEUTRINO=100,
     TRK_ST_PRIMARYCOSMIC=200,
+    TRK_ST_MUONBUNDLE=300,
     TRK_ST_ININUCLEI=5,
     TRK_ST_INTERSTATE=2,
     TRK_ST_DECSTATE=3,
@@ -31,4 +32,5 @@ data = dict(
     TRK_ST_FAKECORSIKA_CHERENKOV_GAMMA=28,
     TRK_ST_PROPLEPTON=1001,
     TRK_ST_PROPDECLEPTON=2001,
+    PDG_MUONBUNDLE=81,
 )

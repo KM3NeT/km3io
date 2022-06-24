@@ -31,6 +31,7 @@ from km3io.tools import (
     is_3dshower,
     is_mxshower,
     is_3dmuon,
+    is_nanobeacon,
 )
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
@@ -641,4 +642,14 @@ class TestTriggerMaskChecks(unittest.TestCase):
         assert np.allclose(
             [False, False, False, True, False, False, True, False, True, True],
             list(is_3dmuon(GENHEN_OFFLINE_FILE.events.trigger_mask)),
+        )
+
+    def test_is_nanobeacon(self):
+        assert np.allclose(
+            [False, False, False, False, False, False, False, False, False, False],
+            list(is_nanobeacon(OFFLINE_FILE.events.trigger_mask)),
+        )
+        assert np.allclose(
+            [False, False, False, False, False, False, False, False, False, False],
+            list(is_nanobeacon(GENHEN_OFFLINE_FILE.events.trigger_mask)),
         )

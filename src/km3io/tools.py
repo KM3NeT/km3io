@@ -536,3 +536,14 @@ def is_3dmuon(trigger_mask):
       A value or an array of the trigger_mask, either of an event, or a hit.
     """
     return is_bit_set(trigger_mask, ktrg.JTRIGGER3DMUON)
+
+
+def is_nanobeacon(trigger_mask):
+    """Returns True if the trigger mask contains the nano-beacon flag.
+
+    Parameters
+    ----------
+    trigger_mask : int or array(int)
+      A value or an array of the trigger_mask, either of an event, or a hit.
+    """
+    return is_bit_set(trigger_mask, ktrg.JTRIGGERNB)

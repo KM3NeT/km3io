@@ -5,6 +5,7 @@ import numpy as np
 import awkward as ak
 import uproot3
 
+import km3io.definitions
 from km3io.definitions import reconstruction as krec
 from km3io.definitions import trigger as ktrg
 from km3io.definitions import fitparameters as kfit
@@ -536,6 +537,24 @@ def is_3dmuon(trigger_mask):
       A value or an array of the trigger_mask, either of an event, or a hit.
     """
     return is_bit_set(trigger_mask, ktrg.JTRIGGER3DMUON)
+
+
+def get_w2list_idx(f):
+    """
+    Get the correct w2list_idx for the given file, or None if there is none.
+
+    Parameters
+    ----------
+    f : km3io.OfflineReader
+        The file.
+
+    """
+    w2s_idx = {
+        "genhen": km3io.definitions.w2list_genhen_idx,
+        "gseagen": km3io.definitions.w2list_gseagen_idx,
+    }
+    sim_program = f.header.simul.program.lower()
+    return w2s_idx.get(sim_program)
 
 
 def is_nanobeacon(trigger_mask):

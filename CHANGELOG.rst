@@ -3,6 +3,12 @@ Unreleased changes
 
 Version 0
 ---------
+0.26.0 / 2022-06-27
+~~~~~~~~~~~~~~~~~~~
+* Added ``km3io.tools.is_nanobeacon()`` to check if the nanobeacon trigger bit is set
+* Added ``km3io.tools.get_w2list_idx()`` to get the w2list index according to the
+  simulation program
+
 0.25.2 / 2022-03-27
 ~~~~~~~~~~~~~~~~~~~
 * Fixes the version

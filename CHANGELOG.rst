@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.26.1 / 2022-07-06
+~~~~~~~~~~~~~~~~~~~
+* The warning from OpenMP/Numba is now silenced
+
 0.26.0 / 2022-06-27
 ~~~~~~~~~~~~~~~~~~~
 * Added ``km3io.tools.is_nanobeacon()`` to check if the nanobeacon trigger bit is set

@@ -11,9 +11,9 @@ The km3io Python package
     :target: https://km3py.pages.km3net.de/km3io
 
 This software provides a set of Python classes to read KM3NeT ROOT files
-without having ROOT, Jpp or aanet installed. It only depends on Python 3.5+ and the amazing `uproot <https://github.com/scikit-hep/uproot>`__ package and gives you access to the data via numpy arrays.
+without having ROOT, Jpp or aanet installed. It only depends on Python 3.5+ and the amazing `uproot <https://github.com/scikit-hep/uproot>`__ package and gives you access to the data via `numpy <https://www.numpy.org>`__ and `awkward <https://awkward-array.readthedocs.io>`__ arrays.
 
-It's very easy to use and according to the `uproot <https://github.com/scikit-hep/uproot>`__ benchmarks, it is able to outperform the ROOT I/O performance. 
+It's very easy to use and according to the `uproot <https://github.com/scikit-hep/uproot>`__ benchmarks, it is able to outperform the original ROOT I/O performance. 
 
 **Note:** Beware that this package is in the development phase, so the API will change until version ``1.0.0`` is released!
 
@@ -23,6 +23,10 @@ Installation
 Install km3io using pip::
 
     pip install km3io 
+
+or conda::
+
+    conda install km3io
 
 To get the latest (stable) development release::
 
@@ -66,18 +70,18 @@ it has 4 subarrays with variable lengths of type ``float64``:
     >>> f[:4].tracks.dir_z
     <Array [[0.213, 0.213, ... 0.229, 0.323]] type='4 * var * float64'>
 
-The same concept applies to everything, including ``hits``, ``mc_hits``,
+The same concept applies to all other branches, including ``hits``, ``mc_hits``,
 ``mc_tracks``, ``t_sec`` etc.
 
 Offline files reader
 --------------------
 
-In general an offline file has two methods to fetch data: the header and the events. Let's start with the header.
+In general an offline file has two attributes to access data: the header and the events. Let's start with the header.
 
 Reading the file header
 """""""""""""""""""""""
 
-To read an offline file start with opening it with an OfflineReader:
+To read an offline file start with opening it with the ``OfflineReader``:
 
 .. code-block:: python3
 
@@ -85,14 +89,14 @@ To read an offline file start with opening it with an OfflineReader:
   >>> from km3net_testdata import data_path
   >>> f = km3io.OfflineReader(data_path("offline/numucc.root"))
 
-Calling the header can be done with:
+Accessing is as easy as typing:
 
 .. code-block:: python3
 
   >>> f.header
   <km3io.offline.Header at 0x7fcd81025990>
 
-and provides lazy access. In offline files the header is unique and can be printed
+Printing it will give an overview of the structure:
 
 .. code-block:: python3
 
@@ -130,7 +134,8 @@ and provides lazy access. In offline files the header is unique and can be print
   xparam: OFF
   zed_user: zed_user(field_0=0.0, field_1=3450.0)
 
-To read the values in the header one can call them directly:
+To read the values in the header one can call them directly, as the structures
+are simple ``namedtuple``-like objects:
 
 .. code-block:: python3
 
@@ -145,7 +150,13 @@ To read the values in the header one can call them directly:
 Reading events
 """"""""""""""
 
-To start reading events call the events method on the file:
+Events are at the top level of an offline file, so that each branch of an event
+is directly accessible at the ``OfflineReader`` instance. The ``.keys()`` method
+can be used to list the available attributes. Notice that some of them are aliases
+for backwards compatibility (like ``mc_tracks`` and ``mc_trks``). Another
+backwards compatibility feature is the ``f.events`` attribute which is simply
+mapping everything to ``f``, so that ``f.events.mc_tracks`` is the same as
+``f.mc_tracks``.
 
 .. code-block:: python3
 
@@ -158,8 +169,14 @@ To start reading events call the events method on the file:
   'n_trks', 'overlays', 'run_id', 't_ns', 't_sec', 'tracks',
   'trigger_counter', 'trigger_mask', 'trks', 'usr', 'usr_names',
   'w', 'w2list', 'w3list'}
+  >>> f.tracks
+  <Branch [10] path='trks'>
+  >>> f.events.tracks
+  <Branch [10] path='trks'>
 
-Like the online reader lazy access is used. Using <TAB> completion gives an overview of available data. Alternatively the method `keys` can be used on events and it's data members containing a structure to see what is available for reading.
+The ``[10]`` denotes that there are ``10`` events available, each containing a sub-array of ``tracks``.
+
+Using <TAB> completion gives an overview of available data. Alternatively the method `keys` can be used on events and it's data members containing a structure to see what is available for reading.
 
 Reading the reconstructed values like energy and direction of an event can be done with:
 

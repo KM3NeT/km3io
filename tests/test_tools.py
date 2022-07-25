@@ -21,6 +21,10 @@ from km3io.tools import (
     best_track,
     get_w2list_param,
     get_multiplicity,
+    has_jmuon,
+    has_jshower,
+    has_aashower,
+    has_dusjshower,
     best_jmuon,
     best_jshower,
     best_aashower,
@@ -32,13 +36,20 @@ from km3io.tools import (
     is_mxshower,
     is_3dmuon,
     is_nanobeacon,
+    TimeConverter,
 )
+
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
 OFFLINE_USR = OfflineReader(data_path("offline/usr-sample.root"))
 OFFLINE_MC_TRACK_USR = OfflineReader(
     data_path(
         "offline/mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root"
+    )
+)
+OFFLINE_JMERGEFIT = OfflineReader(
+    data_path(
+        "offline/mcv5.0.gsg_elec-CC_10-100GeV.km3sim.JDK.jte.jmergefit.orca.aanet.909.evtsample.root"
     )
 )
 GENHEN_OFFLINE_FILE = OfflineReader(
@@ -286,16 +297,44 @@ class TestBestTrackSelection(unittest.TestCase):
             best_track(self.events.tracks, startend=(1, 4), stages=[1, 3, 5, 4])
 
 
+class TestHasJmuon(unittest.TestCase):
+    def test_has_jmuon(self):
+        assert ak.sum(has_jmuon(OFFLINE_JMERGEFIT.events.tracks)) == len(
+            OFFLINE_JMERGEFIT.events.tracks
+        )
+
+
+class TestHasJshower(unittest.TestCase):
+    def test_has_jshower(self):
+        assert ak.sum(has_jshower(OFFLINE_JMERGEFIT.events.tracks)) == len(
+            OFFLINE_JMERGEFIT.events.tracks
+        )
+
+
+class TestHasAashower(unittest.TestCase):
+    def test_has_aashower(self):
+        # there are no aashower events in this file
+        assert ak.sum(has_aashower(OFFLINE_JMERGEFIT.events.tracks)) == 0
+
+
+class TestHasDusjshower(unittest.TestCase):
+    def test_has_dusjshower(self):
+        # there are no dusj events in this file
+        assert ak.sum(has_dusjshower(OFFLINE_JMERGEFIT.events.tracks)) == 0
+
+
 class TestBestJmuon(unittest.TestCase):
     def test_best_jmuon(self):
         best = best_jmuon(OFFLINE_FILE.events.tracks)
 
         assert len(best) == 10
 
-        assert best.rec_stages[0].tolist() == [1, 3, 5, 4]
-        assert best.rec_stages[1].tolist() == [1, 3, 5, 4]
-        assert best.rec_stages[2].tolist() == [1, 3, 5, 4]
-        assert best.rec_stages[3].tolist() == [1, 3, 5, 4]
+        jmuon_stages = [1, 3, 5, 4]
+
+        assert best.rec_stages[0].tolist() == jmuon_stages
+        assert best.rec_stages[1].tolist() == jmuon_stages
+        assert best.rec_stages[2].tolist() == jmuon_stages
+        assert best.rec_stages[3].tolist() == jmuon_stages
 
         assert best.lik[0] == ak.max(OFFLINE_FILE.events.tracks.lik[0])
         assert best.lik[1] == ak.max(OFFLINE_FILE.events.tracks.lik[1])
@@ -304,19 +343,25 @@ class TestBestJmuon(unittest.TestCase):
 
 class TestBestJshower(unittest.TestCase):
     def test_best_jshower(self):
-        # there are no jshower events in this file
-        best = best_jshower(OFFLINE_FILE.events.tracks)
+        best = best_jshower(OFFLINE_JMERGEFIT.events.tracks)
 
         assert len(best) == 10
 
-        assert best.rec_stages[0] is None
-        assert best.rec_stages[1] is None
-        assert best.rec_stages[2] is None
-        assert best.rec_stages[3] is None
+        jshower_stages = [101, 106, 102, 105, 107, 103]
 
-        assert best.lik[0] is None
-        assert best.lik[1] is None
-        assert best.lik[2] is None
+        assert best.rec_stages[0].tolist() == jshower_stages
+        assert best.rec_stages[1].tolist() == jshower_stages
+        assert best.rec_stages[2].tolist() == jshower_stages
+        assert best.rec_stages[3].tolist() == jshower_stages
+
+        jshower_mask = mask(
+            OFFLINE_JMERGEFIT.events.tracks.rec_stages, sequence=jshower_stages
+        )
+        jshower_tracks = OFFLINE_JMERGEFIT.events.tracks[jshower_mask]
+
+        assert best.lik[0] == ak.max(jshower_tracks.lik[0])
+        assert best.lik[1] == ak.max(jshower_tracks.lik[1])
+        assert best.lik[2] == ak.max(jshower_tracks.lik[2])
 
 
 class TestBestAashower(unittest.TestCase):
@@ -338,7 +383,7 @@ class TestBestAashower(unittest.TestCase):
 
 class TestBestDusjshower(unittest.TestCase):
     def test_best_dusjshower(self):
-        # there are no aashower events in this file
+        # there are no dusj events in this file
         best = best_dusjshower(OFFLINE_FILE.events.tracks)
 
         assert len(best) == 10
@@ -652,4 +697,30 @@ class TestTriggerMaskChecks(unittest.TestCase):
         assert np.allclose(
             [False, False, False, False, False, False, False, False, False, False],
             list(is_nanobeacon(GENHEN_OFFLINE_FILE.events.trigger_mask)),
+        )
+
+
+class TestTimeConverter(unittest.TestCase):
+    def setUp(self):
+        self.one_event = GENHEN_OFFLINE_FILE.events[5]
+        self.tconverter = TimeConverter(self.one_event)
+
+    def test_get_time_of_frame(self):
+        t_frame = self.tconverter.get_time_of_frame(self.one_event.frame_index)
+
+        assert t_frame < self.one_event.mc_t
+        assert t_frame % self.tconverter.FRAME_TIME_NS == 0
+
+    def test_get_DAQ_time(self):
+        t_DAQ = self.tconverter.get_DAQ_time(self.one_event.mc_hits.t)
+
+        assert all(t_DAQ < self.tconverter.FRAME_TIME_NS)
+
+    def test_get_MC_time(self):
+        t_frame = self.tconverter.get_time_of_frame(self.one_event.frame_index)
+        t_MC = self.tconverter.get_MC_time(self.one_event.hits.t)
+
+        assert all(
+            np.fabs(self.one_event.mc_t + t_MC - t_frame)
+            < self.tconverter.FRAME_TIME_NS
         )

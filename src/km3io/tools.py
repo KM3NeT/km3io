@@ -13,7 +13,7 @@ from km3io.definitions import w2list_genhen as kw2gen
 from km3io.definitions import w2list_gseagen as kw2gsg
 
 # 110 MB based on the size of the largest basket found so far in km3net
-BASKET_CACHE_SIZE = 110 * 1024 ** 2
+BASKET_CACHE_SIZE = 110 * 1024**2
 BASKET_CACHE = uproot3.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 
@@ -404,6 +404,30 @@ def _mask_atleast(arr, atleast):
     return out
 
 
+def has_jmuon(tracks):
+    """Check if given tracks contain JMUON reconstruction."""
+    m = mask(tracks.rec_stages, minmax=(krec.JMUONBEGIN, krec.JMUONEND))
+    return ak.any(m, axis=m.ndim - 1)
+
+
+def has_jshower(tracks):
+    """Check if given tracks contain JSHOWER reconstruction."""
+    m = mask(tracks.rec_stages, minmax=(krec.JSHOWERBEGIN, krec.JSHOWEREND))
+    return ak.any(m, axis=m.ndim - 1)
+
+
+def has_aashower(tracks):
+    """Check if given tracks contain AASHOWER reconstruction."""
+    m = mask(tracks.rec_stages, minmax=(krec.AASHOWERBEGIN, krec.AASHOWEREND))
+    return ak.any(m, axis=m.ndim - 1)
+
+
+def has_dusjshower(tracks):
+    """Check if given tracks contain AASHOWER reconstruction."""
+    m = mask(tracks.rec_stages, minmax=(krec.DUSJSHOWERBEGIN, krec.DUSJSHOWEREND))
+    return ak.any(m, axis=m.ndim - 1)
+
+
 def best_jmuon(tracks):
     """Select the best JMUON track."""
     return best_track(tracks, minmax=(krec.JMUONBEGIN, krec.JMUONEND))
@@ -566,3 +590,53 @@ def is_nanobeacon(trigger_mask):
       A value or an array of the trigger_mask, either of an event, or a hit.
     """
     return is_bit_set(trigger_mask, ktrg.JTRIGGERNB)
+
+
+class TimeConverter(object):
+    """
+    Auxiliary class to convert Monte Carlo hit times to DAQ/triggered hit times.
+    """
+
+    FRAME_TIME_NS = 1e8  # [ns]
+
+    def __init__(self, event):
+
+        self.__t0 = event.mc_t  # [ns]
+        self.__t1 = self.get_time_of_frame(event.frame_index)  # [ns]
+
+    def get_time_of_frame(self, frame_index):
+        """
+        Get start time of frame in ns since start of run for a given frame index
+
+        Parameters
+        ----------
+        frame_index: int
+          The index of the DAQ frame
+        """
+
+        if frame_index > 0:
+            return (frame_index - 1) * self.FRAME_TIME_NS  # [ns]
+        else:
+            return 0  # [ns]
+
+    def get_DAQ_time(self, t0):
+        """
+        Get DAQ/triggered hit time
+
+        Parameters
+        ----------
+        t0: float or array(float)
+          Simulated time [ns]
+        """
+        return t0 + (self.__t0 - self.__t1)  # [ns]
+
+    def get_MC_time(self, t0):
+        """
+        Get Monte Carlo hit time
+
+        Parameters
+        ----------
+        t0: float or array(float)
+          DAQ/trigger hit time [ns]
+        """
+        return t0 - (self.__t0 - self.__t1)  # [ns]

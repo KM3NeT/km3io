@@ -3,6 +3,13 @@ Unreleased changes
 
 Version 0
 ---------
+0.27.0 / 2022-07-20
+~~~~~~~~~~~~~~~~~~~
+* Adds the TimeConverter class to ``src/km3io/tools.py``
+* Update km3net-dataformat requirement to version 0.3.6 or higher
+* Update Black requirement to version 22.3.0 or higher, to prevent ``ImportError: cannot import name '_unicodefun' from 'click'``
+* Remove ``requirements`` folder (all requirements are now configured in ``setup.cfg``)
+
 0.26.1 / 2022-07-06
 ~~~~~~~~~~~~~~~~~~~
 * The warning from OpenMP/Numba is now silenced
@@ -12,7 +19,7 @@ Version 0
 * Added ``km3io.tools.is_nanobeacon()`` to check if the nanobeacon trigger bit is set
 * Added ``km3io.tools.get_w2list_idx()`` to get the w2list index according to the
   simulation program
-
+  
 0.25.2 / 2022-03-27
 ~~~~~~~~~~~~~~~~~~~
 * Fixes the version

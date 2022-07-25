@@ -147,8 +147,8 @@ are simple ``namedtuple``-like objects:
   100000
 
 
-Reading events
-""""""""""""""
+Reading offline events
+""""""""""""""""""""""
 
 Events are at the top level of an offline file, so that each branch of an event
 is directly accessible at the ``OfflineReader`` instance. The ``.keys()`` method
@@ -180,6 +180,7 @@ Using <TAB> completion gives an overview of available data. Alternatively the at
 can be used on event-branches and to see what is available for reading.
 
 .. code-block:: python3
+
   >>> f.tracks.fields
   ['id',
   'pos_x',
@@ -211,6 +212,7 @@ Read the documention of AwkwardArray to learn how to work with these structures 
 to retrieve the energy of the very first reconstructed track for the first three events is:
 
 .. code-block:: python3
+
   >>> f.events.tracks.E[:3, 0]
   <Array [117, 4.4e+03, 8.37] type='3 * float64'>
 
@@ -223,8 +225,8 @@ L0 timeslices is not working at the moment (but is in progress).
 
 Let's have a look at some online data.
 
-Reading Events
-""""""""""""""
+Reading online events
+"""""""""""""""""""""
 
 Now we use the ``OnlineReader`` to create our file object.
 

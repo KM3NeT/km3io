@@ -7,9 +7,9 @@ import numpy as np
 
 import numba as nb
 
-TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
-SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024 ** 2  # [byte]
-BASKET_CACHE_SIZE = 110 * 1024 ** 2
+TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
+SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
+BASKET_CACHE_SIZE = 110 * 1024**2
 BASKET_CACHE = uproot3.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 # Parameters for PMT rate conversions, since the rates in summary slices are

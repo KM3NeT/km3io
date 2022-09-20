@@ -18,7 +18,7 @@ class OfflineReader(EventReader):
 
     event_path = "E/Evt"
     item_name = "OfflineEvent"
-    skip_keys = ["t", "AAObject", "mc_event_time"]
+    skip_keys = ["t", "AAObject", "mc_event_time", "header_uuid[16]"]
     aliases = {
         "mc_event_time_sec": "mc_event_time/mc_event_time.fSec",
         "mc_event_time_ns": "mc_event_time/mc_event_time.fNanoSec",
@@ -26,6 +26,7 @@ class OfflineReader(EventReader):
         "t_ns": "t/t.fNanoSec",
         "usr": "AAObject/usr",
         "usr_names": "AAObject/usr_names",
+        "header_uuid": "header_uuid[16]"
     }
     nested_branches = {
         "hits": {

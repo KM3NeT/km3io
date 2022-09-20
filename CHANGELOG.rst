@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 0
 ---------
+0.27.1 / 2022-09-20
+~~~~~~~~~~~~~~~~~~~
+* Fixes the issue where files procued with newer Jpp v17+ versions
+  errored due to a `header_uuid[16]` field
+
 0.27.0 / 2022-07-20
 ~~~~~~~~~~~~~~~~~~~
 * Adds the TimeConverter class to ``src/km3io/tools.py``

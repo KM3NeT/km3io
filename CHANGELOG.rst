@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.27.2 / 2022-10-04
+~~~~~~~~~~~~~~~~~~~
+* Added dockerisation
+
 0.27.1 / 2022-09-20
 ~~~~~~~~~~~~~~~~~~~
 * Fixes the issue where files procued with newer Jpp v17+ versions

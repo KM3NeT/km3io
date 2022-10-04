@@ -32,11 +32,11 @@ To get the latest (stable) development release::
 
     pip install git+https://git.km3net.de/km3py/km3io.git
 
-Docker:
+Docker::
 
     docker run -it docker.km3net.de/km3io
 
-Singularity:
+Singularity::
 
     wget https://sftp.km3net.de/singularity/km3io_v0.27.2.sif  # pick the version you like
     singularity shell km3io_v0.27.2.sif

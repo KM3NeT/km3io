@@ -26,7 +26,7 @@ class OfflineReader(EventReader):
         "t_ns": "t/t.fNanoSec",
         "usr": "AAObject/usr",
         "usr_names": "AAObject/usr_names",
-        "header_uuid": "header_uuid[16]"
+        "header_uuid": "header_uuid[16]",
     }
     nested_branches = {
         "hits": {

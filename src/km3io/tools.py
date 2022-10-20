@@ -147,7 +147,7 @@ def fitinf(fitparam, tracks):
     """
     fit = tracks.fitinf
     nonempty = ak.num(fit, axis=-1) > 0
-    return ak.fill_none(fit.mask[nonempty][..., 0], np.nan)
+    return ak.fill_none(fit.mask[nonempty][..., fitparam], np.nan)
 
 
 def count_nested(arr, axis=0):

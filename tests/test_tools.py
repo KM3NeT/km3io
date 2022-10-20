@@ -72,12 +72,35 @@ class TestFitinf(unittest.TestCase):
         assert beta[0][1] == self.fit[0][1][0]
         assert beta[0][2] == self.fit[0][2][0]
 
+        beta1 = fitinf(kfit.JGANDALF_BETA1_RAD, self.tracks)
+
+        self.assertAlmostEqual(0.003417848024252858, beta1[0][1])
+        self.assertAlmostEqual(0.0035514113196960105, beta1[3][2])
+
     def test_fitinf_from_one_event(self):
         beta = fitinf(kfit.JGANDALF_BETA0_RAD, self.best)
 
         assert beta[0] == self.best_fit[0][0]
         assert beta[1] == self.best_fit[1][0]
         assert beta[2] == self.best_fit[2][0]
+
+        beta1 = fitinf(kfit.JGANDALF_BETA1_RAD, self.best)
+
+        assert np.allclose(
+            [
+                0.003417848024252858,
+                0.009401304503949024,
+                0.0015619992272287897,
+                0.0035514113196960105,
+                0.014331655995648987,
+                0.020507433510666175,
+                0.019360118783263776,
+                0.014202233969464604,
+                0.0024146277135960043,
+                0.006569492242345319,
+            ],
+            list(beta1),
+        )
 
 
 class TestBestTrackSelection(unittest.TestCase):

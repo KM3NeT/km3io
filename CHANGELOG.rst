@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.27.3 / 2022-10-20
+~~~~~~~~~~~~~~~~~~~
+* Fixed ``km3io.tools.fitinf()`` which always returned the 0th element
+
 0.27.2 / 2022-10-04
 ~~~~~~~~~~~~~~~~~~~
 * Added dockerisation

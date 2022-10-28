@@ -63,8 +63,16 @@ test-py3.8:
         - make test
     <<: *junit_definition
 
+test-py3.9:
+    image: docker.km3net.de/base/python:3.9
+    stage: test
+    script:
+        - *virtualenv_definition
+        - make test
+    <<: *junit_definition
+
 code-style:
-    image: docker.km3net.de/base/python:3.7
+    image: docker.km3net.de/base/python:3.9
     stage: test
     script:
         - *virtualenv_definition
@@ -72,7 +80,7 @@ code-style:
     allow_failure: true
 
 coverage:
-    image: docker.km3net.de/base/python:3.6
+    image: docker.km3net.de/base/python:3.9
     stage: coverage
     script:
         - *virtualenv_definition
@@ -87,7 +95,7 @@ coverage:
 
 
 build-docs:
-    image: docker.km3net.de/base/python:3.6
+    image: docker.km3net.de/base/python:3.9
     stage: doc
     script:
         - *virtualenv_definition
@@ -95,7 +103,7 @@ build-docs:
     cache: {}
 
 pages:
-    image: docker.km3net.de/base/python:3.6
+    image: docker.km3net.de/base/python:3.9
     stage: doc
     script:
         - *virtualenv_definition
@@ -126,7 +134,7 @@ docker:
 
 
 pypi:
-    image: docker.km3net.de/base/python:3
+    image: docker.km3net.de/base/python:3.9
     stage: release
     cache: {}
     script:

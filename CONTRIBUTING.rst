@@ -13,7 +13,7 @@ such things!
 Use the appropriate template and file a new issue here:
 https://git.km3net.de/km3py/km3io/issues
 
-You can browse all the issues here: https://git.km3net.de/km3py/km3io/issues
+You can browse all the issues here: https://git.km3net.de/km3py/km3io/-/issues
 
 Please follow the instructions in the templates to provide all the
 necessary information which will help other people to understand the
@@ -22,7 +22,7 @@ situation.
 Improve km3io
 ---------------
 
-Check out our KanBan board http://git.km3net.de/km3py/km3io/boards,
+Check out our KanBan board https://git.km3net.de/km3py/km3io/-/boards,
 which shows all the open issues in three columns:
 
 - *discussion*: The issues which are yet to be discussed (e.g. not clear how to proceed)

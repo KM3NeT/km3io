@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KM3NeT Data Definitions v2.2.0
+KM3NeT Data Definitions v2.2.0-16-gbef370c
 https://git.km3net.de/common/km3net-dataformat
 """
 

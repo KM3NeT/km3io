@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.28.0 / 2022-11-02
+~~~~~~~~~~~~~~~~~~~
+* Update km3net-definitions to 2.2.0-16-gbef370c
+
 0.27.3 / 2022-10-20
 ~~~~~~~~~~~~~~~~~~~
 * Fixed ``km3io.tools.fitinf()`` which always returned the 0th element

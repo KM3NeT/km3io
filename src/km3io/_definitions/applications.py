@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KM3NeT Data Definitions v2.2.0-16-gbef370c
+KM3NeT Data Definitions v3.0.0
 https://git.km3net.de/common/km3net-dataformat
 """
 
@@ -9,7 +9,7 @@ data = dict(
     APPLICATION_GENHEN=   "GENHEN"   ,
     APPLICATION_GSEAGEN=  "gSeaGen"  ,
     APPLICATION_MUPAGE=   "MUPAGE"   ,
-    APPLICATION_CORSIKA=  "Corsika"  ,
+    APPLICATION_CORSIKA=  "CORSIKA"  ,
     APPLICATION_KM3BUU=   "KM3BUU"   ,
     APPLICATION_KM3=      "km3"      ,
     APPLICATION_KM3SIM=   "KM3Sim"   ,

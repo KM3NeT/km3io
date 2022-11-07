@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.29.0 / 2022-11-07
+~~~~~~~~~~~~~~~~~~~
+* Update km3net-definitions to 3.0.0
+
 0.28.0 / 2022-11-02
 ~~~~~~~~~~~~~~~~~~~
 * Update km3net-definitions to 2.2.0-16-gbef370c

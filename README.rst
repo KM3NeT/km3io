@@ -10,6 +10,9 @@ The km3io Python package
 .. image:: https://git.km3net.de/examples/km3badges/-/raw/master/docs-latest-brightgreen.svg
     :target: https://km3py.pages.km3net.de/km3io
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.7382620.svg
+   :target: https://doi.org/10.5281/zenodo.7382620
+
 This software provides a set of Python classes to read KM3NeT ROOT files
 without having ROOT, Jpp or aanet installed. It only depends on Python 3.5+ and the amazing `uproot <https://github.com/scikit-hep/uproot>`__ package and gives you access to the data via `numpy <https://www.numpy.org>`__ and `awkward <https://awkward-array.readthedocs.io>`__ arrays.
 

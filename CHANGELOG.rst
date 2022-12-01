@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 0
 ---------
+0.29.1 / 2022-12-01
+~~~~~~~~~~~~~~~~~~~
+* Added ``codemeta.json`` to the MANIFEST
+
 0.29.0 / 2022-11-07
 ~~~~~~~~~~~~~~~~~~~
 * Update km3net-definitions to 3.0.0

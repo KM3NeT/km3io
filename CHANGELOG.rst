@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 0
 ---------
+0.29.2 / 2022-12-21
+~~~~~~~~~~~~~~~~~~~
+* Hotfix for AwkwardArray 2.0 incompatibility, now restricted to
+  be <2.0
+
 0.29.1 / 2022-12-01
 ~~~~~~~~~~~~~~~~~~~
 * Added ``codemeta.json`` to the MANIFEST

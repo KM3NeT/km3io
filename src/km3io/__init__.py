@@ -19,3 +19,4 @@ from .offline import OfflineReader
 from .online import OnlineReader
 from .acoustics import RawAcousticReader
 from .gseagen import GSGReader
+from .dst import DSTReader

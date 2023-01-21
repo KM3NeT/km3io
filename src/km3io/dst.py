@@ -6,7 +6,6 @@ import numpy as np
 import awkward as ak
 
 from .definitions import mc_header
-from ._definitions import dst
 from .tools import cached_property, to_num, unfold_indices
 from .rootio import EventReader
 from .offline import OfflineReader

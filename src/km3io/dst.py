@@ -20,8 +20,8 @@ class DSTReader(EventReader):
     event_path = "T"
     item_name = "DSTEvent"
     skip_keys = []
-    aliases = {"id": "sum_hits/tmin"}
-    nested_branches = {}#dst.parameters
+    aliases = {}
+    nested_branches = {}
     nested_aliases = {}
 
     @cached_property

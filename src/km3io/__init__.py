@@ -18,4 +18,3 @@ with warnings.catch_warnings():
 from .offline import OfflineReader
 from .online import OnlineReader
 from .acoustics import RawAcousticReader
-from .gseagen import GSGReader

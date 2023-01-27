@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* ``gSeaGen`` reader removed
 
 Version 0
 ---------

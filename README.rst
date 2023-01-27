@@ -23,7 +23,7 @@ It's very easy to use and according to the `uproot <https://github.com/scikit-he
 Installation
 ============
 
-Install km3io using pip::
+Install km3io using pip (recommended)::
 
     pip install km3io 
 
@@ -53,24 +53,25 @@ If you have a question about km3io, please proceed as follows:
 
 - Read the documentation below.
 - Explore the `examples <https://km3py.pages.km3net.de/km3io/examples.html>`__ in the documentation.
-- Haven't you found an answer to your question in the documentation, post a git issue with your question showing us an example of what you have tried first, and what you would like to do.
-- Have you noticed a bug, please post it in a git issue, we appreciate your contribution.
+- Haven't you found an answer to your question in the documentation, post a Git issue with your question showing us an example of what you have tried first, and what you would like to do. If you are struggling with a specific file, provide access to it (e.g. filepath in Lyon CC).
+- Have you noticed a bug, please post it in a Git issue, we appreciate your contribution.
+- Always provide the full error message and the version of km3io you are using.
 
 
 Introduction
 ------------
 
-Most of km3net data is stored in root files. These root files are created using the `KM3NeT Dataformat library <https://git.km3net.de/common/km3net-dataformat>`__
+Most of KM3NeT data is stored in ROOT files. These ROOT files are created using the `KM3NeT Dataformat library <https://git.km3net.de/common/km3net-dataformat>`__
 A ROOT file created with
-`Jpp <https://git.km3net.de/common/jpp>`__ is an "online" file and all other software usually produces "offline" files.
+`Jpp <https://git.km3net.de/common/jpp>`__ is commonly an "online" file (e.g. as part of the data taking) and all other software usually produces "offline" files (simulation output). Note however that run-by-run productions mimic the data taking, therefore also produce "online" files.
 
-km3io is a Python package that provides a set of classes: ``OnlineReader``, ``OfflineReader`` and a special class to read gSeaGen files. All of these ROOT files can be read installing any other software like Jpp, aanet or ROOT.
+``km3io`` is a pure Python package that provides two important classes: ``OnlineReader`` and ``OfflineReader``. There is no need to install any other software like Jpp, aanet or ROOT. It is important to note that a file can contain both "online" and "offline" data. Writing ROOT files is not supported.
 
-Data in km3io is returned as ``awkward.Array`` which is an advance Numpy-like container type to store
+Data in ``km3io`` is returned as ``awkward.Array`` which is an advanced Numpy-like container type to store
 contiguous data for high performance computations.
 Such an ``awkward.Array`` supports any level of nested arrays and records which can have different lengths, in contrast to Numpy where everything has to be rectangular.
 
-The example is shown below shows the array which contains the ``dir_z`` values
+The example below shows the array which contains the ``dir_z`` values
 of each track of the first 4 events. The type ``4 * var * float64`` means that
 it has 4 subarrays with variable lengths of type ``float64``:
 
@@ -84,11 +85,12 @@ it has 4 subarrays with variable lengths of type ``float64``:
 
 The same concept applies to all other branches, including ``hits``, ``mc_hits``,
 ``mc_tracks``, ``t_sec`` etc.
+In this case, the data returned is of type ``awkward.Array`` as mentioned above.
 
 Offline files reader
 --------------------
 
-In general an offline file has two attributes to access data: the header and the events. Let's start with the header.
+In general an "offline" file has two attributes to access data: the header and the events. Let's start with the header.
 
 Reading the file header
 """""""""""""""""""""""

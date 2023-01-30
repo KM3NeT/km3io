@@ -1,6 +1,6 @@
 Unreleased changes
 ------------------
-* ``gSeaGen`` reader removed
+* ``gSeaGen`` reader removed, only supported until v0.29.2
 
 Version 0
 ---------

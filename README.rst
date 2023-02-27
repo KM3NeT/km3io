@@ -85,6 +85,31 @@ it has 4 subarrays with variable lengths of type ``float64``:
 The same concept applies to all other branches, including ``hits``, ``mc_hits``,
 ``mc_tracks``, ``t_sec`` etc.
 
+Architecture overview
+---------------------
+
+``km3io`` utilises ``uproot`` behind the scenes and creates a lazy and thin
+wrapper which offers convenient slicing and iterations by delaying the access to
+the actual ROOT data branches to the very last moment. When using the iteration
+functionality, the data is loaded in chunks and the iteration is done over e.g.
+events in each chunk or a bunch of frames in case of the summaryslice reader.
+
+The base class for the event-based readout is the ``km3io.rootio.EventReader``
+class. When subclassing this class, the branches, aliases and nested branches
+need to be defined in the static variables which are then used to mask unwanted
+attributes. Especially in case of the Offline ROOT format, where the "one class
+fits all" design was chosen, it is distracting that e.g. a `Hit` has many
+attributes which make no sense depending on the context (MC hit, raw hit etc.).
+By specifing the branches explicitely, the user API will only expose the
+meaningful fields.
+
+The online ROOT format support is partly still based on ``uproot3``.
+
+Many of the utility functions are using Numba to achieve the best possible
+performance. ``km3io`` does not offer alternative implementations, so Numba is a
+strict dependency and an integral part of the implementation.
+
+
 Offline files reader
 --------------------
 

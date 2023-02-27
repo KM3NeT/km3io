@@ -1,9 +1,13 @@
 Unreleased changes
 ------------------
-* ``gSeaGen`` reader removed, only supported until v0.29.2
 
 Version 0
 ---------
+1.0.0 / 2023-02-27
+~~~~~~~~~~~~~~~~~~~
+* API stabilised and v1 is now LTS
+* ``gSeaGen`` reader removed, only supported until v0.29.2
+
 0.29.2 / 2022-12-21
 ~~~~~~~~~~~~~~~~~~~
 * Hotfix for AwkwardArray 2.0 incompatibility, now restricted to

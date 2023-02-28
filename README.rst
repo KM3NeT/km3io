@@ -18,8 +18,6 @@ without having ROOT, Jpp or aanet installed. It only depends on Python 3.5+ and 
 
 It's very easy to use and according to the `uproot <https://github.com/scikit-hep/uproot>`__ benchmarks, it is able to outperform the original ROOT I/O performance. 
 
-**Note:** Beware that this package is in the development phase, so the API will change until version ``1.0.0`` is released!
-
 Installation
 ============
 

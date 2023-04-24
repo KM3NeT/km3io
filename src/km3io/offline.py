@@ -8,6 +8,7 @@ import awkward as ak
 from .definitions import mc_header
 from .tools import cached_property, to_num, unfold_indices
 from .rootio import EventReader
+from .dst import DSTReader
 
 log = logging.getLogger("offline")
 
@@ -102,6 +103,12 @@ class OfflineReader(EventReader):
             return Header(self._fobj["Head"].tojson()["map<string,string>"])
         else:
             warnings.warn("Your file header has an unsupported format")
+
+    @property
+    def dst(self):
+        if self._dst is None:
+            self._dst = DSTReader(self._filepath)
+        return self._dst
 
 
 class Header:

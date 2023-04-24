@@ -51,6 +51,7 @@ class EventReader:
             Event constructor.
 
         """
+        self._dst = None
         if isinstance(f, str):
             self._fobj = uproot.open(f)
             self._filepath = f
@@ -294,7 +295,10 @@ class EventReader:
 
     def __actual_len__(self):
         """The raw number of events without any indexing/slicing magic"""
-        return len(self._fobj[self.event_path]["id"].array())
+        try:
+            return len(self._fobj[self.event_path]["id"].array())
+        except uproot.KeyInFileError:
+            return len(self)
 
     def __repr__(self):
         length = len(self)

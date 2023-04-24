@@ -8,7 +8,6 @@ import awkward as ak
 from .definitions import mc_header
 from .tools import cached_property, to_num, unfold_indices
 from .rootio import EventReader
-from .offline import OfflineReader
 
 log = logging.getLogger("dst")
 
@@ -20,7 +19,12 @@ class DSTReader(EventReader):
     item_name = "DSTEvent"
     skip_keys = []
     aliases = {}
-    nested_branches = {}
+    nested_branches = {
+        "sum_mc_trks": {
+            "tmuon_pos_x": "tmuon/tmuon.pos.x",
+            "id": "tmuon/tmuon.id"
+        }
+    }
     nested_aliases = {}
 
     @cached_property

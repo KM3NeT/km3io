@@ -20,8 +20,13 @@ import sphinx_rtd_theme
 from pkg_resources import get_distribution
 
 # -- Project information -----------------------------------------------------
+try:
+    from importlib.metadata import version as get_version
+    version = get_version(__name__)
+except ImportError:
+    from pkg_resources import get_distribution
+    version = get_distribution(__name__).version
 
-version = get_distribution("km3io").version
 short_version = ".".join(version.split(".")[:2])
 project = "km3io {}".format(short_version)
 copyright = "{0}, Zineb Aly and Tamas Gal".format(date.today().year)

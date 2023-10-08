@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 1
 ---------
+1.0.2 / 2023-10-08
+~~~~~~~~~~~~~~~~~~
+* Deprecation fixes
+
 1.0.1 / 2023-06-15
 ~~~~~~~~~~~~~~~~~~
 * Minor changes

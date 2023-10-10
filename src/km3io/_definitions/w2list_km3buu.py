@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KM3NeT Data Definitions v3.0.0
+KM3NeT Data Definitions v3.2.0-10-g78c1c7a
 https://git.km3net.de/common/km3net-dataformat
 """
 
@@ -24,4 +24,5 @@ data = dict(
     W2LIST_KM3BUU_LEPINCAN=18,
     W2LIST_KM3BUU_GIBUU_WEIGHT=23,
     W2LIST_KM3BUU_GIBUU_SCAT_TYPE=24,
+    W2LIST_KM3BUU_LEPPROP_SAMPLES=25,
 )

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KM3NeT Data Definitions v3.0.0
+KM3NeT Data Definitions v3.2.0-10-g78c1c7a
 https://git.km3net.de/common/km3net-dataformat
 """
 
@@ -11,4 +11,5 @@ data = dict(
     HYDROPHONE_DISABLE= 2,
     PIEZO_DISABLE= 3,
     MODULE_OUT_OF_SYNC= 4,
+    TRANSMITTER_DISABLE= 5,
 )

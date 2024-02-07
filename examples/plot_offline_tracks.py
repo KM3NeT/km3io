@@ -6,6 +6,7 @@ The following example shows how to access tracks data in an offline ROOT file.
 
 Note: the offline files used here were intentionaly reduced to 10 events.
 """
+
 import km3io as ki
 from km3net_testdata import data_path
 

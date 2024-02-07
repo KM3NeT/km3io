@@ -8,6 +8,7 @@ written by aanet software.
 Note: the offline file used here has MC offline data and was intentionaly reduced
 to 10 events.
 """
+
 import km3io as ki
 from km3net_testdata import data_path
 

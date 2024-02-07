@@ -22,9 +22,11 @@ from pkg_resources import get_distribution
 # -- Project information -----------------------------------------------------
 try:
     from importlib.metadata import version as get_version
+
     version = get_version("km3io")
 except ImportError:
     from pkg_resources import get_distribution
+
     version = get_distribution("km3io").version
 
 short_version = ".".join(version.split(".")[:2])

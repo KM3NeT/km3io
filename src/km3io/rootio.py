@@ -261,7 +261,7 @@ class EventReader:
                 data = {}
                 for k in keys:
                     data[k] = _event[k]
-                for (k, i) in zip(nested_keys, nested_items):
+                for k, i in zip(nested_keys, nested_items):
                     data[k] = i
                 for tokey, fromkey in self.nested_aliases.items():
                     data[tokey] = data[fromkey]

@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* A few astro helpers were added: azimuth(), zenith(), phi(), theta(), ...
+
 Version 1
 ---------
 1.0.2 / 2023-10-08

@@ -5,6 +5,8 @@ import awkward as ak
 import numpy as np
 from pathlib import Path
 
+from numpy.testing import assert_almost_equal, assert_allclose
+
 from km3net_testdata import data_path
 from km3io.definitions import fitparameters as kfit
 
@@ -37,6 +39,14 @@ from km3io.tools import (
     is_3dmuon,
     is_nanobeacon,
     TimeConverter,
+    phi,
+    theta,
+    zenith,
+    azimuth,
+    angle,
+    angle_between,
+    magnitude,
+    unit_vector,
 )
 
 
@@ -746,4 +756,162 @@ class TestTimeConverter(unittest.TestCase):
         assert all(
             np.fabs(self.one_event.mc_t + t_MC - t_frame)
             < self.tconverter.FRAME_TIME_NS
+        )
+
+
+class TestMath(unittest.TestCase):
+    def setUp(self):
+        self.v = np.array([0.26726124, 0.53452248, 0.80178373])
+        self.vecs = np.array(
+            [
+                [0.0, 0.19611614, 0.98058068],
+                [0.23570226, 0.23570226, 0.94280904],
+                [0.53452248, 0.26726124, 0.80178373],
+                [0.80178373, 0.26726124, 0.53452248],
+                [0.94280904, 0.23570226, 0.23570226],
+            ]
+        )
+
+    def test_phi(self):
+        print(phi((1, 0, 0)))
+        assert_almost_equal(0, phi((1, 0, 0)))
+        assert_almost_equal(np.pi, phi((-1, 0, 0)))
+        assert_almost_equal(np.pi / 2, phi((0, 1, 0)))
+        assert_almost_equal(np.pi / 2 * 3, phi((0, -1, 0)))
+        assert_almost_equal(np.pi / 2 * 3, phi((0, -1, 0)))
+        assert_almost_equal(0, phi((0, 0, 0)))
+        assert_almost_equal(phi(self.v), 1.10714872)
+        assert_almost_equal(
+            phi(self.vecs),
+            np.array([1.57079633, 0.78539816, 0.46364761, 0.32175055, 0.24497866]),
+        )
+
+    def test_zenith(self):
+        assert_allclose(np.pi, zenith((0, 0, 1)))
+        assert_allclose(0, zenith((0, 0, -1)))
+        assert_allclose(np.pi / 2, zenith((0, 1, 0)))
+        assert_allclose(np.pi / 2, zenith((0, -1, 0)))
+        assert_allclose(np.pi / 4 * 3, zenith((0, 1, 1)))
+        assert_allclose(np.pi / 4 * 3, zenith((0, -1, 1)))
+        assert_almost_equal(zenith(self.v), 2.5010703409103687)
+        assert_allclose(
+            zenith(self.vecs),
+            np.array([2.94419709, 2.80175574, 2.50107034, 2.13473897, 1.80873745]),
+        )
+
+    def test_azimuth(self):
+        self.assertTrue(np.allclose(np.pi, azimuth((1, 0, 0))))
+        self.assertTrue(np.allclose(0, azimuth((-1, 0, 0))))
+
+        print(azimuth((0, 1, 0)))
+        print(azimuth((0, -1, 0)))
+        print(azimuth((0, 0, 0)))
+        print(azimuth(self.v))
+        print(azimuth(self.vecs))
+        self.assertTrue(np.allclose(np.pi / 2 * 3, azimuth((0, 1, 0))))
+        self.assertTrue(np.allclose(np.pi / 2, azimuth((0, -1, 0))))
+        self.assertTrue(np.allclose(np.pi, azimuth((0, 0, 0))))
+        self.assertTrue(np.allclose(azimuth(self.v), 4.24874137138))
+        self.assertTrue(
+            np.allclose(
+                azimuth(self.vecs),
+                np.array([4.71238898, 3.92699082, 3.60524026, 3.46334321, 3.38657132]),
+            )
+        )
+
+    def test_theta(self):
+        print(theta((0, 0, -1)))
+        print(theta((0, 0, 1)))
+        print(theta((0, 1, 0)))
+        print(theta((0, -1, 0)))
+        print(theta((0, 1, 1)))
+        print(theta((0, -1, 1)))
+        print(theta(self.v))
+        print(theta(self.vecs))
+        self.assertTrue(np.allclose(0, theta((0, 0, 1))))
+        self.assertTrue(np.allclose(np.pi, theta((0, 0, -1))))
+        self.assertTrue(np.allclose(np.pi / 2, theta((0, 1, 0))))
+        self.assertTrue(np.allclose(np.pi / 2, theta((0, -1, 0))))
+        self.assertTrue(np.allclose(0, theta((0, 1, 1))))
+        self.assertTrue(np.allclose(0, theta((0, -1, 1))))
+        self.assertTrue(np.allclose(theta(self.v), 0.64052231))
+        self.assertTrue(
+            np.allclose(
+                theta(self.vecs),
+                np.array([0.19739554, 0.33983691, 0.64052231, 1.00685369, 1.3328552]),
+            )
+        )
+
+    def test_unit_vector(self):
+        v1 = (1, 0, 0)
+        v2 = (1, 1, 0)
+        v3 = (-1, 2, 0)
+        assert np.allclose(v1, unit_vector(v1))
+        assert np.allclose(np.array(v2) / np.sqrt(2), unit_vector(v2))
+        assert np.allclose(np.array(v3) / np.sqrt(5), unit_vector(v3))
+
+    def test_magnitude(self):
+        assert 1 == magnitude(np.array([1, 0, 0]))
+        assert 2 == magnitude(np.array([0, 2, 0]))
+        assert 3 == magnitude(np.array([0, 0, 3]))
+        assert np.allclose(
+            [3.74165739, 8.77496439, 13.92838828],
+            magnitude(np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])),
+        )
+
+    def test_angle(self):
+        v1 = np.array([1, 0, 0])
+        v2 = np.array([0, 1, 0])
+        v3 = np.array([-1, 0, 0])
+        self.assertAlmostEqual(0, angle(v1, v1))
+        self.assertAlmostEqual(np.pi / 2, angle(v1, v2))
+        self.assertAlmostEqual(np.pi, angle(v1, v3))
+        self.assertAlmostEqual(angle(self.v, v1), 1.3002465638163236)
+        self.assertAlmostEqual(angle(self.v, v2), 1.0068536854342678)
+        self.assertAlmostEqual(angle(self.v, v3), 1.8413460897734695)
+
+        assert np.allclose(
+            [1.300246563816323, 1.0068536854342678, 1.8413460897734695],
+            angle(np.array([self.v, self.v, self.v]), np.array([v1, v2, v3])),
+        )
+
+    def test_angle_between(self):
+        v1 = (1, 0, 0)
+        v2 = (0, 1, 0)
+        v3 = (-1, 0, 0)
+        self.assertAlmostEqual(0, angle_between(v1, v1))
+        self.assertAlmostEqual(np.pi / 2, angle_between(v1, v2))
+        self.assertAlmostEqual(np.pi, angle_between(v1, v3))
+        self.assertAlmostEqual(angle_between(self.v, v1), 1.3002465638163236)
+        self.assertAlmostEqual(angle_between(self.v, v2), 1.0068536854342678)
+        self.assertAlmostEqual(angle_between(self.v, v3), 1.8413460897734695)
+
+        assert np.allclose(
+            [0.0, 0.0, 0.0]
+            - angle_between(np.array([v1, v2, v3]), np.array([v1, v2, v3]), axis=1),
+            0,
+        )
+        assert np.allclose(
+            [np.pi / 2, np.pi]
+            - angle_between(np.array([v1, v1]), np.array([v2, v3]), axis=1),
+            0,
+        )
+
+        self.assertTrue(
+            np.allclose(
+                angle_between(self.vecs, v1),
+                np.array([1.57079633, 1.3328552, 1.0068537, 0.64052231, 0.33983691]),
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                angle_between(self.vecs, v2),
+                np.array([1.37340077, 1.3328552, 1.3002466, 1.30024656, 1.3328552]),
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                angle_between(self.vecs, v3),
+                np.array([1.57079633, 1.80873745, 2.13473897, 2.50107034, 2.80175574]),
+            )
         )

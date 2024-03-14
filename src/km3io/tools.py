@@ -640,3 +640,194 @@ class TimeConverter(object):
           DAQ/trigger hit time [ns]
         """
         return t0 - (self.__t0 - self.__t1)  # [ns]
+
+
+def angle(v1, v2, normalized=False):
+    """
+    Compute the unsigned angle between two vectors. For a stacked input, the
+    angle is computed pairwise. Inspired by the "vg" Python package.
+
+    Parameters
+    ----------
+    v1 : np.array
+        With shape `(3,)` or a `kx3` stack of vectors.
+    v2 : np.array
+        A vector or stack of vectors with the same shape as `v1`.
+    normalized : bool
+        By default, the vectors will be normalised unless `normalized` is `True`.
+
+    Returns
+    -------
+    A float or a vector of floats with the angle in radians.
+
+    """
+    dot_products = np.einsum("ij,ij->i", v1.reshape(-1, 3), v2.reshape(-1, 3))
+
+    if normalized:
+        cosines = dot_products
+    else:
+        cosines = dot_products / magnitude(v1) / magnitude(v2)
+
+    # The dot product can exceed 1 or -1 and arccos will fail unless we clip
+    angles = np.arccos(np.clip(cosines, -1.0, 1.0))
+
+    if v1.ndim == v2.ndim == 1:
+        return angles[0]
+
+    return angles
+
+
+def magnitude(v):
+    """
+    Calculates the magnitude of a vector or array of vectors.
+
+    Parameters
+    ----------
+    v : np.array
+        With shape `(3,)` or `kx3` stack of vectors.
+
+    Returns
+    -------
+    A float or a vector of floats with the magnitudes.
+    """
+    if v.ndim == 1:
+        return np.linalg.norm(v)
+    elif v.ndim == 2:
+        return np.linalg.norm(v, axis=1)
+    else:
+        ValueError("Unsupported dimensions")
+
+
+def theta(v):
+    """Neutrino direction in polar coordinates.
+
+    Parameters
+    ----------
+    v : array (x, y, z)
+
+    Notes
+    -----
+    Downgoing event: theta = 180deg
+    Horizont: 90deg
+    Upgoing: theta = 0
+
+    Angles in radians.
+
+    """
+    v = np.atleast_2d(v)
+    dir_z = v[:, 2]
+    return theta_separg(dir_z)
+
+
+def theta_separg(dir_z):
+    return np.arccos(dir_z)
+
+
+def phi(v):
+    """Neutrino direction in polar coordinates.
+
+    Parameters
+    ----------
+    v : array (x, y, z)
+
+
+    Notes
+    -----
+    ``phi``, ``theta`` is the opposite of ``zenith``, ``azimuth``.
+
+    Angles in radians.
+
+    """
+    v = np.atleast_2d(v)
+    dir_x = v[:, 0]
+    dir_y = v[:, 1]
+    return phi_separg(dir_x, dir_y)
+
+
+def phi_separg(dir_x, dir_y):
+    p = np.arctan2(dir_y, dir_x)
+    p[p < 0] += 2 * np.pi
+    return p
+
+
+def zenith(v):
+    """Return the zenith angle in radians.
+
+    Parameters
+    ----------
+    v : array (x, y, z)
+
+
+    Notes
+    -----
+    Defined as 'Angle respective to downgoing'.
+    Downgoing event: zenith = 0
+    Horizont: 90deg
+    Upgoing: zenith = 180deg
+
+    """
+    return angle_between((0, 0, -1), v)
+
+
+def azimuth(v):
+    """Return the azimuth angle in radians.
+
+    Parameters
+    ----------
+    v : array (x, y, z)
+
+
+    Notes
+    -----
+    ``phi``, ``theta`` is the opposite of ``zenith``, ``azimuth``.
+
+    This is the 'normal' azimuth definition -- beware of how you
+    define your coordinates. KM3NeT defines azimuth
+    differently than e.g. SLALIB, astropy, the AAS.org
+
+    """
+    v = np.atleast_2d(v)
+    azi = phi(v) - np.pi
+    azi[azi < 0] += 2 * np.pi
+    if len(azi) == 1:
+        return azi[0]
+    return azi
+
+
+def angle_between(v1, v2, axis=0):
+    """Returns the angle in radians between vectors 'v1' and 'v2'.
+
+    If axis=1 it evaluates the angle between arrays of vectors.
+
+    Examples
+    --------
+    >>> angle_between((1, 0, 0), (0, 1, 0))
+    1.5707963267948966
+    >>> angle_between((1, 0, 0), (1, 0, 0))
+    0.0
+    >>> angle_between((1, 0, 0), (-1, 0, 0))
+    3.141592653589793
+    >>> v1 = np.array([[1, 0, 0], [1, 0, 0]])
+    >>> v2 = np.array([[0, 1, 0], [-1, 0, 0]])
+    >>> angle_between(v1, v2, axis=1)
+    array([1.57079633, 3.14159265])
+
+    """
+    if axis == 0:
+        v1_u = unit_vector(v1)
+        v2_u = unit_vector(v2)
+        # Don't use `np.dot`, does not work with all shapes
+        return np.arccos(np.clip(np.inner(v1_u, v2_u), -1, 1))
+    elif axis == 1:
+        return angle(v1, v2)  # returns angle in deg
+    else:
+        raise ValueError("unsupported axis")
+
+
+def unit_vector(vector, **kwargs):
+    """Returns the unit vector of the vector."""
+    vector = np.array(vector)
+    out_shape = vector.shape
+    vector = np.atleast_2d(vector)
+    unit = vector / np.linalg.norm(vector, axis=1, **kwargs)[:, None]
+    return unit.reshape(out_shape)

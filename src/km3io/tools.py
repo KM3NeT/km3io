@@ -642,6 +642,62 @@ class TimeConverter(object):
         return t0 - (self.__t0 - self.__t1)  # [ns]
 
 
+def angle(v1, v2, normalized=False):
+    """
+    Compute the unsigned angle between two vectors. For a stacked input, the
+    angle is computed pairwise. Inspired by the "vg" Python package.
+
+    Parameters
+    ----------
+    v1 : np.array
+        With shape `(3,)` or a `kx3` stack of vectors.
+    v2 : np.array
+        A vector or stack of vectors with the same shape as `v1`.
+    normalized : bool
+        By default, the vectors will be normalised unless `normalized` is `True`.
+
+    Returns
+    -------
+    A float or a vector of floats with the angle in radians.
+
+    """
+    dot_products = np.einsum("ij,ij->i", v1.reshape(-1, 3), v2.reshape(-1, 3))
+
+    if normalized:
+        cosines = dot_products
+    else:
+        cosines = dot_products / magnitude(v1) / magnitude(v2)
+
+    # The dot product can exceed 1 or -1 and arccos will fail unless we clip
+    angles = np.arccos(np.clip(cosines, -1.0, 1.0))
+
+    if v1.ndim == v2.ndim == 1:
+        return angles[0]
+
+    return angles
+
+
+def magnitude(v):
+    """
+    Calculates the magnitude of a vector or array of vectors.
+
+    Parameters
+    ----------
+    v : np.array
+        With shape `(3,)` or `kx3` stack of vectors.
+
+    Returns
+    -------
+    A float or a vector of floats with the magnitudes.
+    """
+    if v.ndim == 1:
+        return np.linalg.norm(v)
+    elif v.ndim == 2:
+        return np.linalg.norm(v, axis=1)
+    else:
+        ValueError("Unsupported dimensions")
+
+
 def theta(v):
     """Neutrino direction in polar coordinates.
 
@@ -736,8 +792,6 @@ def azimuth(v):
     if len(azi) == 1:
         return azi[0]
     return azi
-
-
 
 
 def angle_between(v1, v2, axis=0):

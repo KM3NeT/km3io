@@ -1,16 +1,9 @@
 import binascii
 from collections import namedtuple
-import os
 import uproot
-import uproot3
 import numpy as np
 
 import numba as nb
-
-TIMESLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
-SUMMARYSLICE_FRAME_BASKET_CACHE_SIZE = 523 * 1024**2  # [byte]
-BASKET_CACHE_SIZE = 110 * 1024**2
-BASKET_CACHE = uproot3.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 # Parameters for PMT rate conversions, since the rates in summary slices are
 # stored as a single byte to save space. The values from 0-255 can be decoded
@@ -220,12 +213,12 @@ class OnlineReader:
     """Reader for online ROOT files"""
 
     def __init__(self, filename):
-        self._fobj = uproot3.open(filename)
+        self._fobj = uproot.open(filename)
         self._filename = filename
         self._events = None
         self._timeslices = None
         self._summaryslices = None
-        self._uuid = binascii.hexlify(self._fobj._context.uuid).decode("ascii")
+        self._uuid = self._fobj.parent.uuid.hex
 
     @property
     def uuid(self):
@@ -285,167 +278,12 @@ class OnlineReader:
         return self._events
 
     @property
-    def timeslices(self):
-        if self._timeslices is None:
-            self._timeslices = Timeslices(self._fobj)
-        return self._timeslices
-
-    @property
     def summaryslices(self):
         if self._summaryslices is None:
             self._summaryslices = SummarysliceReader(
                 uproot.open(self._filename)
             )  # TODO: remove when using uproot4
         return self._summaryslices
-
-
-class Timeslices:
-    """A simple wrapper for timeslices"""
-
-    def __init__(self, fobj):
-        self._fobj = fobj
-        self._timeslices = {}
-        self._read_streams()
-
-    def _read_streams(self):
-        """Read the L0, L1, L2 and SN streams if available"""
-        streams = set(
-            s.split(b"KM3NET_TIMESLICE_")[1].split(b";")[0]
-            for s in self._fobj.keys()
-            if b"KM3NET_TIMESLICE_" in s
-        )
-        for stream in streams:
-            tree = self._fobj[b"KM3NET_TIMESLICE_" + stream][
-                b"KM3NETDAQ::JDAQTimeslice"
-            ]
-            headers = tree[b"KM3NETDAQ::JDAQTimesliceHeader"][b"KM3NETDAQ::JDAQHeader"][
-                b"KM3NETDAQ::JDAQChronometer"
-            ]
-            if len(headers) == 0:
-                continue
-            superframes = tree[b"vector<KM3NETDAQ::JDAQSuperFrame>"]
-            hits_dtype = np.dtype([("pmt", "u1"), ("tdc", "<u4"), ("tot", "u1")])
-            hits_buffer = superframes[
-                b"vector<KM3NETDAQ::JDAQSuperFrame>.buffer"
-            ].lazyarray(
-                uproot3.asjagged(
-                    uproot3.astable(uproot3.asdtype(hits_dtype)), skipbytes=6
-                ),
-                basketcache=uproot3.cache.ThreadSafeArrayCache(
-                    TIMESLICE_FRAME_BASKET_CACHE_SIZE
-                ),
-            )
-            self._timeslices[stream.decode("ascii")] = (
-                headers,
-                superframes,
-                hits_buffer,
-            )
-            setattr(
-                self,
-                stream.decode("ascii"),
-                TimesliceStream(headers, superframes, hits_buffer),
-            )
-
-    def stream(self, stream, idx):
-        ts = self._timeslices[stream]
-        return Timeslice(*ts, idx, stream)
-
-    def __str__(self):
-        return "Available timeslice streams: {}".format(
-            ", ".join(s for s in self._timeslices.keys())
-        )
-
-    def __repr__(self):
-        return str(self)
-
-
-class TimesliceStream:
-    def __init__(self, headers, superframes, hits_buffer):
-        # self.headers = headers.lazyarray(
-        #     uproot3.asjagged(uproot3.astable(
-        #         uproot3.asdtype(
-        #             np.dtype([('a', 'i4'), ('b', 'i4'), ('c', 'i4'),
-        #                       ('d', 'i4'), ('e', 'i4')]))),
-        #                     skipbytes=6),
-        #     basketcache=uproot3.cache.ThreadSafeArrayCache(
-        #         TIMESLICE_FRAME_BASKET_CACHE_SIZE))
-        self.headers = headers
-        self.superframes = superframes
-        self._hits_buffer = hits_buffer
-
-    # def frames(self):
-    #     n_hits = self._superframe[
-    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits'].lazyarray(
-    #             basketcache=BASKET_CACHE)[self._idx]
-    #     module_ids = self._superframe[
-    #         b'vector<KM3NETDAQ::JDAQSuperFrame>.id'].lazyarray(basketcache=BASKET_CACHE)[self._idx]
-    #     idx = 0
-    #     for module_id, n_hits in zip(module_ids, n_hits):
-    #         self._frames[module_id] = hits_buffer[idx:idx + n_hits]
-    #         idx += n_hits
-
-
-class Timeslice:
-    """A wrapper for a timeslice"""
-
-    def __init__(self, header, superframe, hits_buffer, idx, stream):
-        self.header = header
-        self._frames = {}
-        self._superframe = superframe
-        self._hits_buffer = hits_buffer
-        self._idx = idx
-        self._stream = stream
-        self._n_frames = None
-
-    @property
-    def frames(self):
-        if not self._frames:
-            self._read_frames()
-        return self._frames
-
-    def _read_frames(self):
-        """Populate a dictionary of frames with the module ID as key"""
-        hits_buffer = self._hits_buffer[self._idx]
-        n_hits = self._superframe[
-            b"vector<KM3NETDAQ::JDAQSuperFrame>.numberOfHits"
-        ].lazyarray(basketcache=BASKET_CACHE)[self._idx]
-        try:
-            module_ids = self._superframe[
-                b"vector<KM3NETDAQ::JDAQSuperFrame>.id"
-            ].lazyarray(basketcache=BASKET_CACHE)[self._idx]
-        except KeyError:
-            module_ids = (
-                self._superframe[
-                    b"vector<KM3NETDAQ::JDAQSuperFrame>.KM3NETDAQ::JDAQModuleIdentifier"
-                ]
-                .lazyarray(
-                    uproot3.asjagged(
-                        uproot3.astable(uproot3.asdtype([("dom_id", ">i4")]))
-                    ),
-                    basketcache=BASKET_CACHE,
-                )[self._idx]
-                .dom_id
-            )
-
-        idx = 0
-        for module_id, n_hits in zip(module_ids, n_hits):
-            self._frames[module_id] = hits_buffer[idx : idx + n_hits]
-            idx += n_hits
-
-    def __len__(self):
-        if self._n_frames is None:
-            self._n_frames = len(
-                self._superframe[b"vector<KM3NETDAQ::JDAQSuperFrame>.id"].lazyarray(
-                    basketcache=BASKET_CACHE
-                )[self._idx]
-            )
-        return self._n_frames
-
-    def __str__(self):
-        return "{} timeslice with {} frames.".format(self._stream, len(self))
-
-    def __repr__(self):
-        return "<{}: {} entries>".format(self.__class__.__name__, len(self.header))
 
 
 class OnlineEvents:

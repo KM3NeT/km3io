@@ -3,7 +3,6 @@ from collections import namedtuple
 import numba as nb
 import numpy as np
 import awkward as ak
-import uproot3
 
 import km3io.definitions
 from km3io.definitions import reconstruction as krec
@@ -11,10 +10,6 @@ from km3io.definitions import trigger as ktrg
 from km3io.definitions import fitparameters as kfit
 from km3io.definitions import w2list_genhen as kw2gen
 from km3io.definitions import w2list_gseagen as kw2gsg
-
-# 110 MB based on the size of the largest basket found so far in km3net
-BASKET_CACHE_SIZE = 110 * 1024**2
-BASKET_CACHE = uproot3.cache.ThreadSafeArrayCache(BASKET_CACHE_SIZE)
 
 
 class cached_property:
@@ -312,41 +307,27 @@ def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):
             elif atleast is not None:
                 np_array = _mask_atleast(ak.Array(layout), np.array(atleast))
 
-            return ak.layout.NumpyArray(np_array)
+            return ak.contents.NumpyArray(np_array)
 
-        elif isinstance(
-            layout,
-            (
-                ak.layout.ListArray32,
-                ak.layout.ListArrayU32,
-                ak.layout.ListArray64,
-            ),
-        ):
+        elif isinstance(layout, ak.contents.ListArray):
             if len(layout.stops) == 0:
                 content = recurse(layout.content)
             else:
                 content = recurse(layout.content[: np.max(layout.stops)])
             return type(layout)(layout.starts, layout.stops, content)
 
-        elif isinstance(
-            layout,
-            (
-                ak.layout.ListOffsetArray32,
-                ak.layout.ListOffsetArrayU32,
-                ak.layout.ListOffsetArray64,
-            ),
-        ):
+        elif isinstance(layout, ak.contents.ListOffsetArray):
             content = recurse(layout.content[: layout.offsets[-1]])
             return type(layout)(layout.offsets, content)
 
-        elif isinstance(layout, ak.layout.RegularArray):
+        elif isinstance(layout, ak.contents.RegularArray):
             content = recurse(layout.content)
-            return ak.layout.RegularArray(content, layout.size)
+            return ak.contents.RegularArray(content, layout.size)
 
         else:
             raise NotImplementedError(repr(arr))
 
-    layout = ak.to_layout(arr, allow_record=True, allow_other=False)
+    layout = ak.to_layout(arr, allow_record=True)
     return ak.Array(recurse(layout))
 
 

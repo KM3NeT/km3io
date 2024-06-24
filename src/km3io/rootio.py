@@ -60,7 +60,7 @@ class EventReader:
         else:
             raise TypeError("Unsupported file descriptor.")
         self._step_size = step_size
-        self._uuid = self._fobj._file.uuid
+        self._uuid = self._fobj.parent.uuid
         self._iterator_index = 0
         self._keys = keys
         self._event_ctor = event_ctor

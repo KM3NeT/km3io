@@ -6,7 +6,8 @@ Version 1
 ---------
 1.2.0 / 2024-06-24
 ~~~~~~~~~~~~~~~~~~
-* Removed support for timeslices
+* Removed online format support (online events, timeslices and summary slices) in favour of
+  the `KM3io.jl <https://git.km3net.de/common/KM3io.jl>`__` Julia Package.
 * uproot 5 and awkward 2 are now required
 * Python 3.7+ required
 

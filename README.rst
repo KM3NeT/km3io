@@ -254,9 +254,8 @@ to retrieve the energy of the very first reconstructed track for the first three
 Online files reader
 -------------------
 
-``km3io`` is able to read events, summary slices and timeslices. Timeslices are
-currently only supported with split level of 2 or more, which means that reading
-L0 timeslices is not working at the moment (but is in progress).
+``km3io`` is able to read events and summary slices (reading of timeslices is
+only available in ``km3io v1.1.0`` or older).
 
 Let's have a look at some online data.
 
@@ -274,8 +273,7 @@ Now we use the ``OnlineReader`` to create our file object.
 That's it, we created an object which gives access to all the events, but the
 relevant data is still not loaded into the memory (lazy access)!
 The structure is different compared to the ``OfflineReader``
-because online files contain additional branches at the top level
-(summaryslices and timeslices).
+because online files also contains summaryslices at the top level.
 
 .. code-block:: python3
 
@@ -314,40 +312,3 @@ chunk and the second to the index of the summaryslice in that chunk.
   <Array [806451572, 806455814, ... 809544061] type='68 * int32'>
   >>> f.summaryslices[0].slices[2].ch23
   <Array [48, 43, 46, 54, 83, ... 51, 51, 52, 50] type='68 * uint8'>
-
-Reading Timeslices
-""""""""""""""""""
-
-Timeslices are split into different streams since 2017 and ``km3io`` currently
-supports everything except L0, i.e. L1, L2 and SN streams. The API is
-work-in-progress and will be improved in future, however, all the data is
-already accessible (although in ugly ways ;-)
-
-To access the timeslice data, you need to specify which timeslice stream
-to read:
-
-.. code-block:: python3
-
-  >>> f.timeslices
-  Available timeslice streams: SN, L1
-  >>> f.timeslices.stream("L1", 0).frames
-  {806451572: <Table [<Row 0> <Row 1> <Row 2> ... <Row 981> <Row 982> <Row 983>] at 0x00014c167340>,
-  806455814: <Table [<Row 984> <Row 985> <Row 986> ... <Row 1985> <Row 1986> <Row 1987>] at 0x00014c5f4760>,
-  806465101: <Table [<Row 1988> <Row 1989> <Row 1990> ... <Row 2236> <Row 2237> <Row 2238>] at 0x00014c5f45e0>,
-  806483369: <Table [<Row 2239> <Row 2240> <Row 2241> ... <Row 2965> <Row 2966> <Row 2967>] at 0x00014c12b910>,
-  ...
-  809544061: <Table [<Row 48517> <Row 48518> <Row 48519> ... <Row 49240> <Row 49241> <Row 49242>] at 0x00014ca57100>}
-
-The frames are represented by a dictionary where the key is the ``DOM ID`` and
-the value an awkward array of hits, with the usual fields to access the PMT
-channel, time and ToT:
-
-.. code-block:: python3
-
-   >>> f.timeslices.stream("L1", 0).frames[809524432].dtype
-   dtype([('pmt', 'u1'), ('tdc', '<u4'), ('tot', 'u1')])
-   >>> f.timeslices.stream("L1", 0).frames[809524432].tot
-  array([25, 27, 28, ..., 29, 22, 28], dtype=uint8)
-
-
-

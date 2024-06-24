@@ -8,6 +8,7 @@ Version 1
 ~~~~~~~~~~~~~~~~~~
 * Removed support for timeslices
 * uproot 5 and awkward 2 are now required
+* Python 3.7+ required
 
 1.1.0 / 2024-03-14
 ~~~~~~~~~~~~~~~~~~

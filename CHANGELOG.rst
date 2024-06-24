@@ -4,6 +4,11 @@ Unreleased changes
 
 Version 1
 ---------
+1.2.0 / 2024-06-24
+~~~~~~~~~~~~~~~~~~
+* Removed support for timeslices
+* uproot 5 and awkward 2 are now required
+
 1.1.0 / 2024-03-14
 ~~~~~~~~~~~~~~~~~~
 * A few astro helpers were added: azimuth(), zenith(), phi(), theta(), ...

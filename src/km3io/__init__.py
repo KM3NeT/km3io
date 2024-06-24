@@ -17,5 +17,4 @@ import os
 os.environ["KMP_WARNINGS"] = "off"
 
 from .offline import OfflineReader
-from .online import OnlineReader
 from .acoustics import RawAcousticReader

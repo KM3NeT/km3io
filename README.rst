@@ -58,11 +58,21 @@ If you have a question about km3io, please proceed as follows:
 Introduction
 ------------
 
-Most of km3net data is stored in root files. These root files are created using the `KM3NeT Dataformat library <https://git.km3net.de/common/km3net-dataformat>`__
-A ROOT file created with
-`Jpp <https://git.km3net.de/common/jpp>`__ is an "online" file and all other software usually produces "offline" files.
+Most of km3net data is stored in root files. These root files are created using
+the `KM3NeT Dataformat library
+<https://git.km3net.de/common/km3net-dataformat>`__ A ROOT file created with
+`Jpp <https://git.km3net.de/common/jpp>`__ is an "online" file and all other
+software usually produces "offline" files.
 
-km3io is a Python package that provides a set of classes: ``OnlineReader``, ``OfflineReader`` and a special class to read gSeaGen files. All of these ROOT files can be read installing any other software like Jpp, aanet or ROOT.
+km3io is a Python package that provides access to offline files with its
+``OfflineReader`` class and a special one to read gSeaGen files. All of these
+ROOT files can be read without installing any other software like Jpp, aanet or
+ROOT. km3io v1.1 and earlier also support the access to online files (events,
+summaryslices and timeslices). This feature has been dropped due to a lack of
+mainteinance power and inf favour of the `KM3io.jl <https://git.km3net.de/common/KM3io.jl>`__` Julia Package, which
+provides high-performances access to all ROOT files and should also be
+prioritised over ``km3io`` when performance matters (which does, most of the
+time).
 
 Data in km3io is returned as ``awkward.Array`` which is an advance Numpy-like container type to store
 contiguous data for high performance computations.
@@ -254,61 +264,4 @@ to retrieve the energy of the very first reconstructed track for the first three
 Online files reader
 -------------------
 
-``km3io`` is able to read events and summary slices (reading of timeslices is
-only available in ``km3io v1.1.0`` or older).
-
-Let's have a look at some online data.
-
-Reading online events
-"""""""""""""""""""""
-
-Now we use the ``OnlineReader`` to create our file object.
-
-.. code-block:: python3
-
-  import km3io
-  f = km3io.OnlineReader(data_path("online/km3net_online.root"))
-
-
-That's it, we created an object which gives access to all the events, but the
-relevant data is still not loaded into the memory (lazy access)!
-The structure is different compared to the ``OfflineReader``
-because online files also contains summaryslices at the top level.
-
-.. code-block:: python3
-
-  >>> f.events
-  Number of events: 3
-  >>> f.events.snapshot_hits[1].tot[:10]
-  array([27, 24, 21, 17, 22, 15, 24, 30, 19, 15], dtype=uint8)
-  >>> f.events.triggered_hits[1].channel_id[:10]
-  array([ 2,  3, 16, 22, 23,  0,  2,  3,  4,  5], dtype=uint8)
-
-The resulting arrays are numpy arrays. The indexing convention is: the first indexing
-corresponds to the event, the second to the branch and consecutive ones to the
-optional dimensions of the arrays. In the last step we accessed the PMT channel IDs
-of the first 10 hits of the second event.
-
-Reading SummarySlices
-"""""""""""""""""""""
-
-The following example shows how to access summary slices. The summary slices are
-returned in chunks to be more efficient with the I/O. The default chunk-size is
-1000. In the example file we only have three summaryslices, so there is only a single
-chunk. The first index passed to the summaryslices reader is corresponding to the
-chunk and the second to the index of the summaryslice in that chunk.
-
-.. code-block:: python3
-
-  >>> f.summaryslices
-  <SummarysliceReader 3 items, step_size=1000 (1 chunk)>
-  >>> f.summaryslices[0]
-  SummarysliceChunk(headers=<Array [{' cnt': 671088704, ... ] type='3 * {" cnt": uint32, " vers": uint16, " ...'>, slices=<Array [[{dom_id: 806451572, ... ch30: 48}]] type='3 * var * {"dom_id": int32, "...'>)
-  >>> f.summaryslices[0].headers
-  <Array [{' cnt': 671088704, ... ] type='3 * {" cnt": uint32, " vers": uint16, " ...'>
-  >>> f.summaryslices[0].slices[2]
-  <Array [{dom_id: 806451572, ... ch30: 48}] type='68 * {"dom_id": int32, "dq_stat...'>
-  >>> f.summaryslices[0].slices[2].dom_id
-  <Array [806451572, 806455814, ... 809544061] type='68 * int32'>
-  >>> f.summaryslices[0].slices[2].ch23
-  <Array [48, 43, 46, 54, 83, ... 51, 51, 52, 50] type='68 * uint8'>
+The support to read online ROOT files has been dropped in ``km3io`` v1.2.

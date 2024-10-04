@@ -263,8 +263,7 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
     out = apply_mask(tracks, m3)
     if original_ndim == 1:
         if isinstance(out, ak.Record):
-            first_and_only_element_mask = ak.Array([True])
-            return apply_mask(out, first_and_only_element_mask)
+            return select_first_entry_from_record(out)
         return out[0]
     return out[:, 0]
 
@@ -278,6 +277,18 @@ def apply_mask(record, mask):
         return ak.Record(masked_record_data)
     else:
         return record[mask]
+
+
+def select_first_entry_from_record(record):
+    assert isinstance(
+        record, ak.Record
+    ), f"Input has to be ak.Record, but is {type(record)}"
+
+    first_entry_data = {}
+    for field in record.fields:
+        value = record[field]
+        first_entry_data[field] = value[0]
+    return ak.Record(first_entry_data)
 
 
 def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):

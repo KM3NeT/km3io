@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM python:3.12.7-bookworm
 LABEL maintainer="Tamas Gal <tgal@km3net.de>"
 
  ENV INSTALL_DIR /km3io

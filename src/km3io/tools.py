@@ -251,21 +251,33 @@ def best_track(tracks, startend=None, minmax=None, stages=None):
         original_ndim = 1
     axis = 1 if original_ndim == 2 else 0
 
-    tracks = tracks[m1]
+    tracks = apply_mask(tracks, m1)
 
     rec_stage_lengths = ak.num(tracks.rec_stages, axis=-1)
     max_rec_stage_length = ak.max(rec_stage_lengths, axis=axis)
     m2 = rec_stage_lengths == max_rec_stage_length
-    tracks = tracks[m2]
+    tracks = apply_mask(tracks, m2)
 
     m3 = ak.argmax(tracks.lik, axis=axis, keepdims=True)
 
-    out = tracks[m3]
+    out = apply_mask(tracks, m3)
     if original_ndim == 1:
         if isinstance(out, ak.Record):
-            return out[:, 0]
+            first_and_only_element_mask = ak.Array([True])
+            return apply_mask(out, first_and_only_element_mask)
         return out[0]
     return out[:, 0]
+
+
+def apply_mask(record, mask):
+    if isinstance(record, ak.Record):
+        masked_record_data = {}
+        for field in record.fields:
+            value = record[field]
+            masked_record_data[field] = value[mask]
+        return ak.Record(masked_record_data)
+    else:
+        return record[mask]
 
 
 def mask(arr, sequence=None, startend=None, minmax=None, atleast=None):

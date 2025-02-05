@@ -1,14 +1,11 @@
 import unittest
 import numpy as np
-from pathlib import Path
-import uuid
 
 import awkward as ak
 from km3net_testdata import data_path
 
 from km3io import OfflineReader
 from km3io.offline import Header
-from km3io.tools import usr
 
 OFFLINE_FILE = OfflineReader(data_path("offline/km3net_offline.root"))
 OFFLINE_USR = OfflineReader(data_path("offline/usr-sample.root"))
@@ -30,7 +27,6 @@ class TestOfflineReader(unittest.TestCase):
         self.n_events = 10
 
     def test_context_manager(self):
-        filename = OFFLINE_FILE
         with OfflineReader(data_path("offline/km3net_offline.root")) as r:
             assert r
 
@@ -573,7 +569,6 @@ class TestMcTrackUsr(unittest.TestCase):
         self.f = OFFLINE_MC_TRACK_USR
 
     def test_usr_names(self):
-        n_tracks = len(self.f.events)
         for i in range(3):
             self.assertListEqual(
                 ["bx", "by", "ichan", "cc"],

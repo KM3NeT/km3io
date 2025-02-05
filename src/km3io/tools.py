@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from collections import namedtuple
 import numba as nb
 import numpy as np
 import awkward as ak
@@ -7,7 +6,6 @@ import awkward as ak
 import km3io.definitions
 from km3io.definitions import reconstruction as krec
 from km3io.definitions import trigger as ktrg
-from km3io.definitions import fitparameters as kfit
 from km3io.definitions import w2list_genhen as kw2gen
 from km3io.definitions import w2list_gseagen as kw2gsg
 

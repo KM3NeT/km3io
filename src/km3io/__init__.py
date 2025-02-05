@@ -8,7 +8,6 @@ except ImportError:
     version = get_distribution(__name__).version
 
 
-import warnings
 import os
 
 # Getting rid of OpenMP warnings, related to Numba
@@ -18,3 +17,5 @@ os.environ["KMP_WARNINGS"] = "off"
 
 from .offline import OfflineReader
 from .acoustics import RawAcousticReader
+
+__all__ = [OfflineReader, RawAcousticReader]

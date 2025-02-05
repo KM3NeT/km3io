@@ -97,7 +97,6 @@ class RawAcousticReader:
         sample_interval = 1 / F_S
         frame_duration = self.FRAME_LENGTH * sample_interval
         time_axis = np.arange(0, frame_duration, sample_interval)
-        start_frame = self._data[0]
         n_samples = self.FRAME_LENGTH * len(self._data)
 
         timebase = np.zeros(n_samples, dtype=np.float64)

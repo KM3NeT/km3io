@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from km3io._definitions.mc_header import data as mc_header
 
 from km3io._definitions.daqdatatypes import data as daqdatatypes
 from km3io._definitions.fitparameters import data as fitparameters
@@ -11,7 +10,6 @@ from km3io._definitions.w2list_genhen import data as w2list_genhen
 from km3io._definitions.w2list_gseagen import data as w2list_gseagen
 from km3io._definitions.w2list_km3buu import data as w2list_km3buu
 from km3io._definitions.trkmembers import data as trkmembers
-from km3io._definitions.applications import data as applications
 from km3io._definitions.pmt_status import data as pmt_status
 from km3io._definitions.weightlist import data as weightlist
 from km3io._definitions.module_status import data as module_status

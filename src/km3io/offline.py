@@ -1,12 +1,9 @@
 from collections import namedtuple
 import logging
 import warnings
-import uproot
-import numpy as np
-import awkward as ak
 
 from .definitions import mc_header
-from .tools import cached_property, to_num, unfold_indices
+from .tools import cached_property, to_num
 from .rootio import EventReader
 
 log = logging.getLogger("offline")

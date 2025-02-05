@@ -3,7 +3,6 @@
 import unittest
 import awkward as ak
 import numpy as np
-from pathlib import Path
 
 from numpy.testing import assert_almost_equal, assert_allclose
 
@@ -21,7 +20,6 @@ from km3io.tools import (
     count_nested,
     mask,
     best_track,
-    get_w2list_param,
     get_multiplicity,
     has_jmuon,
     has_jshower,
@@ -479,7 +477,7 @@ class TestRecStagesMasks(unittest.TestCase):
 
         assert masks[0][0] == all(rec_stages[0][0] == ak.Array(stages))
         assert masks[1][0] == all(rec_stages[1][0] == ak.Array(stages))
-        assert masks[0][1] == False
+        assert not masks[0][1]
 
     def test_mask_with_atleast_on_multiple_events(self):
         stages = [1, 3, 4, 5]
@@ -498,11 +496,9 @@ class TestRecStagesMasks(unittest.TestCase):
 
         assert masks[0][0] == all(rec_stages[0][0] == ak.Array(stages))
         assert masks[1][0] == all(rec_stages[1][0] == ak.Array(stages))
-        assert masks[0][1] == False
+        assert not masks[0][1]
 
     def test_mask_with_start_and_end_of_rec_stages_signle_event(self):
-        rec_stages = self.tracks.rec_stages[0][0]
-        stages = [1, 3, 5, 4]
         track = self.tracks[0]
         masks = mask(track.rec_stages, startend=(1, 4))
 
@@ -510,7 +506,6 @@ class TestRecStagesMasks(unittest.TestCase):
         assert track[masks].rec_stages[0][-1] == 4
 
     def test_mask_with_explicit_rec_stages_with_single_event(self):
-        rec_stages = self.tracks.rec_stages[0][0]
         stages = [1, 3]
         track = self.tracks[0]
         masks = mask(track.rec_stages, sequence=stages)
@@ -641,9 +636,9 @@ class TestIsCC(unittest.TestCase):
         CC_file = is_cc(GSEAGEN_OFFLINE_FILE)
 
         self.assertFalse(
-            all(NC_file) == True
+            all(NC_file)
         )  # this test fails because the CC flags are not reliable in old files
-        self.assertTrue(all(CC_file) == True)
+        self.assertTrue(all(CC_file))
 
 
 class TestUsr(unittest.TestCase):

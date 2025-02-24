@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KM3NeT Data Definitions v3.2.0-10-g78c1c7a
+KM3NeT Data Definitions v3.6.0
 https://git.km3net.de/common/km3net-dataformat
 """
 
@@ -14,6 +14,7 @@ data = dict(
     JENERGY_CHI2=5,
     JGANDALF_LAMBDA=6,
     JGANDALF_NUMBER_OF_ITERATIONS=7,
+    JMUONFEATURES_NUMBER_OF_HITS=25,
     JMUONFEATURES_NUMBER_OF_DOMS=23,
     JMUONFEATURES_NUMBER_OF_LINES=24,
     JSTART_NPE_MIP=8,

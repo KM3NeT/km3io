@@ -72,7 +72,7 @@ test-py3.12:
     <<: *junit_definition
 
 code-style:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: test
     script:
         - *virtualenv_definition
@@ -80,7 +80,7 @@ code-style:
     allow_failure: true
 
 coverage:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: coverage
     script:
         - *virtualenv_definition
@@ -95,7 +95,7 @@ coverage:
 
 
 build-docs:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: doc
     script:
         - *virtualenv_definition
@@ -103,7 +103,7 @@ build-docs:
     cache: {}
 
 pages:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: doc
     script:
         - *virtualenv_definition
@@ -132,13 +132,12 @@ docker:
   only:
     - tags
 
-
 pypi:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: release
     cache: {}
     script:
-        - pip install -U twine wheel setuptools_scm
+        - pip install -U twine wheel
         - python setup.py sdist
         - python setup.py bdist_wheel
         - twine upload dist/*

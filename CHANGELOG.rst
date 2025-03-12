@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 1
 ---------
+1.2.4 / 2024-03-12
+~~~~~~~~~~~~~~~~~~
+* Version bump for conda forge
+
 1.2.0 / 2024-06-24
 ~~~~~~~~~~~~~~~~~~
 * Removed online format support (online events, timeslices and summary slices) in favour of

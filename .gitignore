@@ -3,12 +3,10 @@ __pycache__/
 *.py[cod]
 *.pyxbldc
 
-# C extensions
-*.so
+# Version info
+src/km3io/version.py
 
-# Distribution / packaging
-.Python
-venv/
+# Build stuff
 build/
 develop-eggs/
 dist/
@@ -16,24 +14,27 @@ eggs/
 sdist/
 *.egg-info/
 *.egg
+.eggs
+pip-wheel-metadata
 
 # Unit test / coverage reports
+htmlcov/
+.tox/
 .coverage
 .cache
+nosetests.xml
+coverage.xml
+.coverage.*
+junit*.xml
 reports
 
 # Sphinx documentation
 doc/_build/
 doc/auto_examples/
+doc/autoapi/
 doc/modules/
 doc/api
+doc/sg_execution_times.rst
 
-# jupyter files
-.ipynb_checkpoints/
-
-.pytest_cache/
-junit.xml
-.mypy_cache
-
-# Version info
-src/km3io/version.py
+# Virtual env
+venv

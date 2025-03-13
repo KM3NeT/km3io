@@ -8,9 +8,9 @@ install:
 	pip install .
 
 install-dev:
-	python -m ipykernel install --user --name=km3io
 	pip install -e ".[dev]"
 	pip install -e ".[extras]"
+	python -m ipykernel install --user --name=km3io
 
 venv:
 	python3 -m venv venv

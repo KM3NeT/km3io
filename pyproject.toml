@@ -30,7 +30,7 @@ dependencies = [
   "docopt",
   "numba>=0.50",
   "numpy>=2",
-  "awkwatd>=2",
+  "awkward>=2",
   "uproot>=5",
   "setuptools_scm"
 ]

@@ -43,7 +43,7 @@ in time.
 """
 
 import numpy as np
-import km3db.extras
+import km3io.extras
 
 
 F_S = 195312.5  # sampling frequency of the acoustic stream in the CLB

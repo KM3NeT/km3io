@@ -81,7 +81,7 @@ Version 0
 * Added ``km3io.tools.is_nanobeacon()`` to check if the nanobeacon trigger bit is set
 * Added ``km3io.tools.get_w2list_idx()`` to get the w2list index according to the
   simulation program
-  
+
 0.25.2 / 2022-03-27
 ~~~~~~~~~~~~~~~~~~~
 * Fixes the version
@@ -174,7 +174,7 @@ Version 0
 0.18.0 / 2020-11-12
 ~~~~~~~~~~~~~~~~~~~
 * A new tool ``km3io.tools.is_cc()`` has been added which can be used to
-  check if the events are of type CC 
+  check if the events are of type CC
 
 0.17.1 / 2020-10-19
 ~~~~~~~~~~~~~~~~~~~

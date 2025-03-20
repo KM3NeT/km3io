@@ -4,7 +4,7 @@ default: build
 
 all: install
 
-install: 
+install:
 	pip install .
 
 install-dev:
@@ -15,13 +15,13 @@ install-dev:
 venv:
 	python3 -m venv venv
 
-test: 
+test:
 	python -m pytest --junitxml=./reports/junit.xml -o junit_suite_name=$(PKGNAME) tests
 
 test-cov:
 	python -m pytest --cov src/$(PKGNAME) --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage tests
 
-test-loop: 
+test-loop:
 	python -m pytest tests
 	ptw --ext=.py,.pyx --ignore=doc tests
 

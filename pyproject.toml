@@ -41,7 +41,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
-  "black>=22.3.0",
+  "black=22.10.0",
   "km3net_testdata>=0.3.6",
   "ipykernel",
   "matplotlib",

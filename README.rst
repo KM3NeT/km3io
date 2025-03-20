@@ -16,14 +16,14 @@ The km3io Python package
 This software provides a set of Python classes to read KM3NeT ROOT files
 without having ROOT, Jpp or aanet installed. It only depends on Python 3.5+ and the amazing `uproot <https://github.com/scikit-hep/uproot>`__ package and gives you access to the data via `numpy <https://www.numpy.org>`__ and `awkward <https://awkward-array.readthedocs.io>`__ arrays.
 
-It's very easy to use and according to the `uproot <https://github.com/scikit-hep/uproot>`__ benchmarks, it is able to outperform the original ROOT I/O performance. 
+It's very easy to use and according to the `uproot <https://github.com/scikit-hep/uproot>`__ benchmarks, it is able to outperform the original ROOT I/O performance.
 
 Installation
 ============
 
 Install km3io using pip::
 
-    pip install km3io 
+    pip install km3io
 
 or conda::
 

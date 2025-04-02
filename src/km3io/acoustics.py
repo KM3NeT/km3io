@@ -43,6 +43,7 @@ in time.
 """
 
 import numpy as np
+import km3io.extras
 
 
 F_S = 195312.5  # sampling frequency of the acoustic stream in the CLB
@@ -114,9 +115,9 @@ class RawAcousticReader:
         """
         Write as wave, with optional gain.
         """
-        from scipy.io import wavfile
+        scipy = km3io.extras.scipy()
 
         pcm = self.pcm
         if gain_dB != 0.0:
             pcm *= 10 ** (0.1 * gain_dB)
-        wavfile.write(filepath, int(F_S), pcm)
+        scipy.io.wavfile.write(filepath, int(F_S), pcm)

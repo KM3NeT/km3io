@@ -1,5 +1,75 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "km3io"
+authors = [
+  {name = "Tamas Gal", email ="tamas.gal@fau.de"}
+]
+maintainers = [
+  {name = "Tamas Gal", email ="tamas.gal@fau.de"}
+]
+dependencies = [
+  "docopt",
+  "numba>=0.50",
+  "numpy>=2",
+  "awkward>=2",
+  "uproot>=5",
+  "setuptools_scm"
+]
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering"
+]
+description = "KM3NeT I/O library without the ROOT requirement."
+readme = {file = "README.rst", content-type = "text/x-rst"}
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+  "black",
+  "km3net_testdata>=0.3.6",
+  "ipykernel",
+  "matplotlib",
+  "memory_profiler",
+  "numpydoc",
+  "pillow",
+  "pylint",
+  "pytest",
+  "pytest-cov",
+  "pytest-flake8",
+  "pytest-watch",
+  "sphinx",
+  "sphinx-autoapi",
+  "sphinx-gallery>=0.1.12",
+  "sphinx_rtd_theme",
+  "sphinxcontrib-versioning",
+  "wheel"
+]
+extras = [
+  "scipy"
+]
+
+[project.urls]
+Homepage = "https://git.km3net.de/km3py/km3io"
+Documentation = "https://km3py.pages.km3net.de/km3io/"
+Repository = "https://git.km3net.de/km3py/km3io.git"
+Issues = "https://git.km3net.de/km3py/km3io/-/issues"
+Changelog = "https://km3py.pages.km3net.de/km3io/changelog.html"
 
 [tool.setuptools_scm]
 write_to = "src/km3io/version.py"

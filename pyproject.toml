@@ -10,6 +10,15 @@ authors = [
 maintainers = [
   {name = "Tamas Gal", email ="tamas.gal@fau.de"}
 ]
+dependencies = [
+  "docopt",
+  "numba>=0.50",
+  "numpy>=2",
+  "awkward>=2",
+  "uproot>=5",
+  "setuptools_scm"
+]
+requires-python = ">=3.9"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -26,22 +35,13 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering"
 ]
-dependencies = [
-  "docopt",
-  "numba>=0.50",
-  "numpy>=2",
-  "awkward>=2",
-  "uproot>=5",
-  "setuptools_scm"
-]
-requires-python = ">=3.9"
 description = "KM3NeT I/O library without the ROOT requirement."
 readme = {file = "README.rst", content-type = "text/x-rst"}
 dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
-  "black=22.10.0",
+  "black",
   "km3net_testdata>=0.3.6",
   "ipykernel",
   "matplotlib",

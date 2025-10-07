@@ -250,6 +250,7 @@ class TestOfflineEvents(unittest.TestCase):
         assert 8 == len(first_tracks)
         assert 8 == len(first_tracks.rec_stages)
         assert 8 == len(first_tracks.lik)
+        assert 8 == len(first_tracks.status)
 
     def test_iteration(self):
         i = 0

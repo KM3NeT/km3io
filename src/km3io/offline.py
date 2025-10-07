@@ -65,6 +65,7 @@ class OfflineReader(EventReader):
             "t": "trks.t",
             "E": "trks.E",
             "len": "trks.len",
+            "status": "trks.status",
             "lik": "trks.lik",
             "rec_type": "trks.rec_type",
             "rec_stages": "trks.rec_stages",

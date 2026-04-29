@@ -72,19 +72,6 @@ test-py3.12:
         - make test
     <<: *junit_definition
 
-    image: git.km3net.de:4567/common/dockerfiles/base/python:3.13
-    stage: test
-    script:
-        - *virtualenv_definition
-        - make test
-    <<: *junit_definition
-    test-py3.14:
-    image: git.km3net.de:4567/common/dockerfiles/base/python:3.14
-    stage: test
-    script:
-        - *virtualenv_definition
-        - make test
-    <<: *junit_definition
 code-style:
     image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: test

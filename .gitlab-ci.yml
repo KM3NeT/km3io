@@ -41,7 +41,7 @@ stages:
         junit: "reports/junit*.xml"
 
 test-py3.9:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.9
     stage: test
     script:
         - *virtualenv_definition
@@ -49,7 +49,7 @@ test-py3.9:
     <<: *junit_definition
 
 test-py3.10:
-    image: docker.km3net.de/base/python:3.10
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.10
     stage: test
     script:
         - *virtualenv_definition
@@ -57,7 +57,7 @@ test-py3.10:
     <<: *junit_definition
 
 test-py3.11:
-    image: docker.km3net.de/base/python:3.11
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.11
     stage: test
     script:
         - *virtualenv_definition
@@ -159,7 +159,7 @@ pypi:
         - tags
 
 cc-lyon:
-    image: docker.km3net.de/base/ci-helper:1
+    image: git.km3net.de:4567/common/dockerfiles/base/ci-helper:1
     stage: release
     script:
         - mkdir -p /root/.ssh && chmod 700 /root/.ssh
@@ -188,7 +188,7 @@ release-docker:
     - tags
 
 release-singularity:
-  image: docker.km3net.de/base/singularity:3.6.2
+  image: git.km3net.de:4567/common/dockerfilesbase/singularity:3.6.2
   stage: release
   script:
     - singularity build $SINGULARITY_RELEASE_IMAGE docker://$CONTAINER_TEST_IMAGE

@@ -70,6 +70,13 @@ class OfflineReader(EventReader):
             "rec_type": "trks.rec_type",
             "rec_stages": "trks.rec_stages",
             "fitinf": "trks.fitinf",
+            "status": "trks.status",
+            "mother_id": "trks.mother_id",
+            "counter": "trks.counter",
+            "fitinf": "trks.fitinf",
+            "hit_ids": "trks.hit_ids",
+            "error_matrix": "trks.error_matrix",
+            "comment": "trks.comment"
         },
         "mc_trks": {
             "id": "mc_trks.id",
@@ -142,8 +149,7 @@ class Header:
             else:
                 log.warning(
                     f"Invalid attribute name for header entry '{attribute}'"
-                    ", access only as dictionary key."
-                )
+                    ", access only as dictionary key.")
 
     def __dir__(self):
         return list(self.keys())

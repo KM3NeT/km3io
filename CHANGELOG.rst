@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 1
 ---------
+1.2.5 / 2026-04-29
+~~~~~~~~~~~~~~~~~~
+* Several fixes, Python 3.12 compat etc.
+
 1.2.4 / 2024-03-12
 ~~~~~~~~~~~~~~~~~~
 * Version bump for conda forge

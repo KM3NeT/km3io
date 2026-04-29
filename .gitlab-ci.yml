@@ -1,4 +1,4 @@
-image: git.km3net.de:4567/common/dockerfiles/base/python
+image: git.km3net.de:4567/common/dockerfiles/base/python:3
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
@@ -7,9 +7,9 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
-  CONTAINER_TEST_IMAGE: git.km3net.de:4567/common/dockerfiles/test/km3io:$CI_COMMIT_REF_SLUG
-  CONTAINER_RELEASE_IMAGE: git.km3net.de:4567/common/dockerfiles/test/km3io:$CI_COMMIT_TAG
-  CONTAINER_LATEST_IMAGE: git.km3net.de:4567/common/dockerfiles/test/km3io:latest
+  CONTAINER_TEST_IMAGE:  git.km3net.de:4567:test/km3io:$CI_COMMIT_REF_SLUG
+  CONTAINER_RELEASE_IMAGE:  git.km3net.de:4567/test/km3io:$CI_COMMIT_TAG
+  CONTAINER_LATEST_IMAGE:  git.km3net.de:4567/test/km3io:latest
   SINGULARITY_RELEASE_IMAGE: km3io_${CI_COMMIT_TAG}.sif
 
 cache:
@@ -175,7 +175,7 @@ release-docker:
     - tags
 
 release-singularity:
-  image: git.km3net.de:4567/common/dockerfilesbase/singularity:3.6.2
+  image: git.km3net.de:4567/common/dockerfiles/base/apptainer:1.4.5
   stage: release
   script:
     - singularity build $SINGULARITY_RELEASE_IMAGE docker://$CONTAINER_TEST_IMAGE

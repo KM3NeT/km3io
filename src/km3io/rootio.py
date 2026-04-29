@@ -3,6 +3,7 @@ from collections import namedtuple
 import numpy as np
 import awkward as ak
 import uproot
+import pathlib
 
 from .tools import unfold_indices
 
@@ -51,7 +52,7 @@ class EventReader:
             Event constructor.
 
         """
-        if isinstance(f, str):
+        if isinstance(f, (str, pathlib.Path)):
             self._fobj = uproot.open(f)
             self._filepath = f
         elif isinstance(f, uproot.reading.ReadOnlyDirectory):

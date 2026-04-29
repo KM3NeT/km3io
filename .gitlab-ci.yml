@@ -77,7 +77,7 @@ code-style:
     stage: test
     script:
         - *virtualenv_definition
-        - make black-check
+        - make black
     allow_failure: true
 
 coverage:

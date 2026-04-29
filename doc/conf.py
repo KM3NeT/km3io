@@ -17,7 +17,6 @@ import sys
 import os
 from datetime import date
 import sphinx_rtd_theme
-from pkg_resources import get_distribution
 
 # -- Project information -----------------------------------------------------
 try:
